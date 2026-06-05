@@ -53,13 +53,16 @@ Sub-agent definitions. Each has frontmatter (`name`, `description`) and a body t
 
 | Agent | Role | Read-only? |
 |---|---|---|
-| `pm` | Decompose features into PR-sized tickets | No (writes plan docs) |
-| `po-manager` | Briefs / SOWs / PRDs | No (writes spec docs) |
+| `orchestrator` | Coordinates the SDD flow, guards the gates, launches specialists | Yes (never edits code) |
+| `pmo` | Conversed spec + Given/When/Then contract + mini-features (supersedes `pm` + `po-manager`) | No (writes spec docs) |
 | `backend-dev` | Backend implementation | No (writes code) |
 | `frontend-dev` | Frontend implementation | No (writes code) |
 | `ui-designer` | Wireframes + specs | Yes |
-| `code-reviewer` | Pre-merge review | Yes |
+| `judge` | Pre-merge review of code + tests vs the contract (renames `code-reviewer`) | Yes |
 | `security-reviewer` | Auth/permissions/data audit | Yes |
+| `mutation-tester` | Validates the tests bite (opt-in, `enforce_mutation_testing`) | Yes |
+
+`pm`, `po-manager`, and `code-reviewer` remain as deprecated stubs (→ `pmo` / `judge`) pending removal in a later release.
 
 Read-only agents never edit code — they report findings to the implementing agent.
 
@@ -69,14 +72,14 @@ Slash command definitions. Each file becomes `/<filename>` in Claude Code.
 
 | Command | What it does |
 |---|---|
-| `/feature` | Full pipeline: brief → plan → implement → review → PR |
-| `/plan` | Decompose into tickets via `pm` agent |
-| `/design` | Wireframe + spec via `ui-designer` |
-| `/idea` | Raw idea → brief via `po-manager` |
-| `/sow` | Statement of Work via `po-manager` |
-| `/audit` | Code-quality + security review |
+| `/spec` | Idea/SOW → conversed spec + Given/When/Then contract + mini-features via `pmo` (replaces `/idea` + `/sow`) |
+| `/feature` | Full spec-driven flow via `orchestrator`: contract → optional TDD → implement → `judge` → micro-commit |
+| `/fix` | Small, scoped change: skips brief/plan + formal Design First, keeps the full Definition of Done |
+| `/audit` | Code + security review via `judge` + `security-reviewer` |
 | `/commit` | Conventional commit, with confirmation gate |
 | `/pr` | Push + open PR, with confirmation gate |
+| `/idea`, `/sow`, `/plan` | **Deprecated** → use `/spec` |
+| `/design` | Wireframe + spec via `ui-designer` (folds into `/feature` for UI work) |
 
 Commands pause at approval gates. Never silently proceed past a brief, plan, or PR creation.
 
@@ -86,22 +89,19 @@ Shell scripts that fire on Claude Code events. Each reads the event's JSON paylo
 
 ### `agent-enforcement.sh` (PreToolUse: Edit | Write)
 
-Runs **before** every Edit or Write. Two checks:
-1. **Branch discipline** — blocks any edit to the source directory while on the default branch (`main` or `master`). Forces you to check out a typed branch first.
-2. **Agent gating** — blocks edits to the source directory that exceed 50 added lines or introduce a new `def`/`class`/`export class`, unless `CLAUDE_AGENT_ACTIVE=1` is set (i.e. you're already inside an agent's sub-conversation). Trivial edits pass through.
-
-Exit code 2 means "blocked"; the message goes to stderr and Claude Code feeds it back to the model so it self-corrects.
+Runs **before** every Edit or Write. Two checks, deliberately with different teeth:
+1. **Branch discipline (hard block)** — blocks any edit to the source directory while on a *protected* branch. Protected = the default branch plus anything in `CLAUDE_CONFIG_PROTECTED_BRANCHES` (comma-separated; defaults to the default branch + `master`). Forces you to check out a typed branch first. Exit code 2 → Claude Code feeds the message back to the model so it self-corrects.
+2. **Agent guidance (advisory)** — for edits to the source directory that exceed 50 added lines or introduce more than one new `def`/`class`/`export class`, it prints a reminder to prefer the right agent, then **exits 0 (does not block)**. Trivial edits (≤50 lines AND ≤1 new def/class) pass silently. The old `CLAUDE_AGENT_ACTIVE` gate was removed — nothing in the runtime ever set it, so it blocked normal editing instead of guiding it.
 
 ### `auto-format.sh` (PostToolUse: Edit | Write)
 
-Runs **after** every Edit or Write. Looks at the file extension and runs the matching formatter:
-- `.py` → `ruff check --fix` then `black`
-- `.ts` / `.tsx` / `.js` / `.jsx` → project-local prettier + eslint
-- `.go` → `gofmt`
-- `.rs` → `rustfmt`
-- `.html` → skipped (template tags break prettier)
+Runs **after** every Edit or Write. Policy: only *targeted* lint autofixers run inline; whole-file formatters do **not** run per-edit (they reformat untouched code and bloat diffs — a Surgical-Changes violation). The full formatter runs once, on the changed set, in the Definition of Done.
+- `.py` → `ruff check --fix` (targeted). `black` runs in the DoD, not here.
+- `.ts` / `.tsx` / `.js` / `.jsx` → project-local `eslint --fix` (targeted). `prettier` runs in the DoD, not here.
+- `.go` / `.rs` → whole-file formatters (`gofmt`/`rustfmt`) run in the DoD, not here.
+- `.html` → skipped (template tags break prettier).
 
-Failures are silenced (`|| true`) — the goal is "best effort", not "block on tooling glitch".
+Issues a tool can't auto-fix are surfaced to stderr (no longer silently swallowed), but the hook never blocks (exit 0).
 
 ### `coding-reminder.sh` (UserPromptSubmit)
 
@@ -130,19 +130,19 @@ The plugin manifest — name, description, version, author, license. Claude Code
 
 ### `plugin/agents/`
 
-Same 7 agents as the template, but with stack-agnostic phrasing ("your project's test command" instead of `pytest`). Path references to `.claude/rules/` are replaced with `the principles skill` / `the backend-style skill` references, since the plugin ships those as skills, not as auto-loaded rules.
+The same agents as the template (incl. the new `orchestrator`, `pmo`, `judge`), with stack-agnostic phrasing ("your project's test command" instead of `pytest`). Path references to `.claude/rules/` are replaced with `the principles skill` / `the backend-style skill` references, since the plugin ships those as skills, not as auto-loaded rules.
 
 ### `plugin/commands/`
 
-Same 8 slash commands. Available as `/claude-config-template:<name>` once installed.
+The slash commands (incl. `/spec`, `/fix`). Available as `/claude-config-template:<name>` once installed.
 
 ### `plugin/skills/`
 
-The principles and style guides shipped as skills (the new convention per the Claude Code plugin docs). Each has YAML frontmatter with a `description` so Claude knows when to invoke them.
+The principles, style guides, and the `sdd-workflow` overview shipped as skills (the new convention per the Claude Code plugin docs). Each has YAML frontmatter with a `description` so Claude knows when to invoke them.
 
 ### `plugin/hooks/hooks.json` + `plugin/hooks/*.sh`
 
-The same three hooks (agent-enforcement, auto-format, coding-reminder) but wired through `hooks.json` (the plugin format) instead of the project's `settings.json`. The `agent-enforcement.sh` script reads env vars (`CLAUDE_CONFIG_SRC_DIR`, `CLAUDE_CONFIG_FRONTEND_DIR`, `CLAUDE_CONFIG_DEFAULT_BRANCH`) with sensible defaults — users override per-project via direnv or shell rc.
+The same three hooks (agent-enforcement, auto-format, coding-reminder) but wired through `hooks.json` (the plugin format) instead of the project's `settings.json`. The `agent-enforcement.sh` script reads env vars (`CLAUDE_CONFIG_SRC_DIR`, `CLAUDE_CONFIG_FRONTEND_DIR`, `CLAUDE_CONFIG_PROTECTED_BRANCHES`) with sensible defaults — users override per-project via direnv or shell rc.
 
 ### `.claude-plugin/marketplace.json`
 

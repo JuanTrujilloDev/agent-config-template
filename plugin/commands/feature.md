@@ -1,39 +1,37 @@
 # /feature
 
-Orchestrate the full feature flow for a feature, from brief to merged PR.
+Full **spec-driven** flow for a feature — from signed contract to merged
+mini-features — coordinated by the `orchestrator` agent. It pauses at every gate
+and never skips ahead.
 
 ## Usage
 
 ```
-/feature <description>       # freeform, e.g. /feature "add CSV export"
+/feature <description>             # freeform, e.g. /feature "add CSV export"
 ```
 
 ## What it does
 
-This command runs a tightly-supervised pipeline. **It pauses at each approval gate** — never skips ahead without user confirmation.
+Spawns `orchestrator`, which runs the pipeline in `the `sdd-workflow` skill`:
 
-### Step 1: Pull / draft the brief
+### 1. Spec + contract
+If there's no approved contract for this work, the orchestrator spawns `pmo`
+(or run `/spec` first). Output: `docs/specs/<slug>/{spec.md, contract.md, features.json}`.
+**Gate 1 — you approve `contract.md` before any code is written.**
 
-- If the argument matches `#<#>`: pull the GitHub issue via `gh issue view`.
-- Otherwise: treat the argument as a freeform description.
+### 2. Per mini-feature (one at a time)
+- Set `in_progress`; check out the typed branch (never `the default branch`).
+- **Apply TDD?** If yes, the implementer writes the failing tests first → **Gate 2: you approve the tests** before production code.
+- Spawn `backend-dev` / `frontend-dev` / `ui-designer` to implement to green, honoring the Design-notes pattern.
+- Spawn `judge` — reviews code **and** tests against the contract scenarios.
+- Spawn `security-reviewer` if the mini-feature touches auth, permissions, or data.
+- Micro-commit on the typed branch; mark `done`.
 
-### Step 2: po-manager produces brief
-Output: `docs/specs/<YYYY-MM-DD>-<slug>.md`. **Pause for approval.**
+## Approval gates (never skipped)
 
-### Step 3: pm decomposes into tickets
-Output: `docs/plans/<slug>-plan.md` with sequenced tickets, each ≤12 files / <3000 LOC. **Pause for approval.**
+1. **Contract** — you approve `contract.md` before any code.
+2. **Tests** — under TDD, you approve the failing tests before production code.
+3. **PR** — you review and merge.
 
-### Step 4: Implement first ticket
-- Check out the named branch (typed; never on `main`)
-- Spawn `backend-dev` or `frontend-dev`
-- Agent runs Design First → user approves → implements
-- Agent runs full Definition of Done
-- Agent opens PR via `gh pr create`
-
-
-## Approval gates (do not skip)
-
-1. After brief — user approves goal + success criteria
-2. After plan — user approves ticket split + branch names
-3. After Design First — user approves data model / wireframe
-4. After PR opened — user reviews + merges
+For a small scoped change with an obvious cause, use `/fix` instead — it skips the
+spec/contract/orchestration but keeps the full Definition of Done.

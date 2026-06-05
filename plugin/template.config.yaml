@@ -145,6 +145,16 @@ variables:
     default: no
     when: has_frontend == yes
 
+  - name: use_gherkin
+    prompt: "Write acceptance contracts as real Gherkin .feature files (needs a runner like behave/cucumber)?"
+    choices: [yes, no]
+    default: no
+
+  - name: enforce_mutation_testing
+    prompt: "Enable mutation testing as a per-feature close gate (compute-heavy; ships tools/mutate.py + mutation-tester agent)?"
+    choices: [yes, no]
+    default: no
+
   # --- MCPs ---
   - name: mcp_plane_workspace
     prompt: "Plane workspace slug"

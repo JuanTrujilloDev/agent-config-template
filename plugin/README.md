@@ -20,16 +20,16 @@ That's it. You now have agents, slash commands, skills, and hooks available ever
 After install you immediately get:
 
 - **7 agents** (`/agents` to list): `pm`, `po-manager`, `backend-dev`, `frontend-dev`, `ui-designer`, `code-reviewer`, `security-reviewer`. Each with embedded "Gotchas" sections.
-- **9 slash commands** namespaced under `/claude-config-template:*` — `feature`, `plan`, `commit`, `pr`, `audit`, `design`, `idea`, `sow`, **`setup-template`**.
+- **10 slash commands** namespaced under `/claude-config-template:*` — `feature`, `fix`, `plan`, `commit`, `pr`, `audit`, `design`, `idea`, `sow`, **`setup-template`**.
 - **3 skills**: `principles`, `backend-style`, `frontend-style`.
-- **3 hooks**: branch discipline, agent gating, auto-format on Edit/Write.
+- **3 hooks**: branch discipline (hard block on protected branches), agent guidance (advisory — guides, doesn't block), targeted auto-format on Edit/Write.
 
 The hooks read environment variables with sensible defaults. Override per-project via `.envrc` (direnv) or your shell rc:
 
 ```bash
-export CLAUDE_CONFIG_SRC_DIR=apps                  # default: src
-export CLAUDE_CONFIG_FRONTEND_DIR=apps/frontend    # default: (none)
-export CLAUDE_CONFIG_DEFAULT_BRANCH=develop        # default: main
+export CLAUDE_CONFIG_SRC_DIR=apps                       # default: src
+export CLAUDE_CONFIG_FRONTEND_DIR=apps/frontend         # default: (none)
+export CLAUDE_CONFIG_PROTECTED_BRANCHES="main,qa,prod"  # default: main,master
 ```
 
 ### 2. Plugin + `/setup-template` (fully calibrated)
@@ -45,7 +45,7 @@ Claude will:
 1. Read `package.json` / `pyproject.toml` / `Cargo.toml` / `go.mod` / `manage.py` / etc.
 2. Draft an `answers.env` with confidence labels (HIGH / LOW / UNKNOWN).
 3. Show it to you and **wait for approval or edits.**
-4. Run the bundled `setup.sh` to render a full `.claude/` tree + `CLAUDE.md`.
+4. Run the bundled `setup.sh` to render a full `.claude/` tree + `CLAUDE.md`. It's **non-destructive** — against an existing config it shows a per-file change plan and won't write without your `--merge` / `--overwrite` choice.
 5. Add `.claude/settings.local.json`, `.claude/mcp.json`, and `answers.env` to `.gitignore`.
 6. Remind you to restart Claude Code.
 

@@ -34,6 +34,11 @@ Save to `docs/plans/<branch-slug>-fe-design.md`. Include:
 - **Responsive breakpoints**
 - **Edge cases** (empty, loading, error)
 - **Accessibility** (focus order, labels, contrast)
+- **Design notes** — any interaction pattern the spec calls for, mapped to a design-system component
+
+## Before you finish
+
+You're read-only — no code, no branch, no Definition of Done. Before handing off, confirm the spec covers every state (empty, loading, error, success), calls out accessibility (focus order, labels, contrast), and has the user's approval. Then hand the artifact to `frontend-dev`.
 
 ## Gotchas
 

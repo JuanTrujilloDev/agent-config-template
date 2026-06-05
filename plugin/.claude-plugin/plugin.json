@@ -1,7 +1,7 @@
 {
   "name": "claude-config-template",
-  "description": "Battle-tested Claude Code config: 7 agents, 9 slash commands (incl. /setup-template for full project calibration), 3 hooks, 3 skills (principles + style guides), 4 pre-filled stack examples.",
-  "version": "0.3.2",
+  "description": "Battle-tested Claude Code config: 7 agents, 10 slash commands (incl. /fix and /setup-template for full project calibration), 3 hooks, 3 skills (principles + style guides), 4 pre-filled stack examples.",
+  "version": "0.3.3",
   "author": {
     "name": "Juan Trujillo",
     "url": "https://juantrujillo.dev"

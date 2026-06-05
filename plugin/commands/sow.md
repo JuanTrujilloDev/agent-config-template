@@ -1,3 +1,5 @@
+> **Deprecated (v0.4.0).** Superseded by `/spec`. Kept temporarily for backwards compatibility; will be removed in a later release. Prefer `/spec`.
+
 # /sow
 
 Create a Statement of Work for a project or feature set.

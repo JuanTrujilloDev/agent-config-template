@@ -61,6 +61,14 @@ Every feature touching both BE and FE ships as **two PRs** in sequence. Never a 
 When the `pm` agent decomposes a feature, it creates one BE ticket and one FE ticket (or more of each if the feature is large). The BE ticket is routed to `backend-dev`; the FE ticket to `frontend-dev`.
 {{/enforce_layer_split}}
 
+## Design Patterns (when warranted)
+
+Reach for a known design pattern **only when the problem genuinely matches one and it reduces complexity for a real, present need** — Strategy, Factory, Adapter, Repository, Observer, etc. Name it in the spec's Design notes with a one-line *why*. Never impose a pattern speculatively: a pattern with no present second caller or real variation is YAGNI (see Principle 2, and the `backend-dev` gotcha about wrapping a single call site in a `*Service` class).
+
+## Spec-Driven & Test-First (when invoked)
+
+For non-trivial features, prefer the spec-driven flow (`/spec` → `/feature`): an approved Given/When/Then contract **before** code, one mini-feature at a time, optionally test-first. See `.claude/HELP.md` and `docs/sdd-workflow.md`. For a small scoped change with an obvious cause, `/fix` is the right tool — skip the ceremony, keep the Definition of Done.
+
 ## Micro-PR Discipline
 
 Every PR must stay under both limits:

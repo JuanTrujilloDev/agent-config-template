@@ -95,26 +95,31 @@ Never code on `{{default_branch}}`. Always check out a typed branch first.
 
 ## Claude Code Workflow
 
-### Agents (`.claude/agents/`) — MANDATORY USAGE
+### Agents (`.claude/agents/`) — PREFER FOR NON-TRIVIAL WORK
 
-You **MUST** spawn the appropriate agent before any **non-trivial** edit. "Trivial" = single file, <50 lines added/changed, no new `def`/`class`/`export class`. Anything else MUST go through an agent.
+**Prefer** the appropriate agent for **non-trivial** edits. "Trivial" = ≤50 lines added/changed and at most one new `def`/`class`/`export class`. The `agent-enforcement` hook is advisory here — it guides, it doesn't block — so this discipline is on you, not the hook.
 
 | Trigger | Agent | Scope |
 |---|---|---|
-| New feature requested | `pm` first → tickets, micro-PR plan | Planning only |
+| Spec a feature (idea/SOW → contract + mini-features) | `pmo` | `docs/specs/<slug>/` |
+| Run the full spec-driven flow for a feature | `orchestrator` | coordinates; never edits code |
 | Backend ticket | `backend-dev` | Backend code in `{{src_dir}}` |
 {{#has_frontend}}
 | Frontend ticket | `frontend-dev` | UI code in `{{frontend_dir}}` |
 | New UI/UX | `ui-designer` (delegated by `frontend-dev`) | wireframes/mockups (read-only) |
 {{/has_frontend}}
-| Requirements / SOW / PRD | `po-manager` | `docs/specs/` |
-| Code review before commit/PR | `code-reviewer` | DoD steps 1–3, micro-PR limits, principles |
+| Review before commit/PR | `judge` | code + tests vs contract, micro-PR limits, principles |
 | Security audit | `security-reviewer` | mandatory for auth/permissions/data |
+{{#enforce_mutation_testing}}
+| Validate tests bite | `mutation-tester` | runs `tools/mutate.py` (opt-in) |
+{{/enforce_mutation_testing}}
+
+> `pm`, `po-manager`, and `code-reviewer` are **deprecated** (→ `pmo`, `pmo`, `judge`) and will be removed in a later release. The end-to-end flow lives in `docs/sdd-workflow.md`.
 
 **Hard rules:**
 
 {{#enforce_layer_split}}
-1. Tasks touching **both** BE and FE → spawn `pm` first. **Never** cross the BE/FE boundary in a single response.
+1. Tasks touching **both** BE and FE → run `/feature` (the `orchestrator` sequences it) or spawn `pmo` first. **Never** cross the BE/FE boundary in a single response.
 2. Both `*-dev` agents follow **Design First**: produce a design artifact (DB models/API surface for BE; wireframes/flow for FE) → user approves → implement. Skipping is allowed only for trivial fixes/hotfixes with obvious root cause.
 {{/enforce_layer_split}}
 {{^enforce_layer_split}}
@@ -124,12 +129,14 @@ You **MUST** spawn the appropriate agent before any **non-trivial** edit. "Trivi
 - Before any code edit, confirm the current branch matches the task type. If on `{{default_branch}}`, check out the right branch first.
 
 ### Commands (`.claude/commands/`)
-- `/feature [{{#branch_prefix}}{{branch_prefix}}-<#> or {{/branch_prefix}}description]` — Full {{#enforce_layer_split}}BE/FE micro-PR{{/enforce_layer_split}}{{^enforce_layer_split}}feature{{/enforce_layer_split}} flow with auto-orchestrated agents
-- `/commit`, `/pr`, `/plan`, `/audit` — see individual command files
+- `/spec [{{#branch_prefix}}{{branch_prefix}}-<#> or {{/branch_prefix}}description]` — Idea/SOW → conversed spec + Given/When/Then contract + mini-features (`pmo`). Replaces `/idea` + `/sow`.
+- `/feature [{{#branch_prefix}}{{branch_prefix}}-<#> or {{/branch_prefix}}description]` — Full spec-driven flow (`orchestrator`): approve contract → optional TDD → implement → `judge` → micro-commit
+- `/fix [description]` — Small, scoped change: skips brief/plan + formal Design First, keeps the full Definition of Done
+- `/commit`, `/pr`, `/audit` — see individual command files (`/idea`, `/sow`, `/plan` are deprecated → use `/spec`)
 
 ### Hooks (`.claude/hooks/`)
-- **PostToolUse** on `Edit|Write` → `auto-format.sh` (runs `{{format_cmd}}` on changed files)
-- **PreToolUse** on `Edit|Write` → `agent-enforcement.sh`: blocks non-trivial `{{src_dir}}` edits outside an agent context, blocks any `{{src_dir}}` edit while on `{{default_branch}}`
+- **PostToolUse** on `Edit|Write` → `auto-format.sh`: runs only targeted lint autofixes (`ruff --fix` / `eslint --fix`) on the changed file; whole-file formatting (`{{format_cmd}}`) runs in the Definition of Done, not per-edit
+- **PreToolUse** on `Edit|Write` → `agent-enforcement.sh`: **hard-blocks** edits while on a protected branch (`{{default_branch}}` or `$CLAUDE_CONFIG_PROTECTED_BRANCHES`); **advises** (does not block) on large non-agent edits to `{{src_dir}}`
 - **UserPromptSubmit** → `coding-reminder.sh`: injects principles + workflow reminder on coding prompts
 
 ### Rules (`.claude/rules/`)
@@ -182,4 +189,5 @@ Inject only what's cheap to compute (sub-second commands). Anything slow makes s
 ## References
 
 - **Usage guide:** `.claude/HELP.md` — decision tree, worked examples
+- **SDD/TDD workflow:** `docs/sdd-workflow.md` — the spec-driven flow end-to-end
 - **Principles:** `.claude/rules/principles.md`

@@ -17,15 +17,17 @@ Practical guide to working with Claude in this project. **Read [Core Operating P
 {{#ticket_tracker_linear}}
 | **Linear task assigned** | `/feature <ticket-id>` → Claude pulls ticket, runs full flow |
 {{/ticket_tracker_linear}}
-| **New feature, no ticket** | `/feature <description>` → same flow, brief drafted from your description |
-| **Hotfix (prod broken)** | *"Hotfix: \<symptom\>. Branch from `{{default_branch}}` as `hotfix/\<slug\>`. Spawn the right dev agent directly, single small PR."* — `pm` skipped; `code-reviewer` still runs |
+| **Spec a feature first** | `/spec <description>` → `pmo` writes spec + Given/When/Then contract + mini-features; you approve |
+| **New feature, no ticket** | `/feature <description>` → full spec-driven flow, orchestrated and gated |
+| **Small scoped fix (obvious cause)** | `/fix <description>` → skips spec + Design First, keeps the full Definition of Done |
+| **Hotfix (prod broken)** | *"Hotfix: \<symptom\>. Branch from `{{default_branch}}` as `hotfix/\<slug\>`. Spawn the right dev agent directly, single small PR."* — `orchestrator`/`pmo` skipped; `judge` still runs |
 | **Bug fix (non-urgent)** | Reproduce → minimal fix → tests → standard agent flow on a `fix/<slug>` branch |
-| **Refactor (no behavior change)** | `code-reviewer` first to baseline → `*-dev` agent on `refactor/<slug>` → single PR ≤{{max_files_per_pr}} files |
-| **Tiny change** (typo, comment, single-value config; <50 lines, no new defs) | Edit directly. Hook allows it. |
+| **Refactor (no behavior change)** | `judge` first to baseline → `*-dev` agent on `refactor/<slug>` → single PR ≤{{max_files_per_pr}} files |
+| **Tiny change** (typo, comment, single-value config; ≤50 lines, ≤1 new def) | Edit directly, or `/fix`. The hook is advisory. |
 | **Question / investigation** | Use `Explore` agent — no code changes, no branch needed |
-| **Pre-merge check** | `/audit` or invoke `code-reviewer` + `security-reviewer` manually |
+| **Pre-merge check** | `/audit` or invoke `judge` + `security-reviewer` manually |
 | **Touching auth, permissions, data exposure** | `security-reviewer` is **mandatory** before merge |
-| **Reviewing teammate's PR** | *"Review PR #\<n\>"* → Claude fetches via `gh`, runs `code-reviewer` (+ `security-reviewer` if relevant) |
+| **Reviewing teammate's PR** | *"Review PR #\<n\>"* → Claude fetches via `gh`, runs `judge` (+ `security-reviewer` if relevant) |
 
 ---
 
@@ -33,13 +35,8 @@ Practical guide to working with Claude in this project. **Read [Core Operating P
 
 | Agent | Spawn it when… | Output |
 |---|---|---|
-| `po-manager` | You need a brief / SOW / PRD before planning | `docs/specs/<slug>.md` |
-{{#enforce_layer_split}}
-| `pm` | A feature touches both BE and FE, or has 2+ tickets | `docs/plans/<slug>-plan.md` with BE + FE ticket split |
-{{/enforce_layer_split}}
-{{^enforce_layer_split}}
-| `pm` | A feature has 2+ tickets or needs decomposition | `docs/plans/<slug>-plan.md` |
-{{/enforce_layer_split}}
+| `pmo` | You need a spec: idea/SOW → Given/When/Then contract + PR-sized mini-features | `docs/specs/<slug>/{spec,contract,features}` |
+| `orchestrator` | You want the full spec-driven flow run and gated for a feature | coordinates; never edits code |
 {{#has_frontend}}
 | `ui-designer` | A non-trivial UI change is needed | Wireframes, mockups, flow descriptions |
 {{/has_frontend}}
@@ -47,8 +44,11 @@ Practical guide to working with Claude in this project. **Read [Core Operating P
 {{#has_frontend}}
 | `frontend-dev` | UI work | Code + tests {{#enforce_layer_split}}on `*-fe` branch (after BE merged){{/enforce_layer_split}} |
 {{/has_frontend}}
-| `code-reviewer` | Before any commit/PR — and on teammate PRs | Findings report (read-only) |
+| `judge` | Before any commit/PR — and on teammate PRs | Findings report (read-only) |
 | `security-reviewer` | Change touches auth/permissions/data | Findings report (read-only) |
+{{#enforce_mutation_testing}}
+| `mutation-tester` | Validate the tests bite before a mini-feature closes | Mutation score (read-only) |
+{{/enforce_mutation_testing}}
 
 ---
 
@@ -59,7 +59,7 @@ A task is **NOT** done until all pass, in order:
 1. **Format** — `{{format_cmd}}`
 2. **Lint** — `{{lint_cmd}}`
 3. **Unit tests** — `{{test_cmd}}` (≥{{test_coverage_target}}% coverage)
-4. **Code review** — `code-reviewer` agent; address all blockers
+4. **Review** — `judge` agent (code + tests vs the contract); address all blockers
 5. **Security review** — `security-reviewer` if change touches auth/permissions/data
 {{#has_e2e}}
 6. **Live browser verification** — for FE-touching changes OR big changes (>5 files / 500 lines): walk through smoke flows + the task's success criteria via `mcp__playwright__*`
@@ -96,7 +96,7 @@ The agent that did the work runs the checklist and reports results before declar
 You:    /feature {{#branch_prefix}}{{branch_prefix}}-87{{/branch_prefix}}{{^branch_prefix}}add CSV export to holdings list{{/branch_prefix}}
 
 Claude: [pulls ticket / drafts brief]
-        Spawning po-manager...
+        Spawning pmo...
 [brief produced]
         Brief ready. Goal: <one sentence>.
         Success criteria: 1) ... 2) ... 3) ...
@@ -104,7 +104,7 @@ Claude: [pulls ticket / drafts brief]
 
 You:    yes
 
-Claude: Spawning pm...
+Claude: Contract approved. Spawning orchestrator...
 [plan produced]
         Plan: BE-1 (... files, ... LOC), FE-1 (... files, ... LOC).
         {{#enforce_layer_split}}BE ships first.{{/enforce_layer_split}} Approve? (yes/edit)
@@ -116,7 +116,7 @@ Claude: Checking out branch... Spawning {{#enforce_layer_split}}backend-dev{{/en
 
 You:    yes
 
-[implements + runs DoD: format, lint, tests, code-reviewer, security-reviewer{{#has_e2e}}, playwright{{/has_e2e}}]
+[implements + runs DoD: format, lint, tests, judge, security-reviewer{{#has_e2e}}, playwright{{/has_e2e}}]
         PR opened. DoD: ✓✓✓✓✓.
 ```
 
@@ -126,7 +126,7 @@ You:    yes
 
 ### Spawning agents manually
 - *"spawn backend-dev to add ..."*
-- *"have code-reviewer check the last 3 commits"*
+- *"have judge check the last 3 commits"*
 
 ### Bypassing the enforcement hook (rare)
 - *"This is a minor copy tweak, just edit directly."*
@@ -143,6 +143,8 @@ You:    yes
 | Hooks | `.claude/hooks/*.sh` |
 | Briefs / SOWs | `docs/specs/` |
 | Implementation plans | `docs/plans/` |
+| Specs + contracts | `docs/specs/<slug>/` |
+| SDD/TDD workflow | `docs/sdd-workflow.md` |
 
 ---
 

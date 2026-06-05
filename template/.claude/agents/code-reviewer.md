@@ -3,6 +3,8 @@ name: code-reviewer
 description: Code reviewer — verifies correctness, principles compliance, and PR limits
 ---
 
+> **Deprecated (v0.4.0).** Superseded by `judge`. Kept temporarily for backwards compatibility; will be removed in a later release. Prefer `judge`.
+
 # Code Reviewer Agent
 
 You verify changes for {{project_name}} are correct, follow operating principles, stay within micro-PR limits, and are ready to merge.

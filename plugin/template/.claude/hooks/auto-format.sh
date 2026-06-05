@@ -1,5 +1,11 @@
 #!/bin/bash
-# Auto-format hook for Claude Code — runs after Edit/Write.
+# PostToolUse hook for Claude Code — runs after Edit/Write.
+#
+# Policy: only *targeted* lint autofixers run inline (ruff --fix, eslint --fix).
+# Whole-file formatters (black, prettier, gofmt, rustfmt) are NOT run per-edit —
+# they reformat untouched code and bloat diffs (violates Surgical Changes). Run
+# them once, on the changed set, in the Definition of Done instead.
+# Tool errors are surfaced to stderr, not silently swallowed.
 
 INPUT=$(cat)
 
@@ -11,38 +17,32 @@ fi
 
 EXT="${FILE_PATH##*.}"
 
+# surface <tool> <captured-output> <exit-status> — report unfixable issues, never block.
+surface() {
+    if [ "$3" -ne 0 ]; then
+        printf '[auto-format] %s reported issues it could not auto-fix:\n%s\n' "$1" "$2" >&2
+    fi
+    return 0
+}
+
 case "$EXT" in
     py)
-        if command -v ruff &> /dev/null; then
-            ruff check --fix "$FILE_PATH" 2>/dev/null || true
+        if command -v ruff >/dev/null 2>&1; then
+            out=$(ruff check --fix "$FILE_PATH" 2>&1); surface ruff "$out" $?
         fi
-        if command -v black &> /dev/null; then
-            black --quiet "$FILE_PATH" 2>/dev/null || true
-        fi
+        # black (whole-file) runs in the Definition of Done, not here.
         ;;
     ts|tsx|js|jsx|mjs|cjs)
-        # Try project-local prettier/eslint first
-        for dir in "$CLAUDE_PROJECT_DIR" "$CLAUDE_PROJECT_DIR/{{frontend_dir}}"; do
-            if [ -f "$dir/node_modules/.bin/prettier" ]; then
-                (cd "$dir" && ./node_modules/.bin/prettier --write "$FILE_PATH" 2>/dev/null) || true
-                break
-            fi
-        done
         for dir in "$CLAUDE_PROJECT_DIR" "$CLAUDE_PROJECT_DIR/{{frontend_dir}}"; do
             if [ -f "$dir/node_modules/.bin/eslint" ]; then
-                (cd "$dir" && ./node_modules/.bin/eslint --fix "$FILE_PATH" 2>/dev/null) || true
+                out=$(cd "$dir" && ./node_modules/.bin/eslint --fix "$FILE_PATH" 2>&1); surface eslint "$out" $?
                 break
             fi
         done
+        # prettier (whole-file) runs in the Definition of Done, not here.
         ;;
-    go)
-        command -v gofmt &> /dev/null && gofmt -w "$FILE_PATH" 2>/dev/null || true
-        ;;
-    rs)
-        command -v rustfmt &> /dev/null && rustfmt "$FILE_PATH" 2>/dev/null || true
-        ;;
-    html|htm)
-        # Skip prettier on template files — it breaks {% %} and {{ }} tags
+    go|rs|html|htm)
+        # Whole-file formatters / template-unsafe — handled by the DoD format step.
         ;;
 esac
 

@@ -19,10 +19,19 @@ This is the **opt-in calibration step** for users who installed the plugin and w
 
 3. **Shows the draft to the user**, grouped by confidence level, and **WAITS for approval or edits.** Do not run the renderer until the user explicitly approves with "yes," "go," "render," or equivalent.
 
-4. **After approval, runs:**
+4. **After approval, runs the renderer.** The renderer is **non-destructive**: against a project that already has a Claude config it writes nothing and prints a per-file change plan until you pass an explicit mode.
    ```bash
+   # Fresh project (no existing .claude/ or root CLAUDE.md) — writes directly:
    bash "${CLAUDE_PLUGIN_ROOT}/setup.sh" --target . --answers ./answers.env
+
+   # Existing config — run with no mode first to show the user the change plan
+   # (writes nothing, exits 1), then apply with one of:
+   #   --merge      add missing files, deep-merge .claude/settings.json, keep your other files
+   #   --overwrite  replace template-managed files (settings.local.json is never touched)
+   #   --abort      do nothing (the default)
+   bash "${CLAUDE_PLUGIN_ROOT}/setup.sh" --target . --answers ./answers.env --merge
    ```
+   For a project that already has config, default to `--merge`. Only use `--overwrite` when the user explicitly wants the template versions to win, and only after they've seen the plan.
 
 5. **Adds to `.gitignore`** (creating it if missing):
    ```
@@ -38,7 +47,7 @@ This is the **opt-in calibration step** for users who installed the plugin and w
 - **Do not invent placeholder values.** If a value is genuinely ambiguous, leave it UNKNOWN and ask one targeted clarifying question — don't guess.
 - **Wait for explicit approval** before invoking `setup.sh`. The draft step is not optional.
 - **Don't modify anything outside `answers.env`, `.claude/`, `CLAUDE.md`, and `.gitignore`.**
-- **Don't overwrite an existing `.claude/` tree without asking first.** If `.claude/` already exists, surface that to the user, show what would change, and let them decide.
+- **Never overwrite an existing config silently.** The renderer now enforces this — against an existing `.claude/` tree (or root `CLAUDE.md`) it writes nothing without an explicit `--merge`/`--overwrite`. Run it once with no mode to show the user the per-file plan, then let them choose. `.claude/settings.local.json` is never touched. If both root `CLAUDE.md` and `.claude/CLAUDE.md` exist with different content, the renderer warns — surface that to the user and ask which is canonical.
 
 ## Honor conditional questions (`when:` clauses)
 
@@ -89,3 +98,4 @@ If the user wants to skip inference entirely and use a known-good preset, point 
 - **`setup.sh: command not found`** — the plugin didn't ship the bundled template. Reinstall: `/plugin update claude-config-template@juantrujillodev`.
 - **Missing `python3`** — `setup.sh` requires Python 3. Install it (it's preinstalled on macOS and most Linux).
 - **`.git/index.lock` errors when committing afterward** — leftover from a crashed git process. Run `rm -f .git/index.lock` and retry.
+- **"Existing Claude config detected … Nothing was written" (exit 1)** — expected, not an error. The project already has a config. Re-run with `--merge` (recommended) or `--overwrite` after the user has reviewed the printed plan.

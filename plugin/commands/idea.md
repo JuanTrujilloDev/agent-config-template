@@ -1,3 +1,5 @@
+> **Deprecated (v0.4.0).** Superseded by `/spec`. Kept temporarily for backwards compatibility; will be removed in a later release. Prefer `/spec`.
+
 # /idea
 
 Transform a raw idea into a structured feature specification.

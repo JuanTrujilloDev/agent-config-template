@@ -1,17 +1,20 @@
 #!/bin/bash
 # PreToolUse hook for Claude Code (Edit | Write).
 #
-# Enforces:
-# - Branch discipline: never edit code under $CLAUDE_CONFIG_SRC_DIR while on
-#   $CLAUDE_CONFIG_DEFAULT_BRANCH (defaults: src/ and main/master).
-# - Agent gating: edits >50 lines or new defs/classes in $CLAUDE_CONFIG_SRC_DIR
-#   must come from inside an agent (CLAUDE_AGENT_ACTIVE=1).
+# Two checks, deliberately with different teeth:
+#  - Branch discipline (HARD BLOCK): never edit code under $CLAUDE_CONFIG_SRC_DIR
+#    while on a protected branch. Protected = $CLAUDE_CONFIG_PROTECTED_BRANCHES,
+#    default "main,master".
+#  - Agent guidance (ADVISORY): non-trivial edits print a reminder to prefer the
+#    right agent, but do NOT block. Discipline is on you, not the hook.
 #
-# Override per-project via environment variables (e.g., in .envrc with direnv,
+# Override per-project via environment variables (e.g. in .envrc with direnv,
 # or your shell rc):
-#   export CLAUDE_CONFIG_SRC_DIR=apps           # default: src
-#   export CLAUDE_CONFIG_FRONTEND_DIR=apps/frontend  # default: (none)
-#   export CLAUDE_CONFIG_DEFAULT_BRANCH=develop # default: main
+#   export CLAUDE_CONFIG_SRC_DIR=apps                  # default: src
+#   export CLAUDE_CONFIG_FRONTEND_DIR=apps/frontend    # default: (none)
+#   export CLAUDE_CONFIG_PROTECTED_BRANCHES="main,qa,prod"  # default: main,master
+#
+# Trivial edits (≤50 lines AND ≤1 new def/class) pass silently.
 
 set -uo pipefail
 
@@ -28,7 +31,7 @@ ti = data.get("tool_input", {}) or {}
 fp = (ti.get("file_path") or "").replace("\t", " ")
 ns = ti.get("new_string") or ti.get("content") or ""
 line_count = ns.count("\n") + (1 if ns and not ns.endswith("\n") else 0)
-has_new_def = 0
+def_count = 0
 for line in ns.splitlines():
     s = line.lstrip()
     if (
@@ -38,30 +41,37 @@ for line in ns.splitlines():
         or s.startswith("export function ")
         or s.startswith("function ")
     ):
-        has_new_def = 1
-        break
-print(f"{fp}\t{line_count}\t{has_new_def}")
+        def_count += 1
+print(f"{fp}\t{line_count}\t{def_count}")
 ')
 
 if [ -z "$SUMMARY" ]; then exit 0; fi
 
 FILE_PATH=$(printf '%s' "$SUMMARY" | awk -F'\t' '{print $1}')
 LINE_COUNT=$(printf '%s' "$SUMMARY" | awk -F'\t' '{print $2}')
-HAS_NEW_DEF=$(printf '%s' "$SUMMARY" | awk -F'\t' '{print $3}')
+DEF_COUNT=$(printf '%s' "$SUMMARY" | awk -F'\t' '{print $3}')
 
 if [ -z "$FILE_PATH" ]; then exit 0; fi
 
 # Defaults; override via environment variables.
 SRC_DIR="${CLAUDE_CONFIG_SRC_DIR:-src}"
 FRONTEND_DIR="${CLAUDE_CONFIG_FRONTEND_DIR:-}"
-DEFAULT_BRANCH="${CLAUDE_CONFIG_DEFAULT_BRANCH:-main}"
+PROTECTED="${CLAUDE_CONFIG_PROTECTED_BRANCHES:-main,master}"
 
-# --- Branch Discipline ---
+# Membership test for a comma/space-separated list (bash 3.2 safe).
+branch_in_list() {
+    _b="$1"; _list=$(printf '%s' "$2" | tr ',' ' '); _i=""
+    for _i in $_list; do
+        [ "$_b" = "$_i" ] && return 0
+    done
+    return 1
+}
+
+# --- Branch Discipline (HARD BLOCK) ---
 PROJECT_DIR="${CLAUDE_PROJECT_DIR:-}"
 if [ -n "$PROJECT_DIR" ] && { [ -d "$PROJECT_DIR/.git" ] || [ -f "$PROJECT_DIR/.git" ]; }; then
     CURRENT_BRANCH=$(git -C "$PROJECT_DIR" rev-parse --abbrev-ref HEAD 2>/dev/null || echo "")
-    if [ "$CURRENT_BRANCH" = "$DEFAULT_BRANCH" ] || [ "$CURRENT_BRANCH" = "main" ] || [ "$CURRENT_BRANCH" = "master" ]; then
-        # Check whether path matches src or frontend dirs.
+    if [ -n "$CURRENT_BRANCH" ] && branch_in_list "$CURRENT_BRANCH" "$PROTECTED"; then
         IN_SCOPE=0
         case "$FILE_PATH" in
             *"/$SRC_DIR/"*|*"/$SRC_DIR"|*"$SRC_DIR/"*) IN_SCOPE=1 ;;
@@ -73,26 +83,27 @@ if [ -n "$PROJECT_DIR" ] && { [ -d "$PROJECT_DIR/.git" ] || [ -f "$PROJECT_DIR/.
         fi
         if [ "$IN_SCOPE" = "1" ]; then
             cat >&2 <<MSG
-[agent-enforcement] BLOCKED: editing on '$CURRENT_BRANCH' is forbidden.
+[agent-enforcement] BLOCKED: '$CURRENT_BRANCH' is a protected branch — no direct edits.
 Check out a typed branch first:
   git checkout -b feature/<slug>
   git checkout -b fix/<slug>
   git checkout -b hotfix/<slug>
   git checkout -b refactor/<slug>
   git checkout -b chore/<slug>
+Protected branches: $PROTECTED  (override with CLAUDE_CONFIG_PROTECTED_BRANCHES)
 MSG
             exit 2
         fi
     fi
 fi
 
-# --- Agent Gating ---
+# --- Agent Guidance (ADVISORY — never blocks) ---
 SCOPE=""
-case "$FILE_PATH" in
-    *"$FRONTEND_DIR"*)
-        if [ -n "$FRONTEND_DIR" ]; then SCOPE="frontend"; fi
-        ;;
-esac
+if [ -n "$FRONTEND_DIR" ]; then
+    case "$FILE_PATH" in
+        *"$FRONTEND_DIR"*) SCOPE="frontend" ;;
+    esac
+fi
 if [ -z "$SCOPE" ]; then
     case "$FILE_PATH" in
         *"/$SRC_DIR/"*|*"/$SRC_DIR"|*"$SRC_DIR/"*) SCOPE="backend" ;;
@@ -100,27 +111,21 @@ if [ -z "$SCOPE" ]; then
     esac
 fi
 
-if [ "${CLAUDE_AGENT_ACTIVE:-0}" = "1" ]; then exit 0; fi
-if [ "${LINE_COUNT:-0}" -le 50 ] && [ "${HAS_NEW_DEF:-0}" -eq 0 ]; then exit 0; fi
+# Trivial edit (≤50 lines AND ≤1 new def/class)? Pass silently.
+if [ "${LINE_COUNT:-0}" -le 50 ] && [ "${DEF_COUNT:-0}" -le 1 ]; then exit 0; fi
 
 case "$SCOPE" in
     backend) AGENT="backend-dev" ;;
     frontend) AGENT="frontend-dev" ;;
 esac
 
-DEF_LABEL="no"
-[ "${HAS_NEW_DEF}" -eq 1 ] && DEF_LABEL="yes"
-
 cat >&2 <<MSG
-[agent-enforcement] BLOCKED: non-trivial edit to ${SCOPE} source.
+[agent-enforcement] ADVISORY: sizable edit to ${SCOPE} source.
+  file:          ${FILE_PATH}
+  added lines:   ${LINE_COUNT}  (advisory threshold: 50)
+  new def/class: ${DEF_COUNT}   (advisory threshold: 1)
 
-Detected:
-  file:        ${FILE_PATH}
-  added lines: ${LINE_COUNT}  (threshold: 50)
-  new def/class: ${DEF_LABEL}
-
-Spawn the \`${AGENT}\` agent (Design First, then implement on the proper branch).
-
-To override (rare): set CLAUDE_AGENT_ACTIVE=1 in your environment.
+For non-trivial work, prefer the \`${AGENT}\` agent. This is guidance, not a
+block — proceed if you've already scoped the change.
 MSG
-exit 2
+exit 0

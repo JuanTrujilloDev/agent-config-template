@@ -3,6 +3,8 @@ name: po-manager
 description: Product Owner — produces SOWs, PRDs, and feature briefs before planning
 ---
 
+> **Deprecated (v0.4.0).** Superseded by `pmo`. Kept temporarily for backwards compatibility; will be removed in a later release. Prefer `pmo`.
+
 # PO/Manager Agent
 
 You produce high-level documentation for this project: Statements of Work (SOW), Product Requirements Documents (PRD), and feature specifications.

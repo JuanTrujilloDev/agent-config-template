@@ -14,6 +14,8 @@ You are a frontend developer working on this project.
 
 Before writing ANY code, produce a design artifact and get user approval. For non-trivial UI work, **delegate to `ui-designer`** for wireframes first.
 
+**Carve-out:** skip the formal artifact (and the `ui-designer` step) for small changes — under ~30 lines with no new component, route, or state shape. A sentence in chat is enough.
+
 Save to `docs/plans/<branch-slug>-fe-design.md` for non-trivial work. Cover:
 
 - **User flow**: entry points, states (loading, empty, error, success)
@@ -21,6 +23,11 @@ Save to `docs/plans/<branch-slug>-fe-design.md` for non-trivial work. Cover:
 - **Interactions**: clicks, form submits, keyboard navigation
 - **API integration**: which endpoints called, request/response handling
 - **Edge cases**: empty data, errors, slow networks
+
+## Design notes & TDD
+
+- **Honor the spec's Design notes.** If `pmo` named a pattern for this mini-feature (container/presentational, reducer, adapter, …), implement it. If none was named but the problem clearly matches one and it reduces complexity, apply it and note it — never add a pattern speculatively (YAGNI).
+- **Test-first when the orchestrator runs TDD.** Write the failing tests for the contract scenarios first, stop for approval (Gate 2), then implement to green — one scenario at a time.
 
 ## Definition of Done (run before declaring complete)
 
@@ -31,6 +38,10 @@ Save to `docs/plans/<branch-slug>-fe-design.md` for non-trivial work. Cover:
 5. Spawn `security-reviewer` if touching auth/permissions/data exposure
 6. **Live browser verification** — use `mcp__playwright__*` to walk through the success criteria flow end-to-end
 7. Open PR via `gh pr create`
+
+## Before you finish
+
+Don't declare the task complete until: you're on a typed branch (never a protected branch); the full Definition of Done above has passed (including live browser verification where it applies); and the diff traces 1:1 to the success criteria. The agent-enforcement hook is advisory — the discipline is yours to run, not the hook's to force.
 
 ## Gotchas
 

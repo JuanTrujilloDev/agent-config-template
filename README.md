@@ -30,7 +30,7 @@ It's not a generic project scaffolder — [cookiecutter](https://github.com/cook
 | **Setup time**                   | 30 min copy-pasting old configs, hand-editing paths         | 60 seconds; Claude infers from your project files        |
 | **`.claude/` consistency**       | Different on every repo, none of them current               | Same battle-tested patterns everywhere                   |
 | **Agent coverage**               | Maybe a `code-reviewer.md` you cargo-culted                 | 7 agents (pm, *-dev, ui-designer, code/security review)  |
-| **Hooks**                        | None, or one `auto-format.sh` you forgot exists             | Branch discipline, agent gating, format-on-write         |
+| **Hooks**                        | None, or one `auto-format.sh` you forgot exists             | Branch discipline (hard), agent guidance (advisory), format-on-write |
 | **Slash commands**               | Whatever you remember to type each time                     | `/feature`, `/plan`, `/commit`, `/pr`, `/audit`, etc.    |
 | **PR discipline**                | Vibes-based                                                 | ≤12 files / <3000 LOC, enforced before commit            |
 | **Updates**                      | Re-cargo-cult next project                                  | `setup.sh --target . --answers ./answers.env` re-renders |
@@ -50,14 +50,14 @@ Inside Claude Code:
 /plugin install claude-config-template@juantrujillodev
 ```
 
-You now have **7 agents** (`pm`, `*-dev`, `ui-designer`, `code-reviewer`, `security-reviewer`), **9 slash commands** (`/claude-config-template:feature`, `:plan`, `:pr`, `:audit`, `:setup-template`, etc.), **3 skills** (principles + style guides), and **3 hooks** (branch discipline, agent gating, auto-format) available across every project where the plugin is enabled.
+You now have **7 agents** (`pm`, `*-dev`, `ui-designer`, `code-reviewer`, `security-reviewer`), **10 slash commands** (`/claude-config-template:feature`, `:fix`, `:plan`, `:pr`, `:audit`, `:setup-template`, etc.), **3 skills** (principles + style guides), and **3 hooks** (branch discipline, agent guidance, auto-format) available across every project where the plugin is enabled.
 
 The hooks use generic defaults — `src/` for source dir, `main` for default branch. Override per-project via env vars in `.envrc` (direnv) or your shell rc:
 
 ```bash
-export CLAUDE_CONFIG_SRC_DIR=apps                  # default: src
-export CLAUDE_CONFIG_FRONTEND_DIR=apps/frontend    # default: (none)
-export CLAUDE_CONFIG_DEFAULT_BRANCH=develop        # default: main
+export CLAUDE_CONFIG_SRC_DIR=apps                       # default: src
+export CLAUDE_CONFIG_FRONTEND_DIR=apps/frontend         # default: (none)
+export CLAUDE_CONFIG_PROTECTED_BRANCHES="main,qa,prod"  # default: main,master
 ```
 
 ### Calibrate a specific project (optional)
@@ -73,7 +73,7 @@ Claude will:
 1. Read `package.json` / `pyproject.toml` / `Cargo.toml` / `go.mod` / `manage.py` / etc.
 2. Draft an `answers.env` with confidence labels (HIGH / LOW / UNKNOWN).
 3. Show it to you and **wait for your approval or edits.**
-4. Run the bundled renderer to write a calibrated `.claude/` tree + `CLAUDE.md`.
+4. Run the bundled renderer to write a calibrated `.claude/` tree + `CLAUDE.md`. It's **non-destructive** — if you already have a `.claude/` config (or a root `CLAUDE.md`), it shows a per-file change plan and won't write without your `--merge` / `--overwrite` choice.
 5. Update `.gitignore` and remind you to restart Claude Code.
 
 The whole flow takes about a minute on a conventional project. After it runs, both layers are active — the plugin commands stay namespaced (`/claude-config-template:feature`); the project-root commands are unnamespaced (`/feature`) and take precedence when they collide, because they have your project's specifics baked in.
@@ -121,10 +121,10 @@ Same renderer, same template, no plugin required.
 │   ├── ui-designer.md        # Wireframes + specs (delegated by frontend-dev)
 │   ├── code-reviewer.md      # Pre-merge correctness review (read-only)
 │   └── security-reviewer.md  # Auth/permissions/data audit (read-only)
-├── commands/                 # /feature, /plan, /commit, /pr, /audit, /design, /idea, /sow
+├── commands/                 # /feature, /fix, /plan, /commit, /pr, /audit, /design, /idea, /sow
 └── hooks/
-    ├── agent-enforcement.sh  # Blocks edits on default branch + non-trivial edits outside agents
-    ├── auto-format.sh        # Runs your formatter after every Edit/Write
+    ├── agent-enforcement.sh  # Hard-blocks edits on protected branches; advises (no block) on large non-agent edits
+    ├── auto-format.sh        # Targeted lint autofix on write; full format runs in the Definition of Done
     └── coding-reminder.sh    # Injects principles reminder on coding prompts
 CLAUDE.md                     # Project root: principles, branch rules, agent map, dynamic context
 ```

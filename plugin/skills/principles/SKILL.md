@@ -47,6 +47,14 @@ For each task:
 5. Repeat until all criteria pass — *then* declare done.
 
 
+## Design Patterns (when warranted)
+
+Reach for a known design pattern **only when the problem genuinely matches one and it reduces complexity for a real, present need** — Strategy, Factory, Adapter, Repository, Observer, etc. Name it in the spec's Design notes with a one-line *why*. Never impose a pattern speculatively: a pattern with no present second caller or real variation is YAGNI (see Principle 2, and the `backend-dev` gotcha about wrapping a single call site in a `*Service` class).
+
+## Spec-Driven & Test-First (when invoked)
+
+For non-trivial features, prefer the spec-driven flow (`/spec` → `/feature`): an approved Given/When/Then contract **before** code, one mini-feature at a time, optionally test-first. See the `sdd-workflow` skill. For a small scoped change with an obvious cause, `/fix` is the right tool — skip the ceremony, keep the Definition of Done.
+
 ## Micro-PR Discipline
 
 Every PR must stay under both limits:

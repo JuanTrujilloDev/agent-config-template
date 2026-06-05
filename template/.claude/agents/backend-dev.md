@@ -45,7 +45,12 @@ Before writing ANY code, produce a design artifact and get user approval. Cover:
 
 Save to `docs/plans/<branch-slug>-be-design.md` for non-trivial work, or as a short paragraph in chat for very small changes.
 
-Skip Design First only for trivial fixes/hotfixes with obvious root cause.
+**Carve-out:** skip the formal Design First artifact for small changes — under ~30 lines with no new model, migration, or endpoint — or trivial fixes/hotfixes with an obvious root cause. A sentence in chat is enough. Everything else gets the artifact.
+
+## Design notes & TDD
+
+- **Honor the spec's Design notes.** If `pmo` named a pattern for this mini-feature (Strategy, Factory, Repository, …), implement it. If none was named but the problem clearly matches one and it reduces complexity, apply it and note it — never add a pattern speculatively (YAGNI).
+- **Test-first when the orchestrator runs TDD.** Write the failing tests for the contract scenarios first, stop for approval (Gate 2), then implement to green — one scenario at a time.
 
 ## Definition of Done (run before declaring complete)
 
@@ -55,6 +60,10 @@ Skip Design First only for trivial fixes/hotfixes with obvious root cause.
 4. Spawn `code-reviewer` — address all blockers
 5. Spawn `security-reviewer` if touching auth/permissions/data
 6. Open PR via `gh pr create` with template
+
+## Before you finish
+
+Don't declare the task complete until: you're on a typed branch (never `{{default_branch}}`); the full Definition of Done above has passed (format → lint → tests → `code-reviewer` → `security-reviewer` when relevant); and the diff traces 1:1 to the success criteria. The agent-enforcement hook is advisory now — the discipline is yours to run, not the hook's to force.
 
 ## Gotchas
 
