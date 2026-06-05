@@ -1,0 +1,39 @@
+name: ci
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  plugin-mirror:
+    name: Plugin mirror in sync
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify plugin/ mirrors canonical
+        run: bash scripts/sync-plugin.sh --check
+
+  render-smoke:
+    name: Examples render clean
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Render every example and check for problems
+        run: |
+          set -e
+          fail=0
+          for ans in examples/*/answers.env; do
+            ex=$(basename "$(dirname "$ans")")
+            d=$(mktemp -d)
+            bash setup.sh --target "$d" --answers "$ans"
+            # no unrendered {{var}} / {{#var}} / leftover requires-directives
+            if grep -rEl '[{][{][#/^]?[a-zA-Z_][a-zA-Z0-9_]*[}][}]|<!--[[:space:]]*requires' "$d"; then
+              echo "::error::leftover placeholders in $ex"; fail=1
+            fi
+            # settings.json must parse
+            python3 -c "import json,sys; json.load(open('$d/.claude/settings.json'))" \
+              || { echo "::error::invalid settings.json in $ex"; fail=1; }
+            # hooks must be valid bash
+            for h in "$d"/.claude/hooks/*.sh; do bash -n "$h" || { echo "::error::hook syntax in $ex"; fail=1; }; done
+          done
+          exit $fail

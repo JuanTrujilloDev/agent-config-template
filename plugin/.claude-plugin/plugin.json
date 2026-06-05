@@ -1,7 +1,7 @@
 {
   "name": "claude-config-template",
-  "description": "Battle-tested Claude Code config: 7 agents, 10 slash commands (incl. /fix and /setup-template for full project calibration), 3 hooks, 3 skills (principles + style guides), 4 pre-filled stack examples.",
-  "version": "0.3.3",
+  "description": "Spec-driven Claude Code config: orchestrator + pmo + judge + dev/security specialists, 11 slash commands (/spec, /feature, /fix, …), advisory hooks (hard branch block), 4 skills, opt-in TDD + mutation testing, 4 stack examples.",
+  "version": "0.4.0",
   "author": {
     "name": "Juan Trujillo",
     "url": "https://juantrujillo.dev"

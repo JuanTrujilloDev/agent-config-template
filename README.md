@@ -4,9 +4,9 @@
 
 # claude-config-template
 
-**The Claude Code config you wished you had — set up by Claude itself.**
+**The Claude Code config you wished you had — a spec-driven `.claude/` set up by Claude itself.**
 
-<sub>Stop reconfiguring `.claude/` from scratch on every project. Clone the template once, tell Claude *"set this up"*, and a minute later your repo has a battle-tested `.claude/` tree calibrated to your stack.</sub>
+<sub>Stop reconfiguring `.claude/` from scratch on every project. Install once, and your repo gets a battle-tested agent/command/hook tree calibrated to your stack — built around a spec-driven workflow: an approved contract before code, one mini-feature at a time, optional test-first.</sub>
 
 [![Install Plugin](https://img.shields.io/badge/Install-Plugin-CC785C?logo=anthropic&logoColor=white&style=flat)](#-quick-start)
 [![Use Template](https://img.shields.io/badge/Use-Template-2EA043?logo=githubactions&logoColor=white&style=flat)](#-quick-start)
@@ -21,25 +21,22 @@
 
 ## 🪄 Why this exists
 
-Reconfiguring `.claude/` and `CLAUDE.md` from scratch every time wastes the patterns you've already debugged. This template extracts a **battle-tested config** (originally a Django/HTMX project where it had time to bake) and parameterizes the project-specific bits, so the same scaffold works on FastAPI, Next.js, Go services, or whatever you're shipping next.
+Reconfiguring `.claude/` and `CLAUDE.md` from scratch every time wastes the patterns you've already debugged. This template packages the `.claude/` layer — the agents, slash commands, hooks, skills, and operating principles — that turn Claude Code from "fancy autocomplete" into a senior teammate who **specs the work before writing it**.
 
-It's not a generic project scaffolder — [cookiecutter](https://github.com/cookiecutter/cookiecutter) exists. It's specifically for the `.claude/` and `CLAUDE.md` layer: the agents, slash commands, hooks, and operating principles that turn Claude Code from "fancy autocomplete" into a senior teammate.
+It's not a generic project scaffolder ([cookiecutter](https://github.com/cookiecutter/cookiecutter) exists). It's specifically the workflow layer, built around **Spec-Driven Development**: a task becomes a conversed spec, a signed Given/When/Then contract, then code — one PR-sized mini-feature at a time, reviewed by a `judge`, optionally test-first.
 
-|                                  | Without this                                                | With this                                                |
-| -------------------------------- | ----------------------------------------------------------- | -------------------------------------------------------- |
-| **Setup time**                   | 30 min copy-pasting old configs, hand-editing paths         | 60 seconds; Claude infers from your project files        |
-| **`.claude/` consistency**       | Different on every repo, none of them current               | Same battle-tested patterns everywhere                   |
-| **Agent coverage**               | Maybe a `code-reviewer.md` you cargo-culted                 | 7 agents (pm, *-dev, ui-designer, code/security review)  |
-| **Hooks**                        | None, or one `auto-format.sh` you forgot exists             | Branch discipline (hard), agent guidance (advisory), format-on-write |
-| **Slash commands**               | Whatever you remember to type each time                     | `/feature`, `/plan`, `/commit`, `/pr`, `/audit`, etc.    |
-| **PR discipline**                | Vibes-based                                                 | ≤12 files / <3000 LOC, enforced before commit            |
-| **Updates**                      | Re-cargo-cult next project                                  | `setup.sh --target . --answers ./answers.env` re-renders |
+|                            | Without this                                        | With this                                                      |
+| -------------------------- | --------------------------------------------------- | -------------------------------------------------------------- |
+| **Setup time**             | 30 min copy-pasting old configs                     | One-line install; `/setup-template` calibrates in ~a minute    |
+| **Feature workflow**       | Vibes → code → hope                                 | Spec → **approve contract** → implement → judge → micro-commit |
+| **Agent coverage**         | Maybe a `code-reviewer.md` you cargo-culted         | `orchestrator`, `pmo`, dev specialists, `judge`, security      |
+| **Hooks**                  | None, or one you forgot exists                      | Branch hard-block + **advisory** agent guidance + format-on-write |
+| **PR discipline**          | Vibes-based                                         | ≤12 files / <3000 LOC, one mini-feature at a time              |
+| **Existing config**        | A setup script that **overwrites** it               | **Non-destructive**: shows a diff, merges, never clobbers      |
 
 ---
 
 ## 🚀 Quick start
-
-One install gets you everything. Optional second step calibrates a specific project to its exact stack.
 
 ### Install once
 
@@ -50,9 +47,7 @@ Inside Claude Code:
 /plugin install claude-config-template@juantrujillodev
 ```
 
-You now have **7 agents** (`pm`, `*-dev`, `ui-designer`, `code-reviewer`, `security-reviewer`), **10 slash commands** (`/claude-config-template:feature`, `:fix`, `:plan`, `:pr`, `:audit`, `:setup-template`, etc.), **3 skills** (principles + style guides), and **3 hooks** (branch discipline, agent guidance, auto-format) available across every project where the plugin is enabled.
-
-The hooks use generic defaults — `src/` for source dir, `main` for default branch. Override per-project via env vars in `.envrc` (direnv) or your shell rc:
+You now have the agents, slash commands, skills, and hooks available across every project where the plugin is enabled. The hooks use generic defaults; override per-project via env vars:
 
 ```bash
 export CLAUDE_CONFIG_SRC_DIR=apps                       # default: src
@@ -60,45 +55,54 @@ export CLAUDE_CONFIG_FRONTEND_DIR=apps/frontend         # default: (none)
 export CLAUDE_CONFIG_PROTECTED_BRANCHES="main,qa,prod"  # default: main,master
 ```
 
-### Calibrate a specific project (optional)
+### Run a feature, spec-first
 
-When you want a project to have a fully-tailored `.claude/` tree — agents and hooks with your *exact* test/lint/format commands, branch prefix, layer-split toggle, framework-specific style guides — run the bundled command from inside the project:
+```
+/spec     add CSV export to the holdings list
+/feature  add CSV export to the holdings list
+```
+
+`/spec` has the `pmo` agent converse with you, then write the spec, a Given/When/Then **contract**, and a list of PR-sized mini-features — and it **stops for your approval of the contract**. `/feature` then hands off to the `orchestrator`, which implements one mini-feature at a time (optionally test-first), runs the `judge`, and micro-commits. For a small scoped change with an obvious cause, skip all of it: `/fix login redirect drops the next param`.
+
+### Calibrate a specific project (optional)
 
 ```
 /claude-config-template:setup-template
 ```
 
-Claude will:
-
-1. Read `package.json` / `pyproject.toml` / `Cargo.toml` / `go.mod` / `manage.py` / etc.
-2. Draft an `answers.env` with confidence labels (HIGH / LOW / UNKNOWN).
-3. Show it to you and **wait for your approval or edits.**
-4. Run the bundled renderer to write a calibrated `.claude/` tree + `CLAUDE.md`. It's **non-destructive** — if you already have a `.claude/` config (or a root `CLAUDE.md`), it shows a per-file change plan and won't write without your `--merge` / `--overwrite` choice.
-5. Update `.gitignore` and remind you to restart Claude Code.
-
-The whole flow takes about a minute on a conventional project. After it runs, both layers are active — the plugin commands stay namespaced (`/claude-config-template:feature`); the project-root commands are unnamespaced (`/feature`) and take precedence when they collide, because they have your project's specifics baked in.
+Claude reads your `package.json` / `pyproject.toml` / `go.mod` / `manage.py` / etc., drafts an `answers.env` with confidence labels, waits for your approval, then renders a fully-calibrated `.claude/` tree + `CLAUDE.md`. It's **non-destructive** — if you already have a `.claude/` config or a root `CLAUDE.md`, it shows a per-file change plan and won't write without your `--merge` / `--overwrite` choice. Your `.claude/settings.local.json` is never touched.
 
 ### Old-school: clone + render manually
-
-For maintainers, advanced users, or anyone who'd rather not depend on the plugin install:
 
 ```bash
 git clone https://github.com/JuanTrujilloDev/claude-config-template.git ~/code/claude-config-template
 cd ~/code/my-new-project
 cp ~/code/claude-config-template/examples/python-fastapi/answers.env ./answers.env
-~/code/claude-config-template/setup.sh --target . --answers ./answers.env
+~/code/claude-config-template/setup.sh --target . --answers ./answers.env            # fresh project
+# existing config? run with no mode to preview the plan, then:
+~/code/claude-config-template/setup.sh --target . --answers ./answers.env --merge
 ```
 
-Same renderer, same template, no plugin required.
+---
 
-### Plugin only vs Plugin + calibration vs Manual clone
+## 🔄 The workflow (SDD + TDD)
 
-|                                | Plugin only           | Plugin + `/setup-template` | Manual clone           |
-| ------------------------------ | --------------------- | -------------------------- | ---------------------- |
-| **Install effort**             | One line              | One line + 1 min/project   | Clone + edit answers   |
-| **Project specifics**          | Generic + env vars    | Baked in                   | Baked in               |
-| **Style guides**               | Stack-agnostic        | Tailored                   | Tailored               |
-| **Best for**                   | Many repos at once    | Flagship projects          | Forks, customization   |
+```
+task in  →  [pmo] spec + Given/When/Then contract + mini-features
+         →  ⏸ GATE 1: you approve the contract
+         →  [orchestrator] per mini-feature, one at a time:
+              ⏸ GATE 2 (only if TDD): approve the failing tests first
+              →  [backend-dev | frontend-dev | ui-designer] implement to green
+              →  [judge] review code AND tests vs the contract
+              →  [security-reviewer] if auth/permissions/data
+              →  [mutation-tester] if mutation testing is enabled
+              →  micro-commit on a typed branch
+         →  done
+```
+
+One mini-feature at a time. One mandatory gate (the contract), one optional gate (the tests). **State lives on disk** — `docs/specs/<slug>/` holds the spec, contract, `features.json` state machine, and per-feature progress — not in chat, so it survives restarts. Full detail in **[`docs/sdd-workflow.md`](./docs/sdd-workflow.md)**.
+
+`/fix` is the escape hatch: small scoped change, no spec or contract, but the full Definition of Done still runs.
 
 ---
 
@@ -106,30 +110,59 @@ Same renderer, same template, no plugin required.
 
 ```
 .claude/
-├── HELP.md                   # Decision tree + worked examples for the team
+├── HELP.md                   # Decision tree + worked examples
 ├── settings.json             # Tightened permissions + hook registrations
-├── mcp.json.example          # MCP server template (copy → mcp.json, fill in)
+├── mcp.json.example          # MCP server template
 ├── rules/
-│   ├── principles.md         # 8 always-loaded operating principles
-│   ├── backend-style.md      # Backend code conventions
-│   └── frontend-style.md     # Frontend code conventions (skipped if API-only)
+│   ├── principles.md         # Operating principles (always-loaded)
+│   ├── backend-style.md      # Backend conventions
+│   └── frontend-style.md     # Frontend conventions (skipped if API-only)
 ├── agents/
-│   ├── pm.md                 # Decomposes features into PR-sized tickets
-│   ├── po-manager.md         # Briefs / SOWs / PRDs
-│   ├── backend-dev.md        # Backend implementation, Design First
-│   ├── frontend-dev.md       # Frontend implementation, Design First
-│   ├── ui-designer.md        # Wireframes + specs (delegated by frontend-dev)
-│   ├── code-reviewer.md      # Pre-merge correctness review (read-only)
-│   └── security-reviewer.md  # Auth/permissions/data audit (read-only)
-├── commands/                 # /feature, /fix, /plan, /commit, /pr, /audit, /design, /idea, /sow
+│   ├── orchestrator.md       # Runs the SDD flow, guards the gates (never codes)
+│   ├── pmo.md                # Conversed spec + contract + mini-features
+│   ├── backend-dev.md        # Backend implementation (Design notes, test-first)
+│   ├── frontend-dev.md       # Frontend implementation
+│   ├── ui-designer.md        # Wireframes + specs (read-only)
+│   ├── judge.md              # Reviews code + tests vs the contract (read-only)
+│   ├── security-reviewer.md  # Auth/permissions/data audit (read-only)
+│   └── mutation-tester.md    # Validates the tests bite (opt-in)
+├── commands/                 # /spec, /feature, /fix, /commit, /pr, /audit, /design
 └── hooks/
-    ├── agent-enforcement.sh  # Hard-blocks edits on protected branches; advises (no block) on large non-agent edits
+    ├── agent-enforcement.sh  # Hard-blocks protected branches; advises (no block) on large non-agent edits
     ├── auto-format.sh        # Targeted lint autofix on write; full format runs in the Definition of Done
-    └── coding-reminder.sh    # Injects principles reminder on coding prompts
-CLAUDE.md                     # Project root: principles, branch rules, agent map, dynamic context
+    └── coding-reminder.sh    # Injects principles on coding prompts
+CLAUDE.md                     # Principles, branch rules, agent map, dynamic context
+docs/sdd-workflow.md          # The spec-driven flow end-to-end
+tools/mutate.py               # No-dep mutation tester (only when mutation testing is on)
 ```
 
-Every agent ships with a **Gotchas** section calling out the specific failure modes for that role — `pm` against ticket inflation, `backend-dev` against speculative `*Service` classes, `code-reviewer` against confusing nits with blockers, etc.
+### Agents
+
+| Agent | Role | Read-only? |
+|---|---|---|
+| `orchestrator` | Coordinates the SDD flow, guards the gates, launches specialists | Yes |
+| `pmo` | Conversed spec → Given/When/Then contract → PR-sized mini-features | No |
+| `backend-dev` / `frontend-dev` | Implementation, Design notes, optional test-first | No |
+| `ui-designer` | Wireframes + specs (delegated by `frontend-dev`) | Yes |
+| `judge` | Pre-merge review of code **and** tests against the contract | Yes |
+| `security-reviewer` | Auth/permissions/data audit | Yes |
+| `mutation-tester` | Validates the tests bite — opt-in (`enforce_mutation_testing`) | Yes |
+
+Every agent ships with a **Gotchas** section listing its role-specific failure modes. `pm`, `po-manager`, and `code-reviewer` are still present as **deprecated** stubs (→ `pmo` / `judge`) and will be removed in a later release.
+
+### Commands
+
+| Command | What it does |
+|---|---|
+| `/spec` | Idea/SOW → conversed spec + Given/When/Then contract + mini-features (`pmo`). Replaces `/idea` + `/sow`. |
+| `/feature` | Full spec-driven flow (`orchestrator`): approve contract → optional TDD → implement → `judge` → micro-commit |
+| `/fix` | Small, scoped change: skips the spec + Design First, keeps the full Definition of Done |
+| `/audit` | Code + security review (`judge` + `security-reviewer`) |
+| `/commit`, `/pr` | Conventional commit / open PR, with confirmation gates |
+| `/design` | Wireframe + spec via `ui-designer` (folds into `/feature` for UI work) |
+| `/setup-template` | Render a calibrated `.claude/` tree into the current project (non-destructive) |
+
+`/idea`, `/sow`, and `/plan` are deprecated → use `/spec`.
 
 ---
 
@@ -137,58 +170,45 @@ Every agent ships with a **Gotchas** section calling out the specific failure mo
 
 [`template.config.yaml`](./template.config.yaml) defines every placeholder. Highlights:
 
-| Variable                                                                   | Example                                                |
-| -------------------------------------------------------------------------- | ------------------------------------------------------ |
-| `project_name`                                                             | `Acme Billing`                                         |
-| `language` / `language_version`                                            | `Python` / `3.12+`                                     |
-| `backend_framework`                                                        | `FastAPI`                                              |
-| `frontend_framework`                                                       | `Next.js 14` (or skip if API-only)                     |
-| `src_dir`, `frontend_dir`, `tests_glob`                                    | `src/`, `frontend/`, `tests/`                          |
-| `format_cmd`, `lint_cmd`, `test_cmd`, `build_cmd`                          | `ruff format .`, `ruff check .`, `pytest`, `npm run dev` |
-| `branch_prefix`, `default_branch`                                          | `ACME`, `main`                                         |
-| `max_files_per_pr`, `max_loc_per_pr`                                       | `12`, `3000`                                           |
-| `has_frontend`, `has_celery`, `has_e2e`, `enforce_layer_split` *(toggles)* | `yes` / `no`                                           |
+| Variable | Example |
+| --- | --- |
+| `project_name` / `language` / `backend_framework` | `Acme Billing` / `Python` / `FastAPI` |
+| `src_dir`, `frontend_dir`, `tests_glob` | `src/`, `frontend/`, `tests/` |
+| `format_cmd`, `lint_cmd`, `test_cmd`, `build_cmd` | `ruff format .`, `ruff check .`, `pytest`, `npm run dev` |
+| `branch_prefix`, `default_branch` | `ACME`, `main` |
+| `max_files_per_pr`, `max_loc_per_pr` | `12`, `3000` |
+| `has_frontend`, `has_celery`, `has_e2e`, `enforce_layer_split` *(toggles)* | `yes` / `no` |
+| `use_gherkin` *(toggle)* | write contracts as real `.feature` files (needs a runner) |
+| `enforce_mutation_testing` *(toggle)* | add a mutation-testing close gate (ships `tools/mutate.py`) |
 
-The toggles drive **conditional sections** — `{{#has_celery}}…{{/has_celery}}` — so you don't end up with Celery boilerplate in a project that doesn't use it, or a `frontend-dev` agent in an API-only repo. File-level conditionals via `<!-- requires: has_frontend -->` drop whole files when the flag is falsy.
+Toggles drive **conditional sections** (`{{#has_celery}}…{{/has_celery}}`) and file-level conditionals (`<!-- requires: enforce_mutation_testing -->` drops whole files when falsy).
 
 ---
 
 ## 🎨 Pre-filled examples
 
-| Stack                                       | Best for                                          | Layer split |
-| ------------------------------------------- | ------------------------------------------------- | ----------- |
-| [`python-fastapi`](./examples/python-fastapi) | API service, no frontend                          | n/a         |
-| [`python-django`](./examples/python-django)   | Django + DRF + HTMX/Alpine (closest to the original) | yes      |
-| [`node-express`](./examples/node-express)     | Express + TypeScript + Prisma                     | n/a         |
-| [`node-nextjs`](./examples/node-nextjs)       | Next.js 14 (App Router) full-stack                | no          |
-
-These are the answers Claude would arrive at for a vanilla version of each stack. Use them as starting points when the AI flow isn't an option.
+| Stack | Best for | Layer split |
+| --- | --- | --- |
+| [`python-fastapi`](./examples/python-fastapi) | API service, no frontend | n/a |
+| [`python-django`](./examples/python-django) | Django + DRF + HTMX/Alpine | yes |
+| [`node-express`](./examples/node-express) | Express + TypeScript + Prisma | n/a |
+| [`node-nextjs`](./examples/node-nextjs) | Next.js 14 (App Router) full-stack | no |
 
 ---
 
 ## 🔧 How it works
 
-1. **Placeholders** use mustache syntax: `{{var}}` for direct substitution, `{{#var}}…{{/var}}` for "include if truthy", `{{^var}}…{{/var}}` for "include if falsy".
-2. **File-level conditionals** use a directive at the top of a template file: `<!-- requires: has_frontend -->`. The renderer drops the file if the var is falsy.
-3. **The renderer** is inline Python inside `setup.sh` — about 50 lines. No Jinja/Mustache library dependency, no surprise behavior. Standalone-tag whitespace cleanup keeps conditionals from leaving blank-line forests.
+1. **Placeholders** use mustache syntax: `{{var}}`, `{{#var}}…{{/var}}` (include if truthy), `{{^var}}…{{/var}}` (include if falsy).
+2. **File-level conditionals** via `<!-- requires: var -->` at the top of a template file drop the file when the var is falsy.
+3. **The renderer** is inline Python inside `setup.sh` — no Jinja/Mustache dependency. It renders to a staging dir, then applies to the target **non-destructively**: against an existing config it requires an explicit `--merge` / `--overwrite` / `--abort`, union-merges `settings.json`, and never touches `settings.local.json`.
 
-That's the whole engine. You can read it in five minutes and modify it without learning a new DSL.
+The plugin's bundled template copy is kept in sync with the canonical source by [`scripts/sync-plugin.sh`](./scripts/sync-plugin.sh); CI fails on drift.
 
 ---
 
 ## ♻️ Upgrading an already-configured project
 
-Keep your `answers.env` checked into the project. Re-render after pulling template updates and `git diff` to see what changed:
-
-```bash
-cd ~/code/my-project
-TMP=$(mktemp -d)
-~/code/claude-config-template/setup.sh --target "$TMP" --answers ./answers.env
-diff -r .claude "$TMP/.claude"
-# Apply selectively, or replace .claude entirely if you don't have local mods.
-```
-
-Full guide: [`docs/upgrade-guide.md`](./docs/upgrade-guide.md).
+Keep your `answers.env` checked in. After pulling template updates, re-render with `--merge` to add what's new without clobbering your customizations, or render to a temp dir and `diff`. Full guide: [`docs/upgrade-guide.md`](./docs/upgrade-guide.md).
 
 ---
 
@@ -196,26 +216,26 @@ Full guide: [`docs/upgrade-guide.md`](./docs/upgrade-guide.md).
 
 - **Not a generic project scaffolder.** [cookiecutter](https://github.com/cookiecutter/cookiecutter) exists.
 - **Not a Claude Code plugin marketplace.** See [Claude Code plugins docs](https://docs.claude.com/en/docs/claude-code/plugins).
-- **Doesn't replace Claude Code's built-in `/init`.** It complements it — run `/init` after rendering if you want Claude to scan your codebase and add project-specific notes to `CLAUDE.md`.
+- **Doesn't replace `/init`.** It complements it — run `/init` after rendering to add codebase-specific notes to `CLAUDE.md`.
 
 ---
 
 ## 📚 Reference
 
+- [`docs/sdd-workflow.md`](./docs/sdd-workflow.md) — the spec-driven flow end-to-end
 - [`docs/what-each-file-does.md`](./docs/what-each-file-does.md) — per-file explainer
 - [`docs/upgrade-guide.md`](./docs/upgrade-guide.md) — pulling template updates into existing projects
 - [`template.config.yaml`](./template.config.yaml) — full placeholder schema
-- [`ai_setup_prompt.md`](./ai_setup_prompt.md) — verbatim setup prompt, for users who want to script it
 
 ---
 
 ## 🙏 Credits & inspiration
 
-The four core principles — *Think Before Coding, Simplicity First, Surgical Changes, Goal-Driven Execution* — come from [forrestchang/andrej-karpathy-skills](https://github.com/forrestchang/andrej-karpathy-skills), distilled from [Andrej Karpathy's observations](https://x.com/karpathy/status/2015883857489522876) on LLM coding pitfalls. If you only want the principles and not the agents/hooks/commands scaffold, that single-file `CLAUDE.md` is a great starting point.
+The core principles — *Think Before Coding, Simplicity First, Surgical Changes, Goal-Driven Execution* — come from [forrestchang/andrej-karpathy-skills](https://github.com/forrestchang/andrej-karpathy-skills), distilled from Andrej Karpathy's observations on LLM coding pitfalls.
 
-Several patterns — embedded "Gotchas" sections in agents, tighter permission wildcards, dynamic context injection via `` !`command` `` — were adapted from [shanraisshan/claude-code-best-practice](https://github.com/shanraisshan/claude-code-best-practice).
+The spec-driven + test-first spine — conversation → executable contract → TDD → judgment → mutation — is adapted from Robert C. Martin's ("Uncle Bob") harness, as shown in [betta-tech/harness-sdd](https://github.com/betta-tech/harness-sdd).
 
-The agent / hook / micro-PR architecture was lifted from a working Django/HTMX project where it had time to bake.
+Several patterns — embedded "Gotchas" in agents, tighter permission wildcards, dynamic context injection — were adapted from [shanraisshan/claude-code-best-practice](https://github.com/shanraisshan/claude-code-best-practice).
 
 ---
 
@@ -225,8 +245,6 @@ If this saved you time, you can support continued work on it:
 
 [![GitHub Sponsors](https://img.shields.io/badge/♥-Sponsor-30363D?logo=github-sponsors&logoColor=EA4AAA&style=for-the-badge)](https://github.com/sponsors/JuanTrujilloDev)
 [![Ko-fi](https://img.shields.io/badge/Ko--fi-Tip-FF5E5B?logo=ko-fi&logoColor=white&style=for-the-badge)](https://ko-fi.com/juantrujillodev)
-
-Sponsorship buys me time. Time becomes side-project hours. Side-project hours become open-source releases — like a from-scratch async Python web framework I'm currently shipping (third attempt, this is the one), [`notihub`](https://pypi.org/project/notihub/) on PyPI, and whatever the next "I keep rebuilding this on every project" tool turns out to be.
 
 ---
 

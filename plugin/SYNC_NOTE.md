@@ -1,22 +1,20 @@
 # Sync note — bundled template
 
 `plugin/template/`, `plugin/setup.sh`, and `plugin/template.config.yaml` are
-**copies** of the canonical versions at the repo root. They're bundled here
-so the plugin is self-contained when installed via `/plugin install` —
-Claude Code clones the marketplace repo and uses only the `plugin/`
-directory, so it needs its own copy of the template.
+**byte-for-byte copies** of the canonical versions at the repo root. They're
+bundled so the plugin is self-contained when installed via `/plugin install`
+(Claude Code uses only the `plugin/` directory).
 
-## Keeping them in sync
-
-Whenever the canonical files change, re-mirror:
+**Don't edit these copies by hand.** Edit the canonical files at the repo root,
+then re-mirror:
 
 ```bash
-cd <repo-root>
-rm -rf plugin/template
-cp -R template plugin/template
-cp setup.sh plugin/setup.sh
-cp template.config.yaml plugin/template.config.yaml
+scripts/sync-plugin.sh
 ```
 
-A pre-commit hook or a `make sync-plugin` target would make this automatic.
-For now it's manual — the trade-off for keeping the canonical source clean.
+CI runs `scripts/sync-plugin.sh --check` on every push/PR and fails if the copies
+have drifted, so the mirror can't silently rot.
+
+> Note: the plugin's own `agents/`, `commands/`, `hooks/`, and `skills/` are
+> hand-authored, stack-agnostic variants — they are **not** mirrors of the
+> canonical template and are not touched by the sync script.
