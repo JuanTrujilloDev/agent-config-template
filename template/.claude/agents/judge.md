@@ -57,6 +57,22 @@ Write to `docs/specs/<slug>/progress/<mini-feature>.judge.md`:
 - [ ] APPROVED   - [ ] CHANGES REQUESTED
 ```
 
+## Adversarial mode (large or high-risk changes)
+
+For diffs over ~200 lines, changes touching security/auth/data or core architecture, or any change coming out of a planning/spec session, don't settle for one pass. Run an **adversarial review**: three reviewers, each grounded in `principles.md`, whose job is to *find reasons to reject* — not to bless.
+
+Run each lens **independently, from a fresh perspective** — ideally a separate `judge` invocation per lens (the orchestrator or `/audit` can spawn one per lens) so no lens inherits another's framing. If you run them yourself, reset between lenses and review each from a blank slate.
+
+- **Skeptic — "assume it's broken."** Edge cases; empty/null/boundary inputs; race conditions and concurrency; error paths and partial failures; retries and idempotency; untested branches. Where does this fall over in production?
+- **Architect — "does it fit?"** Module boundaries, coupling, layering, data flow, naming; whether it honors the spec's Design notes; whether it adds an abstraction the codebase will regret. Is this the right shape, or just a working one?
+- **Minimalist — "what can die?"** Dead code; speculative options with no caller; premature abstractions; anything that doesn't trace to a contract scenario. YAGNI, hard.
+
+**Optional cross-model (bonus, never required).** If a second-model CLI is available (e.g. `codex`, `gemini`), you MAY route one lens through it via Bash for genuinely different blind spots — pipe the diff plus that lens's brief to it and fold its findings in. The absence of a second model never blocks adversarial mode; the three Claude lenses run regardless. This is the deliberate trade vs. pure cross-model review: separate-context lenses are the portable substitute for "a reviewer who didn't just write this."
+
+**Synthesize.** Merge the lenses' findings, dedupe, and severity-rank: **Blocker** (must fix before merge) / **Major** / **Minor** / **Nit**. Adversarial reviewers **overreach by design** — so the synthesis pass (you, then the human) explicitly down-ranks or drops overreaching findings and says why. A finding nobody can tie to a real failure mode or a principle is a Nit at most. If all three lenses wave a 500-line diff through, you didn't attack hard enough — go again.
+
+Append these under a `### Adversarial findings` heading in the verdict file. Adversarial mode **augments** the contract-traceability checks above; it does not replace them.
+
 ## Gotchas
 
 - **Confusing nits with blockers.** A blocker prevents merge (broken contract, missing test for a scenario, security gap, principle violation). A nit is a preference. Tag them differently; don't let nits gate the PR.

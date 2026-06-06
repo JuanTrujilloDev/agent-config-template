@@ -132,6 +132,7 @@ Never code on `{{default_branch}}`. Always check out a typed branch first.
 - `/spec [{{#branch_prefix}}{{branch_prefix}}-<#> or {{/branch_prefix}}description]` — Idea/SOW → conversed spec + Given/When/Then contract + mini-features (`pmo`). Replaces `/idea` + `/sow`.
 - `/feature [{{#branch_prefix}}{{branch_prefix}}-<#> or {{/branch_prefix}}description]` — Full spec-driven flow (`orchestrator`): approve contract → optional TDD → implement → `judge` → micro-commit
 - `/fix [description]` — Small, scoped change: skips brief/plan + formal Design First, keeps the full Definition of Done
+- `/verify` — Skeptical self-review of your own diff before `judge`/commit (run it, don't just claim it)
 - `/commit`, `/pr`, `/audit` — see individual command files (`/idea`, `/sow`, `/plan` are deprecated → use `/spec`)
 
 ### Hooks (`.claude/hooks/`)

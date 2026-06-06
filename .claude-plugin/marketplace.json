@@ -9,7 +9,7 @@
     {
       "name": "claude-config-template",
       "source": "./plugin",
-      "description": "Spec-driven Claude Code config: orchestrator + pmo + judge + dev/security specialists, 11 slash commands (/spec, /feature, /fix, …), advisory hooks, 4 skills, opt-in TDD + mutation testing.",
+      "description": "Spec-driven Claude Code config: orchestrator + pmo + judge + dev/security specialists, 12 slash commands (/spec, /feature, /fix, /verify, …), advisory hooks, 4 skills, opt-in TDD + mutation testing.",
       "version": "0.4.0",
       "homepage": "https://github.com/JuanTrujilloDev/claude-config-template",
       "license": "MIT",

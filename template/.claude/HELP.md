@@ -20,6 +20,7 @@ Practical guide to working with Claude in this project. **Read [Core Operating P
 | **Spec a feature first** | `/spec <description>` → `pmo` writes spec + Given/When/Then contract + mini-features; you approve |
 | **New feature, no ticket** | `/feature <description>` → full spec-driven flow, orchestrated and gated |
 | **Small scoped fix (obvious cause)** | `/fix <description>` → skips spec + Design First, keeps the full Definition of Done |
+| **Before you call it done** | `/verify` → re-read the request, read the diff, run it, fix what you find |
 | **Hotfix (prod broken)** | *"Hotfix: \<symptom\>. Branch from `{{default_branch}}` as `hotfix/\<slug\>`. Spawn the right dev agent directly, single small PR."* — `orchestrator`/`pmo` skipped; `judge` still runs |
 | **Bug fix (non-urgent)** | Reproduce → minimal fix → tests → standard agent flow on a `fix/<slug>` branch |
 | **Refactor (no behavior change)** | `judge` first to baseline → `*-dev` agent on `refactor/<slug>` → single PR ≤{{max_files_per_pr}} files |

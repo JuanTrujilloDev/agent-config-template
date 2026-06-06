@@ -75,6 +75,7 @@ Slash command definitions. Each file becomes `/<filename>` in Claude Code.
 | `/spec` | Idea/SOW → conversed spec + Given/When/Then contract + mini-features via `pmo` (replaces `/idea` + `/sow`) |
 | `/feature` | Full spec-driven flow via `orchestrator`: contract → optional TDD → implement → `judge` → micro-commit |
 | `/fix` | Small, scoped change: skips brief/plan + formal Design First, keeps the full Definition of Done |
+| `/verify` | Implementer's skeptical self-review of its own diff before judge/commit (run it, don't just claim it) |
 | `/audit` | Code + security review via `judge` + `security-reviewer` |
 | `/commit` | Conventional commit, with confirmation gate |
 | `/pr` | Push + open PR, with confirmation gate |
