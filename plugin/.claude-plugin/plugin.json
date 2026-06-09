@@ -1,7 +1,7 @@
 {
   "name": "claude-config-template",
   "description": "Spec-driven Claude Code config: orchestrator + pmo + judge + dev/security specialists, 12 slash commands (/spec, /feature, /fix, /verify, …), advisory hooks (hard branch block), 4 skills, opt-in TDD + mutation testing, 4 stack examples.",
-  "version": "0.4.0",
+  "version": "0.4.1",
   "author": {
     "name": "Juan Trujillo",
     "url": "https://juantrujillo.dev"
