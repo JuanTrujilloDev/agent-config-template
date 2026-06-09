@@ -1,6 +1,6 @@
 # What each file does
 
-A reference for everything in `template/` — what it controls, when it fires, and how to extend it.
+A reference for everything in `core/` (the canonical source; `template/` before v0.5.0) — what it controls, when it fires, and how to extend it.
 
 ## `CLAUDE.md` (project root)
 

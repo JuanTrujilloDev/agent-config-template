@@ -10,8 +10,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Verify plugin/ mirrors canonical
-        run: bash scripts/sync-plugin.sh --check
+      - name: Verify generated trees mirror core/
+        run: bash scripts/build.sh --check
 
   render-smoke:
     name: Examples render clean

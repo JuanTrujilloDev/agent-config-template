@@ -202,7 +202,7 @@ Toggles drive **conditional sections** (`{{#has_celery}}…{{/has_celery}}`) and
 2. **File-level conditionals** via `<!-- requires: var -->` at the top of a template file drop the file when the var is falsy.
 3. **The renderer** is inline Python inside `setup.sh` — no Jinja/Mustache dependency. It renders to a staging dir, then applies to the target **non-destructively**: against an existing config it requires an explicit `--merge` / `--overwrite` / `--abort`, union-merges `settings.json`, and never touches `settings.local.json`.
 
-The plugin's bundled template copy is kept in sync with the canonical source by [`scripts/sync-plugin.sh`](./scripts/sync-plugin.sh); CI fails on drift.
+The plugin's bundled template copy is generated from the canonical source (`core/`) by [`scripts/build.sh`](./scripts/build.sh); CI fails on drift.
 
 ---
 

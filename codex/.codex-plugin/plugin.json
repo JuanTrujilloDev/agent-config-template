@@ -1,0 +1,25 @@
+{
+  "name": "claude-config-template",
+  "version": "0.4.1",
+  "description": "Spec-driven agent config: principles, the SDD/TDD workflow, /spec /fix /verify, and an OWASP security audit \u2014 as portable skills.",
+  "author": {
+    "name": "Juan Trujillo",
+    "url": "https://juantrujillo.dev"
+  },
+  "homepage": "https://github.com/JuanTrujilloDev/claude-config-template",
+  "repository": "https://github.com/JuanTrujilloDev/claude-config-template",
+  "license": "MIT",
+  "keywords": [
+    "sdd",
+    "tdd",
+    "code-review",
+    "security",
+    "workflow"
+  ],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Agent Config \u2014 SDD",
+    "shortDescription": "Spec-driven workflow + reviews as skills",
+    "category": "Productivity"
+  }
+}

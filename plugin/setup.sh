@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 # claude-config-template renderer.
 #
-# Reads template/ + an answers file, substitutes {{var}} placeholders
+# Reads the canonical source (core/ at the repo root, or the plugin's bundled
+# template/) + an answers file, substitutes {{var}} placeholders
 # (and {{#var}}…{{/var}} / {{^var}}…{{/var}} sections), drops files marked
 # `<!-- requires: var -->` when the var is falsy, writes to a target dir.
 #
@@ -42,7 +43,13 @@
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-TEMPLATE_DIR="$SCRIPT_DIR/template"
+# Canonical source is core/ at the repo root; the bundled plugin copy ships as
+# template/. The same script works in both locations by auto-detecting.
+if [ -d "$SCRIPT_DIR/core" ]; then
+  TEMPLATE_DIR="$SCRIPT_DIR/core"
+else
+  TEMPLATE_DIR="$SCRIPT_DIR/template"
+fi
 
 TARGET=""
 ANSWERS_FILE=""
