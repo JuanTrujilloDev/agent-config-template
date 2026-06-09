@@ -40,6 +40,39 @@ REFRAME = {  # agent markdown -> skill under a new name
                        "OWASP-grounded security review: secrets, access control, injection, auth/session, crypto, misconfiguration, SSRF, and vulnerable dependencies. Read-only, severity-ranked findings."),
 }
 
+# Portable always-on rules layer. Emitted as AGENTS.md (cross-tool: Codex,
+# OpenCode, Cursor, …) and GEMINI.md (Antigravity/Gemini). One source, so the
+# two never drift. Kept well under Antigravity's 12,000-char rule limit.
+RULES_DOC = """# Agent operating rules
+
+> Portable rules for any coding agent (Claude Code, Codex, OpenCode, Antigravity).
+> This is the always-on baseline. The full capabilities — `spec`, `fix`, `verify`,
+> `security-audit`, and the style guides — install as skills (see the README).
+
+## Principles (non-negotiable)
+
+1. **Think before coding.** State assumptions; if a request has multiple readings, ask before writing. Restate the goal and list 2–4 verifiable success criteria first.
+2. **Simplicity first (YAGNI).** Write the minimum code that solves the stated problem. No speculative classes, options, or abstractions. Reach for a design pattern only when the problem genuinely matches one.
+3. **Surgical changes.** Touch only what the task needs. No drive-by refactors or reformatting. Match the file's existing style.
+4. **Goal-driven execution.** Define success criteria, implement, run them, fix gaps, repeat until they pass — then declare done.
+
+## Spec-driven workflow (non-trivial features)
+
+Prefer: idea → a conversed spec with a **Given/When/Then contract** you approve → implement **one PR-sized mini-feature at a time** → review (and, under TDD, write the failing tests first and approve them before code) → self-review → micro-commit. Use the `spec` then `feature` flow. For a small change with an obvious cause, use `fix` (skip the spec, keep the Definition of Done). Before declaring done, run `verify` — re-read the request, read the diff, and actually run it.
+
+## Branch discipline
+
+Never commit on a **protected branch** (e.g. `main`/`master`, or your environment branches). Start every change on a typed branch: `feature/…`, `fix/…`, `hotfix/…`, `refactor/…`, `chore/…`, `docs/…`.
+
+## Definition of Done
+
+Format → lint → tests green (coverage maintained) → code review → security review when the change touches auth, permissions, data, or external input → then done. Keep PRs small (≈ ≤12 files / <3000 lines); split if larger.
+
+## Security baseline
+
+Run the `security-audit` skill on anything touching auth, secrets, user data, or external input: no committed secrets, strong password hashing, parameterized queries, escaped output, security headers and cookie flags, rate limiting on sensitive endpoints, and no known-vulnerable dependencies.
+"""
+
 
 def ensure_name(text, name):
     """Codex/OpenCode SKILL.md require both name and description. Claude skills
@@ -109,12 +142,12 @@ def render(dest_root):
     shutil.copytree(skills_dir, os.path.join(codex_dir, "skills"), dirs_exist_ok=True)
     os.makedirs(os.path.join(codex_dir, ".codex-plugin"), exist_ok=True)
     manifest = {
-        "name": "claude-config-template",
+        "name": "agent-config-template",
         "version": version,
         "description": "Spec-driven agent config: principles, the SDD/TDD workflow, /spec /fix /verify, and an OWASP security audit — as portable skills.",
         "author": {"name": "Juan Trujillo", "url": "https://juantrujillo.dev"},
-        "homepage": "https://github.com/JuanTrujilloDev/claude-config-template",
-        "repository": "https://github.com/JuanTrujilloDev/claude-config-template",
+        "homepage": "https://github.com/JuanTrujilloDev/agent-config-template",
+        "repository": "https://github.com/JuanTrujilloDev/agent-config-template",
         "license": "MIT",
         "keywords": ["sdd", "tdd", "code-review", "security", "workflow"],
         "skills": "./skills/",
@@ -135,7 +168,7 @@ def render(dest_root):
         "name": "juantrujillodev",
         "interface": {"displayName": "Juan Trujillo — Agent Config"},
         "plugins": [{
-            "name": "claude-config-template",
+            "name": "agent-config-template",
             "source": {"source": "local", "path": "./codex"},
             "policy": {"installation": "AVAILABLE", "authentication": "ON_INSTALL"},
             "category": "Productivity",
@@ -143,6 +176,23 @@ def render(dest_root):
     }
     with open(os.path.join(mkt_dir, "marketplace.json"), "w", encoding="utf-8") as f:
         json.dump(marketplace, f, indent=2)
+        f.write("\n")
+
+    # Portable rules layer: AGENTS.md (cross-tool) + GEMINI.md (Antigravity), one source.
+    with open(os.path.join(dest_root, "AGENTS.md"), "w", encoding="utf-8") as f:
+        f.write(RULES_DOC)
+    with open(os.path.join(dest_root, "GEMINI.md"), "w", encoding="utf-8") as f:
+        f.write(RULES_DOC)
+
+    # Antigravity / Gemini CLI extension manifest (install via `gemini extensions install <repo-url>`).
+    extension = {
+        "name": "agent-config-template",
+        "version": version,
+        "description": "Spec-driven agent config — principles, the SDD/TDD workflow, and reviews as portable context + skills.",
+        "contextFileName": "GEMINI.md",
+    }
+    with open(os.path.join(dest_root, "gemini-extension.json"), "w", encoding="utf-8") as f:
+        json.dump(extension, f, indent=2)
         f.write("\n")
 
     return sorted(skills.keys())
@@ -154,7 +204,8 @@ def main():
         try:
             render(tmp)
             drift = 0
-            for rel in ("skills", "codex", os.path.join(".agents", "plugins", "marketplace.json")):
+            for rel in ("skills", "codex", os.path.join(".agents", "plugins", "marketplace.json"),
+                        "AGENTS.md", "GEMINI.md", "gemini-extension.json"):
                 a, b = os.path.join(REPO, rel), os.path.join(tmp, rel)
                 cmd = os.path.exists(a) and os.path.exists(b)
                 if not cmd:
@@ -177,6 +228,7 @@ def main():
         names = render(REPO)
         print(f"Generated {len(names)} skills: {', '.join(names)}")
         print("  -> skills/, codex/ (native plugin), .agents/plugins/marketplace.json")
+        print("  -> AGENTS.md + GEMINI.md (rules), gemini-extension.json (Antigravity)")
 
 
 def _deep_diff(a, b):

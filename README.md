@@ -1,15 +1,15 @@
 <div align="center">
 
-<img src="docs/logo.svg" width="120" alt="claude-config-template logo" />
+<img src="docs/logo.svg" width="120" alt="agent-config-template logo" />
 
-# claude-config-template
+# agent-config-template
 
-**The Claude Code config you wished you had — a spec-driven `.claude/` set up by Claude itself.**
+**Spec-driven agent config for Claude Code, Codex, OpenCode & Antigravity — one repo, install on any of them.**
 
-<sub>Stop reconfiguring `.claude/` from scratch on every project. Install once, and your repo gets a battle-tested agent/command/hook tree calibrated to your stack — built around a spec-driven workflow: an approved contract before code, one mini-feature at a time, optional test-first.</sub>
+<sub>Stop reconfiguring your agent setup from scratch on every project *and* every tool. Install once on your agent of choice and get a battle-tested workflow: an approved Given/When/Then contract before code, one mini-feature at a time, reviewed and verified.</sub>
 
-[![Install Plugin](https://img.shields.io/badge/Install-Plugin-CC785C?logo=anthropic&logoColor=white&style=flat)](#-quick-start)
-[![Use Template](https://img.shields.io/badge/Use-Template-2EA043?logo=githubactions&logoColor=white&style=flat)](#-quick-start)
+[![Install Plugin](https://img.shields.io/badge/Install-Plugin-CC785C?logo=anthropic&logoColor=white&style=flat)](#-install)
+[![Use Template](https://img.shields.io/badge/Use-Template-2EA043?logo=githubactions&logoColor=white&style=flat)](#-install)
 [![Examples](https://img.shields.io/badge/Examples-4_stacks-8A2BE2?style=flat)](#-pre-filled-examples)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg?style=flat)](#license)
 [![GitHub Sponsors](https://img.shields.io/badge/♥-Sponsor-30363D?logo=github-sponsors&logoColor=EA4AAA&style=flat)](https://github.com/sponsors/JuanTrujilloDev)
@@ -36,24 +36,20 @@ It's not a generic project scaffolder ([cookiecutter](https://github.com/cookiec
 
 ---
 
-## 🚀 Quick start
+## 🚀 Install
 
-### Install once
+One repo, four hosts. Pick yours:
 
-Inside Claude Code:
+| Host | Install | What you get |
+|---|---|---|
+| **Claude Code** | `/plugin marketplace add JuanTrujilloDev/agent-config-template` → `/plugin install agent-config-template@juantrujillodev` | Everything: agents, slash commands, skills, **hooks**, live sub-agent orchestration |
+| **Codex** | add this repo as a marketplace, install from Codex's plugin directory — or `npx skills add JuanTrujilloDev/agent-config-template` | Rules + skills (`spec`, `fix`, `verify`, `security-audit`, styles) + bundled MCP config |
+| **OpenCode** | `npx skills add JuanTrujilloDev/agent-config-template` | Rules + skills |
+| **Antigravity / Gemini** | `gemini extensions install https://github.com/JuanTrujilloDev/agent-config-template` | Rules (context) + commands |
 
-```
-/plugin marketplace add JuanTrujilloDev/claude-config-template
-/plugin install claude-config-template@juantrujillodev
-```
+Full per-host walkthroughs: [Claude Code](docs/install/claude.md) · [Codex](docs/install/codex.md) · [OpenCode](docs/install/opencode.md) · [Antigravity](docs/install/antigravity.md).
 
-You now have the agents, slash commands, skills, and hooks available across every project where the plugin is enabled. The hooks use generic defaults; override per-project via env vars:
-
-```bash
-export CLAUDE_CONFIG_SRC_DIR=apps                       # default: src
-export CLAUDE_CONFIG_FRONTEND_DIR=apps/frontend         # default: (none)
-export CLAUDE_CONFIG_PROTECTED_BRANCHES="main,qa,prod"  # default: main,master
-```
+> **Where the experience differs (honestly):** Claude Code gets the richest version — the enforcement hooks (protected-branch block, format-on-write) and live multi-agent orchestration run there. On Codex / OpenCode / Antigravity you get the same **principles, spec-driven workflow, and skills** through `AGENTS.md` + `SKILL.md`; hook *enforcement* is guidance there today (per-host enforcement is on the roadmap).
 
 ### Run a feature, spec-first
 
@@ -62,26 +58,15 @@ export CLAUDE_CONFIG_PROTECTED_BRANCHES="main,qa,prod"  # default: main,master
 /feature  add CSV export to the holdings list
 ```
 
-`/spec` has the `pmo` agent converse with you, then write the spec, a Given/When/Then **contract**, and a list of PR-sized mini-features — and it **stops for your approval of the contract**. `/feature` then hands off to the `orchestrator`, which implements one mini-feature at a time (optionally test-first), runs the `judge`, and micro-commits. For a small scoped change with an obvious cause, skip all of it: `/fix login redirect drops the next param`.
+`/spec` writes the spec + a Given/When/Then **contract** + PR-sized mini-features and **stops for your approval**. `/feature` implements one mini-feature at a time (optionally test-first), reviews with `judge`, and micro-commits. Small scoped change with an obvious cause? `/fix`. Before you call anything done: `/verify`.
 
-### Calibrate a specific project (optional)
+### Calibrate a project to its stack (Claude Code)
 
 ```
-/claude-config-template:setup-template
+/agent-config-template:setup-template
 ```
 
-Claude reads your `package.json` / `pyproject.toml` / `go.mod` / `manage.py` / etc., drafts an `answers.env` with confidence labels, waits for your approval, then renders a fully-calibrated `.claude/` tree + `CLAUDE.md`. It's **non-destructive** — if you already have a `.claude/` config or a root `CLAUDE.md`, it shows a per-file change plan and won't write without your `--merge` / `--overwrite` choice. Your `.claude/settings.local.json` is never touched.
-
-### Old-school: clone + render manually
-
-```bash
-git clone https://github.com/JuanTrujilloDev/claude-config-template.git ~/code/claude-config-template
-cd ~/code/my-new-project
-cp ~/code/claude-config-template/examples/python-fastapi/answers.env ./answers.env
-~/code/claude-config-template/setup.sh --target . --answers ./answers.env            # fresh project
-# existing config? run with no mode to preview the plan, then:
-~/code/claude-config-template/setup.sh --target . --answers ./answers.env --merge
-```
+Reads your `package.json` / `pyproject.toml` / `go.mod` / `manage.py` / etc., drafts an `answers.env`, waits for approval, then renders a calibrated `.claude/` tree + `CLAUDE.md`. **Non-destructive** — against an existing config it shows a per-file plan and won't write without your `--merge` / `--overwrite` choice; `.claude/settings.local.json` is never touched. Old-school clone path: `setup.sh --target . --answers ./answers.env [--merge]`.
 
 ---
 

@@ -127,7 +127,7 @@ The repo ships *two* distributable artifacts: the **template** (`template/` + `s
 
 ### `plugin/.claude-plugin/plugin.json`
 
-The plugin manifest — name, description, version, author, license. Claude Code reads this when listing/installing plugins. The `name` field also acts as the namespace for slash commands (`/claude-config-template:feature`, `/claude-config-template:plan`, etc.).
+The plugin manifest — name, description, version, author, license. Claude Code reads this when listing/installing plugins. The `name` field also acts as the namespace for slash commands (`/agent-config-template:feature`, `/agent-config-template:plan`, etc.).
 
 ### `plugin/agents/`
 
@@ -135,7 +135,7 @@ The same agents as the template (incl. the new `orchestrator`, `pmo`, `judge`), 
 
 ### `plugin/commands/`
 
-The slash commands (incl. `/spec`, `/fix`). Available as `/claude-config-template:<name>` once installed.
+The slash commands (incl. `/spec`, `/fix`). Available as `/agent-config-template:<name>` once installed.
 
 ### `plugin/skills/`
 
@@ -147,7 +147,7 @@ The same three hooks (agent-enforcement, auto-format, coding-reminder) but wired
 
 ### `.claude-plugin/marketplace.json`
 
-The repo-as-marketplace listing. Lets users do `/plugin marketplace add JuanTrujilloDev/claude-config-template` and discover the single plugin inside.
+The repo-as-marketplace listing. Lets users do `/plugin marketplace add JuanTrujilloDev/agent-config-template` and discover the single plugin inside.
 
 ## When to use plugin vs template
 

@@ -1,8 +1,8 @@
 ---
-description: Render the full claude-config-template into the current project. Reads project files, infers placeholder values, asks for approval, then writes a calibrated `.claude/` tree + CLAUDE.md.
+description: Render the full agent-config-template into the current project. Reads project files, infers placeholder values, asks for approval, then writes a calibrated `.claude/` tree + CLAUDE.md.
 ---
 
-# /claude-config-template:setup-template
+# /agent-config-template:setup-template
 
 Render the full template into the current project — same flow as cloning the repo and running `setup.sh` manually, but driven by Claude inside the project. After running, the project has a fully-calibrated `.claude/` tree and `CLAUDE.md` tuned to its specific stack, test command, branch convention, and toggles.
 
@@ -84,7 +84,7 @@ After `/setup-template`, both layers are active:
 
 | Layer | Source | Naming |
 |---|---|---|
-| Plugin commands/agents | `${CLAUDE_PLUGIN_ROOT}/...` | Namespaced (`/claude-config-template:feature`) |
+| Plugin commands/agents | `${CLAUDE_PLUGIN_ROOT}/...` | Namespaced (`/agent-config-template:feature`) |
 | Project commands/agents | `./.claude/...` | Unnamespaced (`/feature`) |
 
 The project-root versions take precedence when names collide. This is intentional — the project versions have the calibrated test commands, branch prefixes, and toggles baked in.
@@ -95,7 +95,7 @@ If the user wants to skip inference entirely and use a known-good preset, point 
 
 ## Troubleshooting
 
-- **`setup.sh: command not found`** — the plugin didn't ship the bundled template. Reinstall: `/plugin update claude-config-template@juantrujillodev`.
+- **`setup.sh: command not found`** — the plugin didn't ship the bundled template. Reinstall: `/plugin update agent-config-template@juantrujillodev`.
 - **Missing `python3`** — `setup.sh` requires Python 3. Install it (it's preinstalled on macOS and most Linux).
 - **`.git/index.lock` errors when committing afterward** — leftover from a crashed git process. Run `rm -f .git/index.lock` and retry.
 - **"Existing Claude config detected … Nothing was written" (exit 1)** — expected, not an error. The project already has a config. Re-run with `--merge` (recommended) or `--overwrite` after the user has reviewed the printed plan.

@@ -5,7 +5,7 @@
   },
   "plugins": [
     {
-      "name": "claude-config-template",
+      "name": "agent-config-template",
       "source": {
         "source": "local",
         "path": "./codex"

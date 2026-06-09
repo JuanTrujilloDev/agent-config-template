@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# claude-config-template renderer.
+# agent-config-template renderer.
 #
 # Reads the canonical source (core/ at the repo root, or the plugin's bundled
 # template/) + an answers file, substitutes {{var}} placeholders

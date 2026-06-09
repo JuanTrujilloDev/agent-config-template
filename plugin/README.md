@@ -1,14 +1,14 @@
-# claude-config-template (plugin)
+# agent-config-template (plugin)
 
-Plugin distribution of [claude-config-template](https://github.com/JuanTrujilloDev/claude-config-template). Install once, get the full toolkit across every project.
+Plugin distribution of [agent-config-template](https://github.com/JuanTrujilloDev/agent-config-template). Install once, get the full toolkit across every project.
 
 ## Install
 
 Inside Claude Code:
 
 ```
-/plugin marketplace add JuanTrujilloDev/claude-config-template
-/plugin install claude-config-template@juantrujillodev
+/plugin marketplace add JuanTrujilloDev/agent-config-template
+/plugin install agent-config-template@juantrujillodev
 ```
 
 That's it. You now have agents, slash commands, skills, and hooks available everywhere.
@@ -20,7 +20,7 @@ That's it. You now have agents, slash commands, skills, and hooks available ever
 After install you immediately get:
 
 - **7 agents** (`/agents` to list): `pm`, `po-manager`, `backend-dev`, `frontend-dev`, `ui-designer`, `code-reviewer`, `security-reviewer`. Each with embedded "Gotchas" sections.
-- **10 slash commands** namespaced under `/claude-config-template:*` — `feature`, `fix`, `plan`, `commit`, `pr`, `audit`, `design`, `idea`, `sow`, **`setup-template`**.
+- **10 slash commands** namespaced under `/agent-config-template:*` — `feature`, `fix`, `plan`, `commit`, `pr`, `audit`, `design`, `idea`, `sow`, **`setup-template`**.
 - **3 skills**: `principles`, `backend-style`, `frontend-style`.
 - **3 hooks**: branch discipline (hard block on protected branches), agent guidance (advisory — guides, doesn't block), targeted auto-format on Edit/Write.
 
@@ -37,7 +37,7 @@ export CLAUDE_CONFIG_PROTECTED_BRANCHES="main,qa,prod"  # default: main,master
 When you want a specific project to have a `.claude/` tree calibrated to its exact stack — your test command, your branch prefix, your layer-split toggle — run the bundled command from inside the project:
 
 ```
-/claude-config-template:setup-template
+/agent-config-template:setup-template
 ```
 
 Claude will:
@@ -49,7 +49,7 @@ Claude will:
 5. Add `.claude/settings.local.json`, `.claude/mcp.json`, and `answers.env` to `.gitignore`.
 6. Remind you to restart Claude Code.
 
-After this, both layers are active in that project — the plugin commands stay namespaced (`/claude-config-template:feature`), and the project-root commands are unnamespaced (`/feature`). The project-root versions take precedence when names collide because they have your specifics baked in.
+After this, both layers are active in that project — the plugin commands stay namespaced (`/agent-config-template:feature`), and the project-root commands are unnamespaced (`/feature`). The project-root versions take precedence when names collide because they have your specifics baked in.
 
 ## When to use which
 
@@ -64,7 +64,7 @@ After this, both layers are active in that project — the plugin commands stay 
 ## Updating
 
 ```
-/plugin update claude-config-template@juantrujillodev
+/plugin update agent-config-template@juantrujillodev
 ```
 
 If you previously ran `/setup-template` in a project, the rendered `.claude/` tree is independent — re-run `/setup-template` after upgrading if you want the latest patterns there too.

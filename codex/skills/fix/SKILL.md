@@ -16,7 +16,7 @@ use `/feature`.
 ## Usage
 
 ```
-/claude-config-template:fix <description>
+/agent-config-template:fix <description>
 ```
 
 ## What it does

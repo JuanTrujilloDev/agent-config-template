@@ -23,7 +23,7 @@ exits non-zero), then re-run with the mode you want.
 ### Once: keep your `answers.env` in the project
 
 ```bash
-~/code/claude-config-template/setup.sh --target . --answers ./answers.env
+~/code/agent-config-template/setup.sh --target . --answers ./answers.env
 git add answers.env   # the source of truth — re-renders the same config later
 ```
 
@@ -31,28 +31,43 @@ git add answers.env   # the source of truth — re-renders the same config later
 
 ```bash
 # 1. Pull the latest template (or check out a tag for stability)
-cd ~/code/claude-config-template && git pull origin main   # or: git checkout v0.4.0
+cd ~/code/agent-config-template && git pull origin main   # or: git checkout v0.4.0
 
 # 2. Preview what would change in your project
 cd ~/code/my-project
-~/code/claude-config-template/setup.sh --target . --answers ./answers.env        # prints the plan, writes nothing
+~/code/agent-config-template/setup.sh --target . --answers ./answers.env        # prints the plan, writes nothing
 
 # 3. Apply — merge keeps your customizations and your settings.local.json
-~/code/claude-config-template/setup.sh --target . --answers ./answers.env --merge
+~/code/agent-config-template/setup.sh --target . --answers ./answers.env --merge
 
 # 4. Commit
-git add .claude/ CLAUDE.md docs/ && git commit -m "chore: upgrade claude-config-template to v0.4.0"
+git add .claude/ CLAUDE.md docs/ && git commit -m "chore: upgrade agent-config-template to v0.4.0"
 ```
 
 For fine-grained control, render into a temp dir and cherry-pick:
 
 ```bash
 TMP=$(mktemp -d)
-~/code/claude-config-template/setup.sh --target "$TMP" --answers ./answers.env --overwrite
+~/code/agent-config-template/setup.sh --target "$TMP" --answers ./answers.env --overwrite
 diff -r .claude "$TMP/.claude"
 ```
 
 ---
+
+## Upgrading to v0.5.0 (rename + multi-host)
+
+v0.5.0 renames the repo **`claude-config-template` → `agent-config-template`** and adds Codex, OpenCode, and Antigravity packaging alongside Claude Code. Nothing about the Claude Code experience changes — same agents, commands, hooks, and `/setup-template`.
+
+GitHub redirects old URLs, so existing `/plugin marketplace add JuanTrujilloDev/claude-config-template` keeps resolving. To move cleanly onto the new name:
+
+```
+/plugin marketplace remove juantrujillodev
+/plugin marketplace add JuanTrujilloDev/agent-config-template
+/plugin install agent-config-template@juantrujillodev
+/reload-plugins
+```
+
+The plugin identifier is now `agent-config-template@juantrujillodev` (the marketplace handle `juantrujillodev` is unchanged). Other hosts: see the per-host guides under [`docs/install/`](./install/). The canonical source folder is now `core/` (was `template/`); if you maintain a fork, `template/` → `core/` and `scripts/sync-plugin.sh` → `scripts/build.sh`.
 
 ## Upgrading to v0.4.0 (from v0.3.x)
 
@@ -128,5 +143,5 @@ Stay on your current tag and apply specific upstream changes by hand.
 ## Tracking template version
 
 ```markdown
-<!-- claude-config-template version: v0.4.0 -->
+<!-- agent-config-template version: v0.4.0 -->
 ```

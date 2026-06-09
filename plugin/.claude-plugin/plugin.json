@@ -1,13 +1,13 @@
 {
-  "name": "claude-config-template",
-  "description": "Spec-driven Claude Code config: orchestrator + pmo + judge + dev/security specialists, 12 slash commands (/spec, /feature, /fix, /verify, …), advisory hooks (hard branch block), 4 skills, opt-in TDD + mutation testing, 4 stack examples.",
-  "version": "0.4.1",
+  "name": "agent-config-template",
+  "description": "Spec-driven Claude Code config: orchestrator + pmo + judge + dev/security specialists, 12 slash commands (/spec, /feature, /fix, /verify, \u2026), advisory hooks (hard branch block), 4 skills, opt-in TDD + mutation testing, 4 stack examples.",
+  "version": "0.5.0",
   "author": {
     "name": "Juan Trujillo",
     "url": "https://juantrujillo.dev"
   },
-  "homepage": "https://github.com/JuanTrujilloDev/claude-config-template",
-  "repository": "https://github.com/JuanTrujilloDev/claude-config-template",
+  "homepage": "https://github.com/JuanTrujilloDev/agent-config-template",
+  "repository": "https://github.com/JuanTrujilloDev/agent-config-template",
   "license": "MIT",
   "keywords": [
     "agents",
