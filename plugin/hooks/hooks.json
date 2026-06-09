@@ -6,7 +6,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "${CLAUDE_PLUGIN_ROOT}/hooks/agent-enforcement.sh",
+            "command": "\"${CLAUDE_PLUGIN_ROOT}/hooks/agent-enforcement.sh\"",
             "timeout": 10
           }
         ]
@@ -18,7 +18,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "${CLAUDE_PLUGIN_ROOT}/hooks/auto-format.sh",
+            "command": "\"${CLAUDE_PLUGIN_ROOT}/hooks/auto-format.sh\"",
             "timeout": 30
           }
         ]
@@ -29,7 +29,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "${CLAUDE_PLUGIN_ROOT}/hooks/coding-reminder.sh",
+            "command": "\"${CLAUDE_PLUGIN_ROOT}/hooks/coding-reminder.sh\"",
             "timeout": 5
           }
         ]

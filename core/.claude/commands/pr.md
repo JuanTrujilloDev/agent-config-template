@@ -1,3 +1,7 @@
+---
+description: Open a pull request for the current branch after verifying micro-PR limits, with a confirmation gate.
+---
+
 # /pr
 
 Open a pull request for the current branch.

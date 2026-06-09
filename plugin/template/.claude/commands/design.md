@@ -1,4 +1,9 @@
 <!-- requires: has_frontend -->
+---
+description: Design workflow for a new UI feature — ui-designer wireframes and component specs before any code.
+argument-hint: "<feature description>"
+---
+
 # /design
 
 Start the design workflow for a new UI feature.

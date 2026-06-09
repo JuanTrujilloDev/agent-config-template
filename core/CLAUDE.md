@@ -16,7 +16,7 @@ Read `.claude/rules/principles.md`. The principles are **non-negotiable**:
 5. **Backend / Frontend Split** — Two PRs per feature: BE ships first, FE ships after.
 {{/enforce_layer_split}}
 - **Micro-PR Discipline** — ≤{{max_files_per_pr}} files changed, <{{max_loc_per_pr}} lines changed per PR.
-- **Definition of Done** — Format → Lint → Unit tests → `code-reviewer` → `security-reviewer` (when relevant){{#has_e2e}} → live browser verification (auto for FE / big changes){{/has_e2e}}.
+- **Definition of Done** — Format → Lint → Unit tests → `judge` → `security-reviewer` (when relevant){{#has_e2e}} → live browser verification (auto for FE / big changes){{/has_e2e}}.
 - **Conciseness** — Be brief. No filler, no recaps of visible output, no preambles.
 - **Branch Discipline** — Never code on `{{default_branch}}`. Always check out a typed branch first.
 
@@ -114,7 +114,7 @@ Never code on `{{default_branch}}`. Always check out a typed branch first.
 | Validate tests bite | `mutation-tester` | runs `tools/mutate.py` (opt-in) |
 {{/enforce_mutation_testing}}
 
-> `pm`, `po-manager`, and `code-reviewer` are **deprecated** (→ `pmo`, `pmo`, `judge`) and will be removed in a later release. The end-to-end flow lives in `docs/sdd-workflow.md`.
+> The end-to-end flow lives in `docs/sdd-workflow.md`.
 
 **Hard rules:**
 
@@ -129,11 +129,11 @@ Never code on `{{default_branch}}`. Always check out a typed branch first.
 - Before any code edit, confirm the current branch matches the task type. If on `{{default_branch}}`, check out the right branch first.
 
 ### Commands (`.claude/commands/`)
-- `/spec [{{#branch_prefix}}{{branch_prefix}}-<#> or {{/branch_prefix}}description]` — Idea/SOW → conversed spec + Given/When/Then contract + mini-features (`pmo`). Replaces `/idea` + `/sow`.
+- `/spec [{{#branch_prefix}}{{branch_prefix}}-<#> or {{/branch_prefix}}description]` — Idea/SOW → conversed spec + Given/When/Then contract + mini-features (`pmo`).
 - `/feature [{{#branch_prefix}}{{branch_prefix}}-<#> or {{/branch_prefix}}description]` — Full spec-driven flow (`orchestrator`): approve contract → optional TDD → implement → `judge` → micro-commit
 - `/fix [description]` — Small, scoped change: skips brief/plan + formal Design First, keeps the full Definition of Done
 - `/verify` — Skeptical self-review of your own diff before `judge`/commit (run it, don't just claim it)
-- `/commit`, `/pr`, `/audit` — see individual command files (`/idea`, `/sow`, `/plan` are deprecated → use `/spec`)
+- `/commit`, `/pr`, `/audit` — see individual command files
 
 ### Hooks (`.claude/hooks/`)
 - **PostToolUse** on `Edit|Write` → `auto-format.sh`: runs only targeted lint autofixes (`ruff --fix` / `eslint --fix`) on the changed file; whole-file formatting (`{{format_cmd}}`) runs in the Definition of Done, not per-edit
@@ -176,7 +176,7 @@ Pick the lines that are useful for your team and uncomment them. Skip everything
 <!-- Open PRs / issues — useful when /feature pulls a ticket -->
 <!-- Open PRs: !`gh pr list --limit 5 --json number,title,headRefName --jq '.[] | "  #\(.number) [\(.headRefName)] \(.title)"' 2>/dev/null || echo "  (gh not configured)"` -->
 
-<!-- Test coverage — surface drift before code-reviewer asks -->
+<!-- Test coverage — surface drift before judge asks -->
 <!-- Coverage: !`{{test_cmd}} --cov={{src_dir}} 2>/dev/null | tail -1 || echo "(run tests to see coverage)"` -->
 ```
 

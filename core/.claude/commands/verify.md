@@ -1,3 +1,8 @@
+---
+description: Skeptical self-review of your own uncommitted diff — re-read the request, read every changed line, actually run it, fix what you find.
+argument-hint: "[branch range]"
+---
+
 # /verify
 
 A skeptical self-review of your **own** uncommitted work before you call it done. "Should work" is not a status — `/verify` is how you earn "done." Run it after implementing and before `judge` or the commit; for a `/fix`, it's the lightweight verification step.

@@ -11,6 +11,12 @@ production code. Inspired by Robert C. Martin's harness — conversation → con
 `/feature` or `/spec`. For a small scoped change with an obvious cause, skip all
 of this and use `/fix`.
 
+
+> **Who is "the orchestrator"?** A role, not necessarily a subagent. On Claude
+> Code the **main conversation** plays it (following the `orchestrator` agent
+> file as a playbook), because subagents cannot spawn other subagents; running
+> `claude --agent orchestrator` makes it the main thread with the same rules.
+
 ## The pipeline
 
 ```

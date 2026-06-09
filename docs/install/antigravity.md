@@ -14,8 +14,10 @@ The extension is defined by [`gemini-extension.json`](../../gemini-extension.jso
 
 ## What you get
 
+- **Native slash commands:** the extension ships `commands/*.toml`, so `/spec`, `/feature`, `/fix`, `/verify`, and `/audit` work as first-class commands (generated from the same sources as every other host).
+
 - **Context / rules:** `GEMINI.md` is loaded as standing context — the principles, the spec-driven workflow, branch discipline, and the Definition of Done. Antigravity also reads `AGENTS.md` (the cross-tool rules file) as a fallback; both carry the same content, so there's no conflict.
-- The portable **skills** (`spec`, `fix`, `verify`, `security-audit`, …) are available in the repo's `skills/` tree if you want to wire them as Agent Skills.
+- **Skills:** the extension's `skills/` tree (`spec`, `fix`, `verify`, `security-audit`, …) is auto-discovered as Agent Skills by recent Gemini CLI versions — activated on demand, no extra wiring. On older versions, copy them into your skills directory manually.
 
 ## What's different vs Claude Code
 

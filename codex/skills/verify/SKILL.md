@@ -1,6 +1,6 @@
 ---
 name: verify
-description: Skeptical self-review of your own diff before review or commit — re-read the request, read every changed line, actually run it, fix and re-review.
+description: "Skeptical self-review of your own diff before review or commit — re-read the request, read every changed line, actually run it, fix and re-review."
 ---
 
 # /verify
@@ -58,3 +58,16 @@ Don't just list problems — fix them. Then re-review the fixes with the same sk
 A short verdict: what you checked, what you ran and its result, what you found and fixed, and anything you couldn't verify and why. If it's genuinely clean, say so plainly — a clean pass is a real outcome, not a failure to find something.
 
 > Want a *second model's* eyes too? `judge`'s adversarial mode has an optional hook to route a review lens through an external CLI (e.g. Codex, Gemini) when you have one. `/verify` itself stays single-model and portable.
+
+---
+
+## On hosts without subagents
+
+On Claude Code, `pmo`, `backend-dev`/`frontend-dev`, `judge`, and
+`security-reviewer` are subagents the main conversation spawns. On hosts without
+subagents (Codex, OpenCode, Antigravity), **play each role yourself, in
+sequence, switching hats explicitly** — say which hat you're wearing. Produce
+the same artifacts under `docs/specs/<slug>/`, stop at the same human gates
+(contract approval; failing tests under TDD), and run the review passes with the
+`verify` and `security-audit` skills. The artifacts, the gates, and the
+Definition of Done are identical; only the executor changes.

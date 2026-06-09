@@ -42,6 +42,6 @@ Before any code edit:
      Micro-PR (≤12 files / <3,000 LOC) · Definition of Done · Conciseness ·
      Branch Discipline.
   5. Definition of Done before declaring complete: format → lint → tests →
-     `code-reviewer` → `security-reviewer` (if relevant).
+     `judge` → `security-reviewer` (if relevant).
 HEREDOC
 exit 0

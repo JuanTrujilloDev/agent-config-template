@@ -1,7 +1,7 @@
----
-description: "Turn an idea, ticket, or SOW into a conversed spec, a Given/When/Then contract, and PR-sized mini-features (pmo). Gate 1: you approve the contract."
-argument-hint: "<idea, ticket, or description>"
----
+description = "Turn an idea, ticket, or SOW into a conversed spec, a Given/When/Then contract, and PR-sized mini-features (pmo). Gate 1: you approve the contract."
+
+prompt = '''
+User request: {{args}}
 
 # /spec
 
@@ -16,16 +16,12 @@ mini-features, and write the contract you sign.
 /spec <idea or description>
 ```
 
-{{#branch_prefix}}
-From a tracked ticket: `/spec {{branch_prefix}}-<#>` (e.g. `/spec {{branch_prefix}}-87`).
-
-{{/branch_prefix}}
 ## What it does
 
 1. Spawns **`pmo`**, which **converses** with you — debating decisions and edge cases, recording the *why*.
 2. Writes `docs/specs/<slug>/spec.md` — problem, goal, verifiable success criteria, decisions, out-of-scope, open questions, and **Design notes** (a named design pattern where one genuinely fits).
 3. Distills `docs/specs/<slug>/contract.md` — Given/When/Then acceptance scenarios, one block per mini-feature.
-4. Writes `docs/specs/<slug>/features.json` — the mini-feature list (each ≤{{max_files_per_pr}} files / <{{max_loc_per_pr}} LOC), status `pending`.
+4. Writes `docs/specs/<slug>/features.json` — the mini-feature list (each ≤12 files / <3000 LOC), status `pending`.
 5. Asks whether to mirror the mini-features into your tracker as subtasks or as a comment on the main task.
 6. **Pauses for your approval of the contract (Gate 1).**
 
@@ -34,3 +30,17 @@ From a tracked ticket: `/spec {{branch_prefix}}-<#>` (e.g. `/spec {{branch_prefi
 Once you approve the contract, run `/feature` — it picks up the approved spec and
 implements the mini-features one at a time. For a small scoped change with an
 obvious root cause, skip all of this and use `/fix`.
+
+---
+
+## On hosts without subagents
+
+On Claude Code, `pmo`, `backend-dev`/`frontend-dev`, `judge`, and
+`security-reviewer` are subagents the main conversation spawns. On hosts without
+subagents (Codex, OpenCode, Antigravity), **play each role yourself, in
+sequence, switching hats explicitly** — say which hat you're wearing. Produce
+the same artifacts under `docs/specs/<slug>/`, stop at the same human gates
+(contract approval; failing tests under TDD), and run the review passes with the
+`verify` and `security-audit` skills. The artifacts, the gates, and the
+Definition of Done are identical; only the executor changes.
+'''

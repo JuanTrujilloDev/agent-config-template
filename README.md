@@ -42,10 +42,10 @@ One repo, four hosts. Pick yours (each badge links to its full guide):
 
 | Host | Install | What you get |
 |---|---|---|
-| <a href="docs/install/claude.md"><img alt="Claude Code" src="https://img.shields.io/badge/Claude_Code-D97757?logo=anthropic&logoColor=white&style=for-the-badge" height="24"></a> | `/plugin marketplace add JuanTrujilloDev/agent-config-template` then `/plugin install agent-config-template@juantrujillodev` | Everything: agents, slash commands, skills, **hooks**, live sub-agent orchestration |
-| <a href="docs/install/codex.md"><img alt="Codex" src="https://img.shields.io/badge/Codex-000000?logo=openai&logoColor=white&style=for-the-badge" height="24"></a> | add this repo as a marketplace and install from Codex's plugin directory, or `npx skills add JuanTrujilloDev/agent-config-template` | Rules + skills (`spec`, `fix`, `verify`, `security-audit`, styles) + bundled MCP config |
-| <a href="docs/install/opencode.md"><img alt="OpenCode" src="https://img.shields.io/badge/OpenCode-FF4A00?style=for-the-badge" height="24"></a> | `npx skills add JuanTrujilloDev/agent-config-template` | Rules + skills |
-| <a href="docs/install/antigravity.md"><img alt="Antigravity / Gemini" src="https://img.shields.io/badge/Antigravity-4285F4?logo=googlegemini&logoColor=white&style=for-the-badge" height="24"></a> | `gemini extensions install https://github.com/JuanTrujilloDev/agent-config-template` | Rules (context) + commands |
+| <a href="docs/install/claude.md"><img alt="Claude Code" src="https://img.shields.io/badge/Claude_Code-D97757?logo=anthropic&logoColor=white&style=for-the-badge" height="34"></a> | `/plugin marketplace add JuanTrujilloDev/agent-config-template` then `/plugin install agent-config-template@juantrujillodev` | Everything: agents, slash commands, skills, **hooks**, live sub-agent orchestration |
+| <a href="docs/install/codex.md"><img alt="Codex" src="https://img.shields.io/badge/Codex-000000?logo=openai&logoColor=white&style=for-the-badge" height="34"></a> | add this repo as a marketplace and install from Codex's plugin directory, or `npx skills add JuanTrujilloDev/agent-config-template` | Rules + skills (`spec`, `feature`, `fix`, `verify`, `security-audit`, styles) + bundled MCP config |
+| <a href="docs/install/opencode.md"><img alt="OpenCode" src="https://img.shields.io/badge/OpenCode-FF4A00?style=for-the-badge" height="34"></a> | `npx skills add JuanTrujilloDev/agent-config-template` | Rules + skills |
+| <a href="docs/install/antigravity.md"><img alt="Antigravity / Gemini" src="https://img.shields.io/badge/Antigravity-4285F4?logo=googlegemini&logoColor=white&style=for-the-badge" height="34"></a> | `gemini extensions install https://github.com/JuanTrujilloDev/agent-config-template` | Rules (context) + native `/spec` `/feature` `/fix` `/verify` `/audit` commands + skills |
 
 > **Where the experience differs (honestly):** Claude Code gets the richest version. The enforcement hooks (protected-branch block, format-on-write) and live multi-agent orchestration run there. On Codex, OpenCode, and Antigravity you get the same **principles, spec-driven workflow, and skills** through `AGENTS.md` and `SKILL.md`; hook *enforcement* is guidance there today (per-host enforcement is on the roadmap).
 
@@ -131,13 +131,13 @@ tools/mutate.py               # No-dep mutation tester (only when mutation testi
 | `security-reviewer` | Auth/permissions/data audit | Yes |
 | `mutation-tester` | Validates the tests bite (opt-in via `enforce_mutation_testing`) | Yes |
 
-Every agent ships with a **Gotchas** section listing its role-specific failure modes. `pm`, `po-manager`, and `code-reviewer` are still present as **deprecated** stubs (now `pmo` / `judge`) and will be removed in a later release.
+Every agent ships with a **Gotchas** section listing its role-specific failure modes.
 
 ### Commands
 
 | Command | What it does |
 |---|---|
-| `/spec` | Idea/SOW → conversed spec + Given/When/Then contract + mini-features (`pmo`). Replaces `/idea` + `/sow`. |
+| `/spec` | Idea/SOW → conversed spec + Given/When/Then contract + mini-features (`pmo`) |
 | `/feature` | Full spec-driven flow (`orchestrator`): approve contract → optional TDD → implement → `judge` → micro-commit |
 | `/fix` | Small, scoped change: skips the spec + Design First, keeps the full Definition of Done |
 | `/audit` | Code + security review (`judge` + `security-reviewer`) |
@@ -145,7 +145,6 @@ Every agent ships with a **Gotchas** section listing its role-specific failure m
 | `/design` | Wireframe + spec via `ui-designer` (folds into `/feature` for UI work) |
 | `/setup-template` | Render a calibrated `.claude/` tree into the current project (non-destructive) |
 
-`/idea`, `/sow`, and `/plan` are deprecated → use `/spec`.
 
 ---
 

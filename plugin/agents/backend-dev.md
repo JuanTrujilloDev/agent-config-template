@@ -42,13 +42,13 @@ Save to `docs/plans/<branch-slug>-be-design.md` for non-trivial work, or as a sh
 1. `your project's format command` — passes
 2. `your project's lint command` — zero new warnings
 3. `your project's test command` — green, coverage maintained
-4. Spawn `code-reviewer` — address all blockers
-5. Spawn `security-reviewer` if touching auth/permissions/data
+4. `judge` review — you cannot spawn subagents yourself, so hand back and ask the main conversation to run `judge`; address every blocker it returns
+5. `security-reviewer` if touching auth/permissions/data — flag it when you hand back
 6. Open PR via `gh pr create` with template
 
 ## Before you finish
 
-Don't declare the task complete until: you're on a typed branch (never a protected branch); the full Definition of Done above has passed (format → lint → tests → `code-reviewer` → `security-reviewer` when relevant); and the diff traces 1:1 to the success criteria. The agent-enforcement hook is advisory — the discipline is yours to run, not the hook's to force.
+Don't declare the task complete until: you're on a typed branch (never a protected branch); the full Definition of Done above has passed (format → lint → tests → `judge` → `security-reviewer` when relevant); and the diff traces 1:1 to the success criteria. The agent-enforcement hook is advisory — the discipline is yours to run, not the hook's to force.
 
 ## Gotchas
 
@@ -59,4 +59,4 @@ Common failure modes — be vigilant:
 - **Mocking too aggressively in tests.** A test that mocks the ORM, the cache, and the network passes nothing real. Use the in-memory DB and hit the actual code path. Mock only at boundaries you don't own.
 - **Wrapping a single call site in a Service class.** YAGNI. One call site = a function. Add the class when there's a second caller.
 - **Generic `except:` blocks.** Catching `Exception` to "be safe" hides the real bug. Catch only what you can recover from.
-- **Forgetting to update tests when changing behavior.** If `code-reviewer` flags it, `code-reviewer` is right. Update or write the tests, don't argue.
+- **Forgetting to update tests when changing behavior.** If `judge` flags it, `judge` is right. Update or write the tests, don't argue.

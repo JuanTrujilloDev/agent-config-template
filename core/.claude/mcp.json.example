@@ -5,7 +5,7 @@
     "playwright": {
       "command": "npx",
       "args": ["-y", "@playwright/mcp@latest"]
-    }{{#ticket_tracker_plane}},{{/ticket_tracker_plane}}
+    }{{#ticket_tracker_plane}},{{/ticket_tracker_plane}}{{#ticket_tracker_jira}},{{/ticket_tracker_jira}}{{#ticket_tracker_linear}},{{/ticket_tracker_linear}}
 {{/has_e2e}}
 {{#ticket_tracker_plane}}
     "plane": {
@@ -18,5 +18,17 @@
       }
     }
 {{/ticket_tracker_plane}}
+{{#ticket_tracker_jira}}
+    "atlassian": {
+      "command": "npx",
+      "args": ["-y", "mcp-remote", "https://mcp.atlassian.com/v1/sse"]
+    }
+{{/ticket_tracker_jira}}
+{{#ticket_tracker_linear}}
+    "linear": {
+      "command": "npx",
+      "args": ["-y", "mcp-remote", "https://mcp.linear.app/sse"]
+    }
+{{/ticket_tracker_linear}}
   }
 }

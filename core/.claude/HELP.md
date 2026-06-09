@@ -96,12 +96,12 @@ The agent that did the work runs the checklist and reports results before declar
 ```
 You:    /feature {{#branch_prefix}}{{branch_prefix}}-87{{/branch_prefix}}{{^branch_prefix}}add CSV export to holdings list{{/branch_prefix}}
 
-Claude: [pulls ticket / drafts brief]
+Claude: [pulls ticket / converses the spec]
         Spawning pmo...
-[brief produced]
-        Brief ready. Goal: <one sentence>.
-        Success criteria: 1) ... 2) ... 3) ...
-        Approve brief? (yes/edit)
+[spec + contract produced]
+        Contract ready in docs/specs/<slug>/contract.md. Goal: <one sentence>.
+        Scenarios: @s1 ... @s2 ... @s3 ...
+        Approve the contract? (yes/edit)
 
 You:    yes
 
@@ -151,8 +151,10 @@ You:    yes
 
 ## Troubleshooting
 
-**"The hook blocked my edit but I just want to fix one line."**
-The threshold (50 lines or new def/class) is intentional. To bypass, say *"edit directly, skip the agent"* — but don't make it a habit.
+**"The hook warned about my edit but I just want to fix one line."**
+Only the protected-branch check hard-blocks — check out a typed branch and retry.
+The size advisory (>50 lines or a new def/class) never blocks; it's a reminder to
+prefer the right agent. Trivial edits pass silently.
 
 **"Claude didn't spawn an agent."**
 Reference `CLAUDE.md` Agent Usage Rules. If it happens repeatedly, the `coding-reminder.sh` hook may not be firing — check `.claude/settings.json`.

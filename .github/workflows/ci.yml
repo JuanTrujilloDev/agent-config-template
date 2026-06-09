@@ -13,6 +13,32 @@ jobs:
       - name: Verify generated trees mirror core/
         run: bash scripts/build.sh --check
 
+  package-validation:
+    name: All host packagings install-ready
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate Claude / Codex / Antigravity manifests + skills + rules
+        run: python3 scripts/validate-packaging.py
+
+  skills-install-smoke:
+    name: Live npx skills add (informational)
+    # Hits the published repo over the network, so only on main; never blocks.
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    steps:
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Install skills into a throwaway project
+        timeout-minutes: 4
+        run: |
+          mkdir -p /tmp/proj && cd /tmp/proj && npm init -y >/dev/null 2>&1
+          npx -y skills add JuanTrujilloDev/agent-config-template \
+            || echo "::warning::npx skills add returned non-zero (informational only)"
+          echo "Installed skill trees, if any:"; ls -R .agents .opencode .codex 2>/dev/null || true
+
   render-smoke:
     name: Examples render clean
     runs-on: ubuntu-latest

@@ -1,14 +1,14 @@
 ---
 name: spec
-description: Spec-driven: turn an idea, ticket, or SOW into a Given/When/Then contract and PR-sized mini-features before any code is written.
+description: "Spec-driven: turn an idea, ticket, or SOW into a Given/When/Then contract and PR-sized mini-features before any code is written."
 ---
 
 # /spec
 
 Turn a raw idea, a tracked ticket, or a SOW request into an approved, executable
-contract — via the `pmo` agent. This is the single entry point that **replaces
-the old `/idea` and `/sow`**: frame the problem, decide the open questions,
-decompose into PR-sized mini-features, and write the contract you sign.
+contract — via the `pmo` agent. This is the **single entry point for framing
+work**: frame the problem, decide the open questions, decompose into PR-sized
+mini-features, and write the contract you sign.
 
 ## Usage
 
@@ -30,3 +30,16 @@ decompose into PR-sized mini-features, and write the contract you sign.
 Once you approve the contract, run `/feature` — it picks up the approved spec and
 implements the mini-features one at a time. For a small scoped change with an
 obvious root cause, skip all of this and use `/fix`.
+
+---
+
+## On hosts without subagents
+
+On Claude Code, `pmo`, `backend-dev`/`frontend-dev`, `judge`, and
+`security-reviewer` are subagents the main conversation spawns. On hosts without
+subagents (Codex, OpenCode, Antigravity), **play each role yourself, in
+sequence, switching hats explicitly** — say which hat you're wearing. Produce
+the same artifacts under `docs/specs/<slug>/`, stop at the same human gates
+(contract approval; failing tests under TDD), and run the review passes with the
+`verify` and `security-audit` skills. The artifacts, the gates, and the
+Definition of Done are identical; only the executor changes.

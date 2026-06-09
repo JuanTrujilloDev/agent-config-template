@@ -1,7 +1,7 @@
----
-description: Code-quality + security audit of the codebase, a path, or a branch diff (judge + security-reviewer).
-argument-hint: "[path or branch]"
----
+description = "Code-quality + security audit of the codebase, a path, or a branch diff (judge + security-reviewer)."
+
+prompt = '''
+User request: {{args}}
 
 # /audit
 
@@ -54,3 +54,17 @@ Spawn `security-reviewer` against the scope. Capture findings.
 ## Recommended actions
 1. ...
 ```
+
+---
+
+## On hosts without subagents
+
+On Claude Code, `pmo`, `backend-dev`/`frontend-dev`, `judge`, and
+`security-reviewer` are subagents the main conversation spawns. On hosts without
+subagents (Codex, OpenCode, Antigravity), **play each role yourself, in
+sequence, switching hats explicitly** — say which hat you're wearing. Produce
+the same artifacts under `docs/specs/<slug>/`, stop at the same human gates
+(contract approval; failing tests under TDD), and run the review passes with the
+`verify` and `security-audit` skills. The artifacts, the gates, and the
+Definition of Done are identical; only the executor changes.
+'''

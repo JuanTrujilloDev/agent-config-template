@@ -1,13 +1,14 @@
 # Placeholder schema for the Claude Code config template.
-# setup.sh reads this file, prompts the user for each variable in order,
-# substitutes {{name}} occurrences across the template/ tree, and writes
-# the result to the target directory.
+# This file documents every {{placeholder}}. setup.sh does NOT read it and is
+# NOT interactive: an agent (or you) reads this schema to draft an answers.env,
+# then setup.sh substitutes {{name}} occurrences across the core/ tree and
+# writes the result to the target directory.
 #
 # Each variable has:
-#   prompt:   the question shown to the user
-#   default:  pre-filled value (press Enter to accept)
-#   choices:  optional list — restricts input to these values
-#   when:     optional dependency — variable only asked if condition holds
+#   prompt:   the question an agent should answer when drafting answers.env
+#   default:  value to use when the project gives no signal
+#   choices:  optional list — restricts the value to these options
+#   when:     optional dependency — variable only applies if condition holds
 #
 # Conditional sections inside template files use:
 #   {{#var_name}}...{{/var_name}}        (kept when var_name is truthy)
