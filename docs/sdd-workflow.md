@@ -34,7 +34,8 @@ in_progress  (per mini-feature, one at a time)
   ├─ ⏸  GATE 2 (human, ONLY under TDD): implementer writes the failing
   │      tests first; you approve the tests before any production code
   │
-  ├─ [backend-dev | frontend-dev | ui-designer]  implement to green
+  ├─ [dev specialist for the stack | ui-designer]  implement to green
+  │     (backend-dev/frontend-dev for web · mobile-dev · game-dev · desktop-dev · core-dev)
   ├─ [judge]              review code AND tests against the contract
   ├─ [security-reviewer]  when auth / permissions / data are touched
   ├─ [mutation-tester]    only if `enforce_mutation_testing` is on

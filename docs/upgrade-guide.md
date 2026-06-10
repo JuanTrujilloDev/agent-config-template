@@ -54,9 +54,33 @@ diff -r .claude "$TMP/.claude"
 
 ---
 
+## Upgrading to v0.6.0 (Claude-focused + any-stack)
+
+v0.6.0 refocuses the repo on Claude Code and makes the template stack-agnostic.
+
+- **Multi-host packagings removed** (Codex plugin, Gemini extension, portable
+  `skills/` tree, `AGENTS.md`/`GEMINI.md`). To use the workflow on another
+  host, run the new **`port-config`** skill — it generates a config for that
+  host against its *current* docs instead of shipping packagings that rot.
+- **`project_type` added** (`web-app`, `api-service`, `mobile-app`,
+  `desktop-app`, `game`, `library-cli`, `data-ml`, `other`). It picks which dev
+  agents render: `backend-dev`/`frontend-dev` (web), `mobile-dev`, `game-dev`,
+  `desktop-dev`, or `core-dev`.
+- **answers.env key changes:** `backend_framework` → `framework`;
+  `has_celery` → `has_background_jobs` (the old key is still accepted).
+  Omitting `project_type` defaults to `web-app` (old behavior).
+- **New principles:** Read Before You Write (bypassable reporting, mandatory
+  reading), Code Health (DRY rule-of-three, ~40/~400-line guidelines,
+  why-comments), Commits (one logical change per commit).
+
+**Migration:** add `project_type=` to your `answers.env`, rename the two keys,
+re-render with `--merge`.
+
+---
+
 ## Upgrading to v0.5.0 (rename + multi-host)
 
-v0.5.0 renames the repo **`claude-config-template` → `agent-config-template`** and adds Codex, OpenCode, and Antigravity packaging alongside Claude Code. Nothing about the Claude Code experience changes — same agents, commands, hooks, and `/setup-template`.
+v0.5.0 renamed the repo **`claude-config-template` → `agent-config-template`** and briefly added Codex, OpenCode, and Antigravity packaging alongside Claude Code. Nothing about the Claude Code experience changes — same agents, commands, hooks, and `/setup-template`.
 
 GitHub redirects old URLs, so existing `/plugin marketplace add JuanTrujilloDev/claude-config-template` keeps resolving. To move cleanly onto the new name:
 

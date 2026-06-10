@@ -4,9 +4,9 @@
 
 # agent-config-template
 
-**Spec-driven agent config for Claude Code, Codex, OpenCode & Antigravity. One repo, install on any of them.**
+**Spec-driven agent config for Claude Code. Any tech stack — web, mobile, games, desktop, CLIs.**
 
-<sub>Stop reconfiguring your agent setup from scratch on every project *and* every tool. Install once on your agent of choice and get a battle-tested workflow: an approved Given/When/Then contract before code, one mini-feature at a time, reviewed and verified.</sub>
+<sub>Stop reconfiguring your agent setup from scratch on every project. Install once and get a battle-tested workflow: an approved Given/When/Then contract before code, one mini-feature at a time, reviewed and verified. Using another agent too? The bundled <code>port-config</code> skill generates a config for it from this one, against its current docs.</sub>
 
 [![Install Plugin](https://img.shields.io/badge/Install-Plugin-CC785C?logo=anthropic&logoColor=white&style=flat)](#-install)
 [![Use Template](https://img.shields.io/badge/Use-Template-2EA043?logo=githubactions&logoColor=white&style=flat)](#-install)
@@ -38,16 +38,16 @@ It's not a generic project scaffolder ([cookiecutter](https://github.com/cookiec
 
 ## 🚀 Install
 
-One repo, four hosts. Pick yours (each badge links to its full guide):
+Inside Claude Code:
 
-| Host | Install | What you get |
-|---|---|---|
-| <a href="docs/install/claude.md"><img alt="Claude Code" src="https://img.shields.io/badge/Claude_Code-D97757?logo=anthropic&logoColor=white&style=for-the-badge" height="34"></a> | `/plugin marketplace add JuanTrujilloDev/agent-config-template` then `/plugin install agent-config-template@juantrujillodev` | Everything: agents, slash commands, skills, **hooks**, live sub-agent orchestration |
-| <a href="docs/install/codex.md"><img alt="Codex" src="https://img.shields.io/badge/Codex-000000?logo=openai&logoColor=white&style=for-the-badge" height="34"></a> | add this repo as a marketplace and install from Codex's plugin directory, or `npx skills add JuanTrujilloDev/agent-config-template` | Rules + skills (`spec`, `feature`, `fix`, `verify`, `security-audit`, styles) + bundled MCP config |
-| <a href="docs/install/opencode.md"><img alt="OpenCode" src="https://img.shields.io/badge/OpenCode-FF4A00?style=for-the-badge" height="34"></a> | `npx skills add JuanTrujilloDev/agent-config-template` | Rules + skills |
-| <a href="docs/install/antigravity.md"><img alt="Antigravity / Gemini" src="https://img.shields.io/badge/Antigravity-4285F4?logo=googlegemini&logoColor=white&style=for-the-badge" height="34"></a> | `gemini extensions install https://github.com/JuanTrujilloDev/agent-config-template` | Rules (context) + native `/spec` `/feature` `/fix` `/verify` `/audit` commands + skills |
+```
+/plugin marketplace add JuanTrujilloDev/agent-config-template
+/plugin install agent-config-template@juantrujillodev
+```
 
-> **Where the experience differs (honestly):** Claude Code gets the richest version. The enforcement hooks (protected-branch block, format-on-write) and live multi-agent orchestration run there. On Codex, OpenCode, and Antigravity you get the same **principles, spec-driven workflow, and skills** through `AGENTS.md` and `SKILL.md`; hook *enforcement* is guidance there today (per-host enforcement is on the roadmap).
+Full guide (including updating): [`docs/install/claude.md`](docs/install/claude.md).
+
+> **Using Codex / OpenCode / Gemini / Cursor too?** Run the bundled **`port-config`** skill: it looks up the target host's *current* config format online and generates the equivalent rules + skills from this config — instead of this repo shipping packagings that rot.
 
 ### Run a feature, spec-first
 
@@ -103,9 +103,9 @@ One mini-feature at a time. One mandatory gate (the contract), one optional gate
 ├── agents/
 │   ├── orchestrator.md       # Runs the SDD flow, guards the gates (never codes)
 │   ├── pmo.md                # Conversed spec + contract + mini-features
-│   ├── backend-dev.md        # Backend implementation (Design notes, test-first)
-│   ├── frontend-dev.md       # Frontend implementation
-│   ├── ui-designer.md        # Wireframes + specs (read-only)
+│   ├── <stack>-dev.md        # The dev specialists your project_type needs
+│   │                         #   (backend/frontend, mobile, game, desktop, core)
+│   ├── ui-designer.md        # Wireframes + specs (read-only, UI projects)
 │   ├── judge.md              # Reviews code + tests vs the contract (read-only)
 │   ├── security-reviewer.md  # Auth/permissions/data audit (read-only)
 │   └── mutation-tester.md    # Validates the tests bite (opt-in)
@@ -125,7 +125,7 @@ tools/mutate.py               # No-dep mutation tester (only when mutation testi
 |---|---|---|
 | `orchestrator` | Coordinates the SDD flow, guards the gates, launches specialists | Yes |
 | `pmo` | Conversed spec → Given/When/Then contract → PR-sized mini-features | No |
-| `backend-dev` / `frontend-dev` | Implementation, Design notes, optional test-first | No |
+| `backend-dev` / `frontend-dev` / `mobile-dev` / `game-dev` / `desktop-dev` / `core-dev` | Per-stack implementers (only the ones your `project_type` needs render) | No |
 | `ui-designer` | Wireframes + specs (delegated by `frontend-dev`) | Yes |
 | `judge` | Pre-merge review of code **and** tests against the contract | Yes |
 | `security-reviewer` | Auth/permissions/data audit | Yes |
@@ -154,16 +154,17 @@ Every agent ships with a **Gotchas** section listing its role-specific failure m
 
 | Variable | Example |
 | --- | --- |
-| `project_name` / `language` / `backend_framework` | `Acme Billing` / `Python` / `FastAPI` |
+| `project_type` | `web-app`, `api-service`, `mobile-app`, `desktop-app`, `game`, `library-cli`, `data-ml` — picks the dev agents |
+| `project_name` / `language` / `framework` | `Acme Billing` / `Python` / `FastAPI` (or `Unity`, `Flutter`, `Electron`…) |
 | `src_dir`, `frontend_dir`, `tests_glob` | `src/`, `frontend/`, `tests/` |
 | `format_cmd`, `lint_cmd`, `test_cmd`, `build_cmd` | `ruff format .`, `ruff check .`, `pytest`, `npm run dev` |
 | `branch_prefix`, `default_branch` | `ACME`, `main` |
 | `max_files_per_pr`, `max_loc_per_pr` | `12`, `3000` |
-| `has_frontend`, `has_celery`, `has_e2e`, `enforce_layer_split` *(toggles)* | `yes` / `no` |
+| `has_frontend`, `has_background_jobs`, `has_e2e`, `enforce_layer_split` *(toggles)* | `yes` / `no` |
 | `use_gherkin` *(toggle)* | write contracts as real `.feature` files (needs a runner) |
 | `enforce_mutation_testing` *(toggle)* | add a mutation-testing close gate (ships `tools/mutate.py`) |
 
-Toggles drive **conditional sections** (`{{#has_celery}}…{{/has_celery}}`) and file-level conditionals (`<!-- requires: enforce_mutation_testing -->` drops whole files when falsy).
+Toggles drive **conditional sections** (`{{#has_background_jobs}}…{{/has_background_jobs}}`) and file-level conditionals (`<!-- requires: enforce_mutation_testing -->` drops whole files when falsy).
 
 ---
 
@@ -175,6 +176,8 @@ Toggles drive **conditional sections** (`{{#has_celery}}…{{/has_celery}}`) and
 | [`python-django`](./examples/python-django) | Django + DRF + HTMX/Alpine | yes |
 | [`node-express`](./examples/node-express) | Express + TypeScript + Prisma | n/a |
 | [`node-nextjs`](./examples/node-nextjs) | Next.js 14 (App Router) full-stack | no |
+| [`flutter-mobile`](./examples/flutter-mobile) | Flutter mobile app (renders `mobile-dev`) | n/a |
+| [`unity-game`](./examples/unity-game) | Unity game (renders `game-dev`) | n/a |
 
 ---
 

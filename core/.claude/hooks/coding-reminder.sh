@@ -42,18 +42,18 @@ Before any code edit:
 {{#enforce_layer_split}}
   2. If task touches BOTH backend AND frontend → spawn `pmo` first to split into
      BE + FE mini-features (BE ships first, FE consumes the merged API).
-  3. Edits >50 lines or new defs/classes in {{src_dir}} → spawn `backend-dev`
+  3. Edits >50 lines or new defs/classes in {{src_dir}} → spawn `{{primary_dev_agent}}`
      or `frontend-dev`. Both run Design First before implementing.
 {{/enforce_layer_split}}
 {{^enforce_layer_split}}
-  2. Edits >50 lines or new defs/classes in {{src_dir}} → spawn `backend-dev`
+  2. Edits >50 lines or new defs/classes in {{src_dir}} → spawn `{{primary_dev_agent}}`
      {{#has_frontend}}or `frontend-dev` {{/has_frontend}}with Design First before implementing.
 {{/enforce_layer_split}}
   - Confirm the current branch matches the task type. NEVER code on `{{default_branch}}`.
      Use: feature/{{#branch_prefix}}{{branch_prefix}}-<#>-{{/branch_prefix}}<slug>{{#enforce_layer_split}}[-be|-fe]{{/enforce_layer_split}}, fix/..., hotfix/..., refactor/..., chore/..., docs/...
-  - Apply the principles: Think · Simplicity · Surgical · Goal-Driven{{#enforce_layer_split}} ·
-     BE/FE Split{{/enforce_layer_split}} · Micro-PR (≤{{max_files_per_pr}} files / <{{max_loc_per_pr}} LOC) · Definition of Done ·
-     Conciseness (be brief, no filler/recaps) · Branch Discipline.
+  - Apply the principles: Think · Simplicity · Surgical · Goal-Driven · Read-Before-Write ·
+     Code Health (DRY, small units, why-comments){{#enforce_layer_split}} · BE/FE Split{{/enforce_layer_split}} · Micro-PR (≤{{max_files_per_pr}} files / <{{max_loc_per_pr}} LOC) ·
+     Definition of Done · Conciseness (be brief, no filler/recaps) · Branch Discipline.
   - Definition of Done before declaring complete: format → lint → tests →
      `judge` → `security-reviewer` (if relevant){{#has_e2e}} → live `mcp__playwright__*`
      verification (auto for FE-touching or big changes >5 files / 500 LOC){{/has_e2e}}.

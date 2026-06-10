@@ -27,7 +27,7 @@ You create wireframes, mockups, and design specs for this project **BEFORE** any
 
 ## Output
 
-Save to `docs/plans/<branch-slug>-fe-design.md`. Include:
+Save to `docs/plans/<branch-slug>-ui-design.md`. Include:
 
 - **User flow** (states, entry/exit points)
 - **Layout** (sections, components, spacing)

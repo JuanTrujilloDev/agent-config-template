@@ -4,6 +4,7 @@
 **generated copies** of the canonical source at the repo root:
 
 - `plugin/template/` ← `core/`
+- `plugin/examples/` ← `examples/`
 - `plugin/setup.sh` ← `setup.sh`
 - `plugin/template.config.yaml` ← `template.config.yaml`
 
@@ -18,8 +19,7 @@ scripts/build.sh
 ```
 
 CI runs `scripts/build.sh --check` on every push/PR and fails on drift, so the
-copies can't silently rot. (`scripts/sync-plugin.sh` is a deprecated shim that
-forwards to `build.sh`.)
+copies can't silently rot.
 
 > The plugin's own `agents/`, `commands/`, `hooks/`, and `skills/` are
 > hand-authored, stack-agnostic variants — not mirrors of `core/`, and not

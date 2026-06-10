@@ -1,4 +1,4 @@
-<!-- requires: has_frontend -->
+<!-- requires: has_ui -->
 ---
 description: Design workflow for a new UI feature — ui-designer wireframes and component specs before any code.
 argument-hint: "<feature description>"
@@ -28,6 +28,6 @@ Start the design workflow for a new UI feature.
 
 3. **Spawn `ui-designer`** to produce wireframes + component specs
 
-4. **Pause for user approval** before handoff to `frontend-dev`
+4. **Pause for user approval** before handoff to the implementing dev agent
 
-5. After approval, route to `frontend-dev` for implementation
+5. After approval, route to {{#has_frontend}}`frontend-dev`{{/has_frontend}}{{^has_frontend}}`{{primary_dev_agent}}`{{/has_frontend}} for implementation

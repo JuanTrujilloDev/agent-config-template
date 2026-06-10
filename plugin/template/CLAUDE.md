@@ -15,7 +15,9 @@ Read `.claude/rules/principles.md`. The principles are **non-negotiable**:
 {{#enforce_layer_split}}
 5. **Backend / Frontend Split** — Two PRs per feature: BE ships first, FE ships after.
 {{/enforce_layer_split}}
-- **Micro-PR Discipline** — ≤{{max_files_per_pr}} files changed, <{{max_loc_per_pr}} lines changed per PR.
+- **Read Before You Write** — never edit code you haven't read; check callers first (reporting bypassable, reading isn't).
+- **Code Health** — DRY (rule of three), small functions/files (~40/~400 lines), no god objects, comments explain *why* (no narration, no commented-out code).
+- **Micro-PR Discipline** — ≤{{max_files_per_pr}} files changed, <{{max_loc_per_pr}} lines changed per PR; one logical change per commit.
 - **Definition of Done** — Format → Lint → Unit tests → `judge` → `security-reviewer` (when relevant){{#has_e2e}} → live browser verification (auto for FE / big changes){{/has_e2e}}.
 - **Conciseness** — Be brief. No filler, no recaps of visible output, no preambles.
 - **Branch Discipline** — Never code on `{{default_branch}}`. Always check out a typed branch first.
@@ -27,7 +29,8 @@ Before any coding task: restate the goal in one sentence + list 2–4 verifiable
 | Layer | Technologies |
 |-------|-------------|
 | Language | {{language}} {{language_version}} |
-| Backend | {{backend_framework}} |
+| Type | {{project_type}} |
+| Framework | {{framework}} |
 {{#has_frontend}}
 | Frontend | {{frontend_framework}} |
 {{/has_frontend}}
@@ -103,11 +106,13 @@ Never code on `{{default_branch}}`. Always check out a typed branch first.
 |---|---|---|
 | Spec a feature (idea/SOW → contract + mini-features) | `pmo` | `docs/specs/<slug>/` |
 | Run the full spec-driven flow for a feature | `orchestrator` | coordinates; never edits code |
-| Backend ticket | `backend-dev` | Backend code in `{{src_dir}}` |
+| Implementation ticket | `{{primary_dev_agent}}` | Code in `{{src_dir}}` |
 {{#has_frontend}}
 | Frontend ticket | `frontend-dev` | UI code in `{{frontend_dir}}` |
-| New UI/UX | `ui-designer` (delegated by `frontend-dev`) | wireframes/mockups (read-only) |
 {{/has_frontend}}
+{{#has_ui}}
+| New UI/UX | `ui-designer` (before UI implementation) | wireframes/mockups (read-only) |
+{{/has_ui}}
 | Review before commit/PR | `judge` | code + tests vs contract, micro-PR limits, principles |
 | Security audit | `security-reviewer` | mandatory for auth/permissions/data |
 {{#enforce_mutation_testing}}
@@ -123,7 +128,7 @@ Never code on `{{default_branch}}`. Always check out a typed branch first.
 2. Both `*-dev` agents follow **Design First**: produce a design artifact (DB models/API surface for BE; wireframes/flow for FE) → user approves → implement. Skipping is allowed only for trivial fixes/hotfixes with obvious root cause.
 {{/enforce_layer_split}}
 {{^enforce_layer_split}}
-1. The `*-dev` agent follows **Design First**: produce a design artifact (DB models/API surface for BE{{#has_frontend}}, wireframes/flow for FE{{/has_frontend}}) → user approves → implement. Skipping is allowed only for trivial fixes/hotfixes with obvious root cause.
+1. The `*-dev` agent follows **Design First**: produce a design artifact (data model / public surface{{#has_ui}}; wireframes/flow for UI work{{/has_ui}}) → user approves → implement. Skipping is allowed only for trivial fixes/hotfixes with obvious root cause.
 {{/enforce_layer_split}}
 - Before declaring a task complete, run the **Definition of Done** (rules/principles.md).
 - Before any code edit, confirm the current branch matches the task type. If on `{{default_branch}}`, check out the right branch first.

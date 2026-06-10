@@ -1,6 +1,6 @@
 ---
 name: security-reviewer
-description: Security reviewer — audits a change (or the whole repo) against the OWASP Top 10 and table-stakes hygiene: secrets, access control, injection, auth/session, crypto, misconfig, SSRF, abuse, and vulnerable dependencies. Read-only; reports severity-ranked findings.
+description: "Security reviewer \u2014 audits a change (or the whole repo) against the OWASP Top 10 and table-stakes hygiene: secrets, access control, injection, auth/session, crypto, misconfig, SSRF, abuse, and vulnerable dependencies. Read-only; reports severity-ranked findings."
 tools: Read, Glob, Grep, Bash, Write
 ---
 

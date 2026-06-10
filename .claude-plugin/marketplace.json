@@ -9,8 +9,8 @@
     {
       "name": "agent-config-template",
       "source": "./plugin",
-      "description": "Spec-driven Claude Code config: orchestrator + pmo + judge + dev/security specialists, 9 slash commands (/spec, /feature, /fix, /verify, …), advisory hooks, 4 skills, opt-in TDD + mutation testing.",
-      "version": "0.5.0",
+      "description": "Spec-driven Claude Code config for any stack: orchestrated SDD/TDD workflow, pmo + judge + security + per-stack dev agents, 9 slash commands, advisory hooks, 5 skills incl. port-config for other hosts.",
+      "version": "0.6.0",
       "homepage": "https://github.com/JuanTrujilloDev/agent-config-template",
       "license": "MIT",
       "keywords": [

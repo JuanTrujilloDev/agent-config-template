@@ -36,6 +36,8 @@ the mini-feature's scenarios in `docs/specs/<slug>/contract.md`:
 - [ ] Micro-PR limits — ≤{{max_files_per_pr}} files, <{{max_loc_per_pr}} lines. Branch is typed ({{default_branch}} untouched).{{#enforce_layer_split}}
 - [ ] BE/FE split honored — no straddling.{{/enforce_layer_split}}
 - [ ] Surgical (no drive-by refactors); YAGNI (no speculative options/abstractions).
+- [ ] Code health — no new duplication (rule of three), no file ballooning (~400-line guideline) or god object, dependencies still point one way.
+- [ ] Comments earn their keep — *why* not *what*; no narration, no commented-out code left behind.
 - [ ] No debug residue (`# TODO`, `console.log`, `print()`); follows `.claude/rules/backend-style.md`{{#has_frontend}} / `frontend-style.md`{{/has_frontend}}.
 
 ## Output

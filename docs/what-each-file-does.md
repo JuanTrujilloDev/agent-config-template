@@ -55,8 +55,8 @@ Sub-agent definitions. Each has frontmatter (`name`, `description`) and a body t
 |---|---|---|
 | `orchestrator` | Coordinates the SDD flow, guards the gates, launches specialists | Yes (never edits code) |
 | `pmo` | Conversed spec + Given/When/Then contract + mini-features | No (writes spec docs) |
-| `backend-dev` | Backend implementation | No (writes code) |
-| `frontend-dev` | Frontend implementation | No (writes code) |
+| `backend-dev` / `frontend-dev` | Web implementation (web projects) | No (writes code) |
+| `mobile-dev` / `game-dev` / `desktop-dev` / `core-dev` | Per-stack implementers — only the one matching `project_type` renders | No (writes code) |
 | `ui-designer` | Wireframes + specs | Yes |
 | `judge` | Pre-merge review of code + tests vs the contract | Yes |
 | `security-reviewer` | Auth/permissions/data audit | Yes |

@@ -19,7 +19,8 @@ Create a conventional commit with the staged changes.
    - `docs(scope): description`
    - `style(scope): description`
    - `chore(scope): description`
-5. **Ask the user to confirm** the commit message before committing.
-6. Run `git commit -m "<message>"` only after explicit confirmation.
+5. **One logical change per commit.** If the staged diff mixes unrelated changes, say so and offer to split it before going on.
+6. **Ask the user to confirm** the commit message before committing.
+7. Run `git commit -m "<message>"` only after explicit confirmation.
 
 Never commit on `{{default_branch}}`. If on `{{default_branch}}`, stop and tell the user to check out a typed branch first.

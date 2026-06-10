@@ -19,9 +19,9 @@ That's it. You now have agents, slash commands, skills, and hooks available ever
 
 After install you immediately get:
 
-- **7 agents** (`/agents` to list): `orchestrator`, `pmo`, `backend-dev`, `frontend-dev`, `ui-designer`, `judge`, `security-reviewer` — each with an embedded "Gotchas" section.
+- **11 agents** (`/agents` to list): `orchestrator`, `pmo`, `judge`, `security-reviewer`, `ui-designer`, plus a dev library Claude picks from per project type — `backend-dev` (web/API), `frontend-dev` (web UI), `mobile-dev`, `game-dev`, `desktop-dev`, `core-dev` (library/CLI/data). Each with an embedded "Gotchas" section.
 - **9 slash commands** namespaced under `/agent-config-template:*` — `spec`, `feature`, `fix`, `verify`, `audit`, `commit`, `pr`, `design`, **`setup-template`**.
-- **4 skills**: `principles`, `sdd-workflow`, `backend-style`, `frontend-style`.
+- **5 skills**: `principles`, `sdd-workflow`, `backend-style`, `frontend-style`, `port-config` (generate this config for another agent host from its current docs).
 - **3 hooks**: branch discipline (hard block on protected branches), agent guidance (advisory — guides, doesn't block), targeted auto-format on Edit/Write.
 
 The hooks read environment variables with sensible defaults. Override per-project via `.envrc` (direnv) or your shell rc:

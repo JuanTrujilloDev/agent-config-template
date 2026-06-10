@@ -38,10 +38,10 @@ Practical guide to working with Claude in this project. **Read [Core Operating P
 |---|---|---|
 | `pmo` | You need a spec: idea/SOW → Given/When/Then contract + PR-sized mini-features | `docs/specs/<slug>/{spec,contract,features}` |
 | `orchestrator` | You want the full spec-driven flow run and gated for a feature | coordinates; never edits code |
-{{#has_frontend}}
+{{#has_ui}}
 | `ui-designer` | A non-trivial UI change is needed | Wireframes, mockups, flow descriptions |
-{{/has_frontend}}
-| `backend-dev` | API-layer work | Code + tests {{#enforce_layer_split}}on `*-be` branch{{/enforce_layer_split}} |
+{{/has_ui}}
+| `{{primary_dev_agent}}` | Implementation work | Code + tests {{#enforce_layer_split}}on `*-be` branch{{/enforce_layer_split}} |
 {{#has_frontend}}
 | `frontend-dev` | UI work | Code + tests {{#enforce_layer_split}}on `*-fe` branch (after BE merged){{/enforce_layer_split}} |
 {{/has_frontend}}
@@ -112,7 +112,7 @@ Claude: Contract approved. Spawning orchestrator...
 
 You:    yes
 
-Claude: Checking out branch... Spawning {{#enforce_layer_split}}backend-dev{{/enforce_layer_split}}{{^enforce_layer_split}}*-dev{{/enforce_layer_split}}.
+Claude: Checking out branch... Spawning {{#enforce_layer_split}}backend-dev{{/enforce_layer_split}}{{^enforce_layer_split}}{{primary_dev_agent}}{{/enforce_layer_split}}.
         Design First: <design artifact>. Approve? (yes/edit)
 
 You:    yes
@@ -126,7 +126,7 @@ You:    yes
 ## Quick reference
 
 ### Spawning agents manually
-- *"spawn backend-dev to add ..."*
+- *"spawn {{primary_dev_agent}} to add ..."*
 - *"have judge check the last 3 commits"*
 
 ### Bypassing the enforcement hook (rare)

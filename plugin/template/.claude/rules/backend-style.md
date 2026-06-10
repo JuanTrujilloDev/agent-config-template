@@ -1,6 +1,6 @@
-# Backend Code Style — {{project_name}}
+# Code Style — {{project_name}}
 
-> Applies to: `{{src_dir}}/**`. {{language}} {{language_version}}, {{backend_framework}}.
+> Applies to: `{{src_dir}}/**`. {{language}} {{language_version}}, {{framework}}.
 
 ## Code Formatting
 
@@ -39,19 +39,21 @@
 - Use fixtures/factories for test data; never share mutable state across tests.
 - Coverage target: ≥{{test_coverage_target}}%.
 
+{{#has_database}}
 ## Database / Persistence
 
 - Always use the project's ORM/query builder — no raw SQL unless there's a specific reason (and document it).
 - Optimize queries: use `select_related`/eager loading for FKs, `prefetch_related` for reverse relations / collections.
 - Bulk operations for >10 inserts/updates.
+{{/has_database}}
 
-{{#has_celery}}
-## Background Tasks (Celery)
+{{#has_background_jobs}}
+## Background Tasks / Workers
 
-- Tasks live under `{{src_dir}}/<app>/tasks/`.
-- Tasks should be idempotent: re-running shouldn't cause double-effects.
-- Pass IDs/primitive args, not ORM instances.
-{{/has_celery}}
+- Tasks should be idempotent: re-running must not cause double-effects.
+- Pass IDs / primitive args into jobs, not live objects.
+- Make failure visible: retries with backoff, dead-letter or alert on exhaustion.
+{{/has_background_jobs}}
 
 ## Anti-patterns to avoid
 

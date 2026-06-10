@@ -31,6 +31,16 @@ variables:
     default: ""
 
   # --- Tech stack ---
+  - name: project_type
+    prompt: "Project type"
+    choices: [web-app, api-service, mobile-app, desktop-app, game, library-cli, data-ml, other]
+    default: web-app
+    # Drives which dev agents render and how design artifacts are framed.
+    # Synthetic flags derived by setup.sh: is_web (web-app|api-service),
+    # is_mobile, is_desktop, is_game, is_generic (library-cli|data-ml|other),
+    # has_ui (frontend or any UI-bearing type), has_database (database != none),
+    # and primary_dev_agent (backend-dev|mobile-dev|desktop-dev|game-dev|core-dev).
+
   - name: language
     prompt: "Primary language"
     choices: [Python, TypeScript, JavaScript, Go, Rust, Ruby, Java, Other]
@@ -40,14 +50,15 @@ variables:
     prompt: "Language version (e.g. '3.12+', '20.x')"
     default: ""
 
-  - name: backend_framework
-    prompt: "Backend framework (e.g. 'Django + DRF', 'FastAPI', 'Express')"
+  - name: framework
+    prompt: "Primary framework / engine (e.g. 'Django + DRF', 'FastAPI', 'Flutter', 'Unity', 'Electron', 'none')"
     default: ""
 
   - name: has_frontend
-    prompt: "Does this project have a frontend (templates, SPA, etc.)?"
+    prompt: "Does this web app have a distinct frontend layer (templates, SPA)?"
     choices: [yes, no]
     default: yes
+    when: project_type == web-app
 
   - name: frontend_framework
     prompt: "Frontend framework (e.g. 'Django Templates + HTMX', 'Next.js 14', 'Vue 3')"
@@ -55,7 +66,7 @@ variables:
     when: has_frontend == yes
 
   - name: database
-    prompt: "Database (e.g. 'PostgreSQL', 'SQLite', 'MongoDB')"
+    prompt: "Database / persistence (e.g. 'PostgreSQL', 'SQLite', 'MongoDB', 'none')"
     default: PostgreSQL
 
   # --- Code structure ---
@@ -129,8 +140,8 @@ variables:
     default: "main"
 
   # --- Optional features ---
-  - name: has_celery
-    prompt: "Does the project use Celery (background tasks)?"
+  - name: has_background_jobs
+    prompt: "Background jobs / workers (Celery, Sidekiq, BullMQ, queues)?"
     choices: [yes, no]
     default: no
 

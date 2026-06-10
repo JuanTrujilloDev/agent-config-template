@@ -30,7 +30,7 @@ If there's no approved contract for this work, spawn `pmo`
 ### 2. Per mini-feature (one at a time)
 - Set `in_progress`; check out the typed branch (never `the default branch`).
 - **Apply TDD?** If yes, the implementer writes the failing tests first → **Gate 2: you approve the tests** before production code.
-- Spawn `backend-dev` / `frontend-dev` / `ui-designer` to implement to green, honoring the Design-notes pattern.
+- Spawn the dev specialist that matches the project type (`backend-dev` web/API · `frontend-dev` web UI · `mobile-dev` · `game-dev` · `desktop-dev` · `core-dev` library/CLI/data), with `ui-designer` first for new UI; implement to green, honoring the Design-notes pattern.
 - Spawn `judge` — reviews code **and** tests against the contract scenarios.
 - Spawn `security-reviewer` if the mini-feature touches auth, permissions, or data.
 - Micro-commit on the typed branch; mark `done`.

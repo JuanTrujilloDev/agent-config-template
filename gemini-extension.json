@@ -1,6 +1,0 @@
-{
-  "name": "agent-config-template",
-  "version": "0.5.0",
-  "description": "Spec-driven agent config \u2014 principles, the SDD/TDD workflow, and reviews as portable context + skills.",
-  "contextFileName": "GEMINI.md"
-}

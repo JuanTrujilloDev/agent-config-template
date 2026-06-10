@@ -74,7 +74,7 @@ A full `.claude/` tree calibrated to the project:
 - **`.claude/settings.json`** — permissions tightened around the project's actual tools.
 - **`.claude/mcp.json.example`** — MCP server template.
 - **`.claude/rules/principles.md`**, **`backend-style.md`**, optional **`frontend-style.md`** — operating principles + style guides tailored to the stack.
-- **`.claude/agents/`** — the same agents as the plugin (plus `mutation-tester` when `enforce_mutation_testing=yes`), with placeholders rendered to specifics (e.g., `backend-dev` references the project's actual test command).
+- **`.claude/agents/`** — the orchestration/review agents plus only the dev specialists your `project_type` needs (`backend-dev` for web/API, `mobile-dev`, `game-dev`, `desktop-dev`, or `core-dev`; `frontend-dev`/`ui-designer` when there's a UI; `mutation-tester` when enabled), with placeholders rendered to specifics.
 - **`.claude/commands/`** — the slash commands (`/spec`, `/feature`, `/fix`, `/verify`, `/audit`, `/commit`, `/pr`, `/design`, …), locally available (non-namespaced).
 - **`.claude/hooks/`** — branch discipline, agent gating, auto-format — with the project's actual `src_dir` / `default_branch` baked in (no env-var fallback needed).
 

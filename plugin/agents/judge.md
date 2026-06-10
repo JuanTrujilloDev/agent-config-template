@@ -35,6 +35,8 @@ the mini-feature's scenarios in `docs/specs/<slug>/contract.md`:
 - [ ] Definition of Done passed — `your project's format command`, `your project's lint command`, `your project's test command` green, coverage ≥80%.
 - [ ] Micro-PR limits — ≤12 files, <3000 lines. Branch is typed (the default branch untouched).
 - [ ] Surgical (no drive-by refactors); YAGNI (no speculative options/abstractions).
+- [ ] Code health — no new duplication (rule of three), no file ballooning (~400-line guideline) or god object, dependencies still point one way.
+- [ ] Comments earn their keep — *why* not *what*; no narration, no commented-out code left behind.
 - [ ] No debug residue (`# TODO`, `console.log`, `print()`); follows the `backend-style` skill / `frontend-style.md`.
 
 ## Output

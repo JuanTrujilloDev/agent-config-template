@@ -110,7 +110,7 @@ fi
 
 case "$SCOPE" in
     backend)
-        AGENT="backend-dev"
+        AGENT="{{primary_dev_agent}}"
         SCOPE_DESC="{{src_dir}} (backend code)"
         ;;
     frontend)

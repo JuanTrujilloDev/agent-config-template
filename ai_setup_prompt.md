@@ -11,9 +11,10 @@ Set up Claude Code config from the template at <ABSOLUTE PATH TO TEMPLATE REPO>.
    Read package.json, pyproject.toml, Cargo.toml, go.mod, Gemfile,
    requirements.txt, manage.py, top-level README.md, and the source layout.
    From those, infer answers for every variable defined in
-   <TEMPLATE PATH>/template.config.yaml — language, framework, src_dir,
-   test/lint/format/build commands, default branch, has_frontend, has_celery,
-   has_e2e, ticket_tracker, etc.
+   <TEMPLATE PATH>/template.config.yaml — project_type (web-app, api-service,
+   mobile-app, desktop-app, game, library-cli, data-ml, other), language,
+   framework, src_dir, test/lint/format/build commands, default branch,
+   has_frontend (web only), has_background_jobs, has_e2e, ticket_tracker, etc.
 
 2. Draft an answers.env at the project root. One KEY=VALUE per line.
    For each value, classify your confidence:

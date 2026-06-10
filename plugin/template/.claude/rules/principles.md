@@ -69,6 +69,43 @@ Reach for a known design pattern **only when the problem genuinely matches one a
 
 For non-trivial features, prefer the spec-driven flow (`/spec` → `/feature`): an approved Given/When/Then contract **before** code, one mini-feature at a time, optionally test-first. See `.claude/HELP.md` and `docs/sdd-workflow.md`. For a small scoped change with an obvious cause, `/fix` is the right tool — skip the ceremony, keep the Definition of Done.
 
+## Read Before You Write
+
+Never modify code you haven't read. Before editing, read the target file end to
+end and check its callers/usages — an edit made on a pattern-match guess is how
+context gets lost and regressions ship.
+
+- For non-trivial changes, state what you found (current behavior, who depends
+  on it) before proposing the diff — that's the human's chance to catch a wrong
+  assumption while it's still cheap.
+- **Bypass:** the human can say "just go" / "skip the walkthrough" for changes
+  they consider low-risk, and trivial edits (≤50 lines, no new def/class) don't
+  need the narration. The *reading* is never skipped — only the reporting.
+
+## Code Health
+
+Leave the codebase no worse than you found it — within the surgical-changes rule.
+
+- **DRY by the rule of three.** Don't extract on the second occurrence;
+  *do* extract on the third. Never paste a third copy.
+- **Small units.** Functions that do one thing (aim well under ~40 lines);
+  split any file that grows past ~400 lines or mixes responsibilities. If your
+  change would push a file past the limit, split *as part of the change*.
+- **No god objects / spaghetti.** Dependencies point one way; modules have one
+  reason to change. If your diff adds an import cycle or a "misc" dump, stop.
+- **Comments explain *why*, not *what*.** No narration of obvious code, no
+  commented-out code (delete it — git remembers), no decorative banners.
+  Docstrings for the public surface; one-liners elsewhere when needed.
+
+## Commits
+
+Ship small, traceable commits.
+
+- One logical change per commit — never batch unrelated changes.
+- Commit at every green point (each mini-feature / each DoD pass), via `/commit`.
+- Conventional message (`type(scope): description`); the diff should be
+  reviewable in one sitting.
+
 ## Micro-PR Discipline
 
 Every PR must stay under both limits:

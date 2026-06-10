@@ -157,8 +157,36 @@ flag_map = {
 if tt in flag_map:
     ANS[flag_map[tt]] = "yes"
 
+# 2b. Synthesize project-type flags + the primary dev agent for this stack.
+#     {{primary_dev_agent}} lets every reference to "the implementer" render
+#     to the right specialist; {{#is_*}} sections gate type-specific files.
+pt = (ANS.get("project_type") or "web-app").strip().lower()
+PT_FLAGS = {
+    "web-app":     ("is_web",     "backend-dev"),
+    "api-service": ("is_web",     "backend-dev"),
+    "mobile-app":  ("is_mobile",  "mobile-dev"),
+    "desktop-app": ("is_desktop", "desktop-dev"),
+    "game":        ("is_game",    "game-dev"),
+    "library-cli": ("is_generic", "core-dev"),
+    "data-ml":     ("is_generic", "core-dev"),
+    "other":       ("is_generic", "core-dev"),
+}
+flag, dev = PT_FLAGS.get(pt, ("is_generic", "core-dev"))
+ANS.setdefault("project_type", pt)
+ANS[flag] = "yes"
+ANS["primary_dev_agent"] = dev
+# UI-bearing projects get ui-designer; web frontends additionally get frontend-dev.
+if ANS.get("has_frontend", "").strip().lower() in ("yes", "true") or flag in ("is_mobile", "is_desktop", "is_game"):
+    ANS["has_ui"] = "yes"
+# Persistence-aware sections (style guide DB rules etc.).
+if (ANS.get("database") or "").strip().lower() not in ("", "none", "n/a", "no"):
+    ANS["has_database"] = "yes"
+# Back-compat: accept old has_celery as has_background_jobs.
+if "has_background_jobs" not in ANS and "has_celery" in ANS:
+    ANS["has_background_jobs"] = ANS["has_celery"]
+
 # 3. Normalize yes/no booleans — anything blank/no/false → empty (= falsy).
-for k in ("has_frontend", "has_celery", "has_e2e", "enforce_layer_split", "use_gherkin", "enforce_mutation_testing"):
+for k in ("has_frontend", "has_background_jobs", "has_e2e", "enforce_layer_split", "use_gherkin", "enforce_mutation_testing", "has_ui", "has_database"):
     v = ANS.get(k, "").strip().lower()
     if v in ("", "no", "false"):
         ANS[k] = ""

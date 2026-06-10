@@ -46,7 +46,7 @@ pending
   → ⏸ GATE 1: human approves the contract
   → in_progress (one mini-feature at a time)
      → ⏸ GATE 2 (only if TDD): implementer writes failing tests → human approves
-     → [backend-dev | frontend-dev | ui-designer]  implement to green
+     → [{{primary_dev_agent}}{{#has_frontend}} | frontend-dev{{/has_frontend}}{{#has_ui}} | ui-designer{{/has_ui}}]  implement to green
      → [judge]              review code + tests vs the contract
      → [security-reviewer]  if auth/permissions/data touched
 {{#enforce_mutation_testing}}
@@ -69,7 +69,7 @@ pending
    test-first mode (write the failing tests, then **STOP** at Gate 2 for
    approval). If no, proceed.
 4. **Check out the typed branch** for the mini-feature (never `{{default_branch}}`).
-5. **Launch the specialist** — `backend-dev`{{#has_frontend}}, `frontend-dev`, or `ui-designer`{{/has_frontend}} — passing the relevant `contract.md` scenarios and the spec's Design notes.
+5. **Launch the specialist** — `{{primary_dev_agent}}`{{#has_frontend}} or `frontend-dev`{{/has_frontend}}{{#has_ui}} (with `ui-designer` first for new UI){{/has_ui}} — passing the relevant `contract.md` scenarios and the spec's Design notes.
 6. **Launch `judge`** (reviews code + tests against the contract). If it requests
    changes, route them back to the specialist.
 7. **Launch `security-reviewer`** if the mini-feature touches auth, permissions,

@@ -39,6 +39,7 @@ Before any code edit:
      default branch. Use: feature/<slug>, fix/<slug>, hotfix/<slug>,
      refactor/<slug>, chore/<slug>, docs/<slug>.
   4. Apply the principles: Think · Simplicity · Surgical · Goal-Driven ·
+     Read-Before-Write · Code Health (DRY, small units, why-comments) ·
      Micro-PR (≤12 files / <3,000 LOC) · Definition of Done · Conciseness ·
      Branch Discipline.
   5. Definition of Done before declaring complete: format → lint → tests →
