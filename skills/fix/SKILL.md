@@ -1,6 +1,6 @@
 ---
 name: fix
-description: Small, scoped change with an obvious cause — skip the spec and Design First, keep the full Definition of Done.
+description: "Small, scoped change with an obvious cause — skip the spec and Design First, keep the full Definition of Done."
 ---
 
 # /fix
@@ -24,10 +24,23 @@ use `/feature`.
 1. **State the root cause** in a sentence or two, plus 2–4 verifiable success criteria. No separate brief/plan docs.
 2. **Check out a typed branch** — `fix/<slug>` (or `hotfix/<slug>` for urgent prod). Never edit on a protected branch.
 3. **Implement** the scoped change, surgically — the diff traces 1:1 to the success criteria.
-4. **Run the full Definition of Done:** your project's format → lint → test commands, then spawn `code-reviewer` (and `security-reviewer` if the fix touches auth/permissions/data).
+4. **Run the full Definition of Done:** your project's format → lint → test commands, then spawn `judge` (and `security-reviewer` if the fix touches auth/permissions/data).
 5. **Commit / open the PR** on the typed branch.
 
 ## Guardrails
 
 - If the change grows past a small scoped edit, **stop and switch to `/feature`** and do the brief + Design First properly.
 - `/fix` skips Design First, not the Definition of Done. Review is never optional.
+
+---
+
+## On hosts without subagents
+
+On Claude Code, `pmo`, `backend-dev`/`frontend-dev`, `judge`, and
+`security-reviewer` are subagents the main conversation spawns. On hosts without
+subagents (Codex, OpenCode, Antigravity), **play each role yourself, in
+sequence, switching hats explicitly** — say which hat you're wearing. Produce
+the same artifacts under `docs/specs/<slug>/`, stop at the same human gates
+(contract approval; failing tests under TDD), and run the review passes with the
+`verify` and `security-audit` skills. The artifacts, the gates, and the
+Definition of Done are identical; only the executor changes.

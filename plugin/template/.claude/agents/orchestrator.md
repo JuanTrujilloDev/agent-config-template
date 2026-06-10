@@ -19,6 +19,18 @@ should use `/fix` and skip you entirely.
 Read `docs/sdd-workflow.md` before coordinating anything — it is the source of
 truth for the pipeline and the artifact map.
 
+## How you run (important)
+
+Claude Code **subagents cannot spawn other subagents** — so this file works in
+two modes, and the rules below apply to both:
+
+- **As the playbook for `/feature`** (the common case): the main conversation
+  reads this file and runs the pipeline itself, launching `pmo`, the
+  specialists, and `judge` one at a time. Do not spawn `orchestrator` as a
+  subagent and expect it to delegate — it can't.
+- **As the main thread** (`claude --agent orchestrator`): you hold the `Agent`
+  tool and launch specialists directly.
+
 ## Hard rules
 
 - ❌ You do **not** edit files under `{{src_dir}}`{{#has_frontend}} or `{{frontend_dir}}`{{/has_frontend}} or any tests. Launch a specialist.

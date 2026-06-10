@@ -99,9 +99,10 @@ deprecated stubs — but the workflow and several behaviors changed.
    `enforce_mutation_testing=no` (both optional — omitting them = off).
 2. Re-render with `--merge`. This adds the new agents/commands and merges your
    `settings.json`; your customizations and `settings.local.json` stay intact.
-3. **Optional cleanup** — delete the deprecated files once you've moved over:
+3. **Cleanup** — the deprecated files were removed upstream in v0.5.x:
    `pm.md`, `po-manager.md`, `code-reviewer.md` (agents) and `idea.md`, `sow.md`,
-   `plan.md` (commands). They carry a deprecation banner until you do.
+   `plan.md` (commands). The renderer never deletes, so remove your local copies
+   by hand once you've moved over.
 4. If you overrode `CLAUDE_CONFIG_DEFAULT_BRANCH` via env, switch to
    `CLAUDE_CONFIG_PROTECTED_BRANCHES` (the old var is no longer read).
 
@@ -126,8 +127,9 @@ copy that one file over.
 
 ### File removed / deprecated
 
-The renderer never deletes. Remove deprecated files by hand (e.g. the v0.4.0
-`pm`/`po-manager`/`code-reviewer` stubs) once you're ready.
+The renderer never deletes. Remove deprecated files by hand (e.g. the old
+`pm`/`po-manager`/`code-reviewer` stubs, removed upstream in v0.5.x) once
+you're ready.
 
 ---
 

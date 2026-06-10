@@ -1,3 +1,8 @@
+---
+description: Code-quality + security audit of the codebase, a path, or a branch diff (judge + security-reviewer).
+argument-hint: "[path or branch]"
+---
+
 # /audit
 
 Run a comprehensive code-quality + security audit on the codebase or a specific scope.
@@ -18,7 +23,7 @@ Run a comprehensive code-quality + security audit on the codebase or a specific 
 3. List the audit categories you'll cover
 
 ### Phase 2: Code review
-Spawn `code-reviewer` against the scope. Capture findings.
+Spawn `judge` against the scope. Capture findings.
 
 ### Phase 3: Security review
 Spawn `security-reviewer` against the scope. Capture findings.

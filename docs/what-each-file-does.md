@@ -54,15 +54,14 @@ Sub-agent definitions. Each has frontmatter (`name`, `description`) and a body t
 | Agent | Role | Read-only? |
 |---|---|---|
 | `orchestrator` | Coordinates the SDD flow, guards the gates, launches specialists | Yes (never edits code) |
-| `pmo` | Conversed spec + Given/When/Then contract + mini-features (supersedes `pm` + `po-manager`) | No (writes spec docs) |
+| `pmo` | Conversed spec + Given/When/Then contract + mini-features | No (writes spec docs) |
 | `backend-dev` | Backend implementation | No (writes code) |
 | `frontend-dev` | Frontend implementation | No (writes code) |
 | `ui-designer` | Wireframes + specs | Yes |
-| `judge` | Pre-merge review of code + tests vs the contract (renames `code-reviewer`) | Yes |
+| `judge` | Pre-merge review of code + tests vs the contract | Yes |
 | `security-reviewer` | Auth/permissions/data audit | Yes |
 | `mutation-tester` | Validates the tests bite (opt-in, `enforce_mutation_testing`) | Yes |
 
-`pm`, `po-manager`, and `code-reviewer` remain as deprecated stubs (→ `pmo` / `judge`) pending removal in a later release.
 
 Read-only agents never edit code — they report findings to the implementing agent.
 
@@ -72,14 +71,13 @@ Slash command definitions. Each file becomes `/<filename>` in Claude Code.
 
 | Command | What it does |
 |---|---|
-| `/spec` | Idea/SOW → conversed spec + Given/When/Then contract + mini-features via `pmo` (replaces `/idea` + `/sow`) |
+| `/spec` | Idea/SOW → conversed spec + Given/When/Then contract + mini-features via `pmo` |
 | `/feature` | Full spec-driven flow via `orchestrator`: contract → optional TDD → implement → `judge` → micro-commit |
 | `/fix` | Small, scoped change: skips brief/plan + formal Design First, keeps the full Definition of Done |
 | `/verify` | Implementer's skeptical self-review of its own diff before judge/commit (run it, don't just claim it) |
 | `/audit` | Code + security review via `judge` + `security-reviewer` |
 | `/commit` | Conventional commit, with confirmation gate |
 | `/pr` | Push + open PR, with confirmation gate |
-| `/idea`, `/sow`, `/plan` | **Deprecated** → use `/spec` |
 | `/design` | Wireframe + spec via `ui-designer` (folds into `/feature` for UI work) |
 
 Commands pause at approval gates. Never silently proceed past a brief, plan, or PR creation.

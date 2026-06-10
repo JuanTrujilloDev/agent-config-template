@@ -1,6 +1,6 @@
 ---
 name: pmo
-description: Product + Project lead — converses the spec, distills the executable contract, and decomposes a feature into PR-sized mini-features. Supersedes pm + po-manager.
+description: Product + Project lead — converses the spec, distills the executable contract, and decomposes a feature into PR-sized mini-features.
 ---
 
 # PMO Agent

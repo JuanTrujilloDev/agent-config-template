@@ -1,3 +1,8 @@
+---
+description: "Full spec-driven flow for a feature: approved contract, optional TDD, implement, judge review, micro-commit — one mini-feature at a time."
+argument-hint: "<ticket or description>"
+---
+
 # /feature
 
 Full **spec-driven** flow for a feature — from signed contract to merged
@@ -13,10 +18,13 @@ and never skips ahead.
 
 ## What it does
 
-Spawns `orchestrator`, which runs the pipeline in `docs/sdd-workflow.md`:
+**You (the main conversation) are the orchestrator.** Claude Code subagents
+cannot spawn other subagents, so never delegate the coordination itself —
+read `.claude/agents/orchestrator.md` (the playbook) and `docs/sdd-workflow.md`,
+then run the pipeline from this conversation, chaining one subagent at a time:
 
 ### 1. Spec + contract
-If there's no approved contract for this work, the orchestrator spawns `pmo`
+If there's no approved contract for this work, spawn `pmo`
 (or run `/spec` first). Output: `docs/specs/<slug>/{spec.md, contract.md, features.json}`.
 **Gate 1 — you approve `contract.md` before any code is written.**
 

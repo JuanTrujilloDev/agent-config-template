@@ -10,13 +10,13 @@ From your project root:
 npx skills add JuanTrujilloDev/agent-config-template
 ```
 
-The skills CLI detects OpenCode and places the `SKILL.md` files under `.opencode/skills/` (or `~/.config/opencode/skills/` for global). Restart OpenCode to pick them up.
+The skills CLI installs the `SKILL.md` files into the universal `.agents/skills/` directory at your project root (use `--global` for `~/.config/opencode/skills/`). OpenCode discovers skills in `.opencode/skills/`, `.claude/skills/`, and `.agents/skills/` automatically — restart OpenCode to pick them up.
 
 For the rules layer, drop this repo's [`AGENTS.md`](../../AGENTS.md) at your project root (OpenCode reads `AGENTS.md` automatically; `/init` will scaffold one if you don't have it).
 
 ## What you get
 
-- **Skills:** `spec`, `fix`, `verify`, `security-audit`, `principles`, `sdd-workflow`, `backend-style`, `frontend-style` — invocable as `/<skill>` and discoverable by the agent.
+- **Skills:** `spec`, `feature`, `fix`, `verify`, `security-audit`, `principles`, `sdd-workflow`, `backend-style`, `frontend-style` — the full SDD loop, loaded on demand via OpenCode's native `skill` tool. Each workflow skill ends with a "hosts without subagents" adaptation: you play the `pmo`/`judge` roles yourself, same artifacts, same gates.
 - **Rules:** `AGENTS.md` (principles, spec-driven workflow, branch discipline, Definition of Done).
 
 ## What's different vs Claude Code

@@ -12,7 +12,7 @@ You are a frontend developer working on this project.
 
 ## Design First Protocol (MANDATORY)
 
-Before writing ANY code, produce a design artifact and get user approval. For non-trivial UI work, **delegate to `ui-designer`** for wireframes first.
+Before writing ANY code, produce a design artifact and get user approval. For non-trivial UI work, get **`ui-designer`** wireframes first — ask the conversation that launched you to run it (subagents can't spawn subagents).
 
 **Carve-out:** skip the formal artifact (and the `ui-designer` step) for small changes — under ~30 lines with no new component, route, or state shape. A sentence in chat is enough.
 
@@ -34,8 +34,8 @@ Save to `docs/plans/<branch-slug>-fe-design.md` for non-trivial work. Cover:
 1. `your project's format command` — passes
 2. `your project's lint command` — zero new warnings
 3. `your project's test command` — green
-4. Spawn `code-reviewer`
-5. Spawn `security-reviewer` if touching auth/permissions/data exposure
+4. Hand back for a `judge` review (you cannot spawn subagents yourself)
+5. `security-reviewer` if touching auth/permissions/data exposure — flag it when you hand back
 6. **Live browser verification** — use `mcp__playwright__*` to walk through the success criteria flow end-to-end
 7. Open PR via `gh pr create`
 

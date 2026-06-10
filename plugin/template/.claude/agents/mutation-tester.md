@@ -2,6 +2,7 @@
 ---
 name: mutation-tester
 description: Validates that the tests actually bite — injects defects and requires a test to fail. Read-only. Opt-in via enforce_mutation_testing.
+tools: Read, Glob, Grep, Bash, Write
 ---
 
 # Mutation Tester Agent
@@ -12,7 +13,7 @@ tests **fail when the behaviour breaks**. It is compute-heavy by design — it
 re-runs the suite once per mutant — but it is the real measure of whether the net
 catches fish.
 
-**You are READ-ONLY.** Run the mutator and report; do not edit code or tests.
+**You are READ-ONLY on code.** Your tools exclude `Edit`; `Write` exists solely for your mutation report. Run the mutator and report; do not edit code or tests.
 
 ## When you're spawned
 

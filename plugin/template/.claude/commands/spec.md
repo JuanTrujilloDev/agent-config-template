@@ -1,9 +1,14 @@
+---
+description: "Turn an idea, ticket, or SOW into a conversed spec, a Given/When/Then contract, and PR-sized mini-features (pmo). Gate 1: you approve the contract."
+argument-hint: "<idea, ticket, or description>"
+---
+
 # /spec
 
 Turn a raw idea, a tracked ticket, or a SOW request into an approved, executable
-contract — via the `pmo` agent. This is the single entry point that **replaces
-the old `/idea` and `/sow`**: frame the problem, decide the open questions,
-decompose into PR-sized mini-features, and write the contract you sign.
+contract — via the `pmo` agent. This is the **single entry point for framing
+work**: frame the problem, decide the open questions, decompose into PR-sized
+mini-features, and write the contract you sign.
 
 ## Usage
 

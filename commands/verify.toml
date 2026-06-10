@@ -1,7 +1,7 @@
----
-name: verify
-description: "Skeptical self-review of your own diff before review or commit — re-read the request, read every changed line, actually run it, fix and re-review."
----
+description = "Skeptical self-review of your own uncommitted diff — re-read the request, read every changed line, actually run it, fix what you find."
+
+prompt = '''
+User request: {{args}}
 
 # /verify
 
@@ -71,3 +71,4 @@ the same artifacts under `docs/specs/<slug>/`, stop at the same human gates
 (contract approval; failing tests under TDD), and run the review passes with the
 `verify` and `security-audit` skills. The artifacts, the gates, and the
 Definition of Done are identical; only the executor changes.
+'''

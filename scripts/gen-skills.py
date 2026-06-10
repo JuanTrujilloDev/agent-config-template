@@ -7,6 +7,7 @@ Outputs (all generated — don't hand-edit):
   codex/.codex-plugin/plugin.json     # Codex native plugin manifest
   codex/skills/<name>/SKILL.md        # bundled copy
   .agents/plugins/marketplace.json    # Codex marketplace catalog -> ./codex
+  commands/<name>.toml                # Gemini/Antigravity native slash commands
 
 Usage:
   python3 scripts/gen-skills.py            # regenerate
@@ -27,13 +28,42 @@ PASSTHROUGH = {  # already SKILL.md with good frontmatter — copy verbatim
     "backend-style": "plugin/skills/backend-style/SKILL.md",
     "frontend-style": "plugin/skills/frontend-style/SKILL.md",
 }
-WRAP = {  # command markdown (no frontmatter) -> wrap as a skill
+WRAP = {  # command markdown -> wrap as a skill (frontmatter stripped, host note appended)
     "spec": ("plugin/commands/spec.md",
              "Spec-driven: turn an idea, ticket, or SOW into a Given/When/Then contract and PR-sized mini-features before any code is written."),
+    "feature": ("plugin/commands/feature.md",
+                "Run the full spec-driven flow for a feature: approved Given/When/Then contract, optional TDD, implement one PR-sized mini-feature at a time, review against the contract, micro-commit."),
     "fix": ("plugin/commands/fix.md",
             "Small, scoped change with an obvious cause — skip the spec and Design First, keep the full Definition of Done."),
     "verify": ("plugin/commands/verify.md",
                "Skeptical self-review of your own diff before review or commit — re-read the request, read every changed line, actually run it, fix and re-review."),
+}
+
+# Appended to every WRAP skill so the SDD practice survives on hosts that have
+# no subagents: same artifacts, same gates, different executor.
+HOST_NOTE = """
+---
+
+## On hosts without subagents
+
+On Claude Code, `pmo`, `backend-dev`/`frontend-dev`, `judge`, and
+`security-reviewer` are subagents the main conversation spawns. On hosts without
+subagents (Codex, OpenCode, Antigravity), **play each role yourself, in
+sequence, switching hats explicitly** — say which hat you're wearing. Produce
+the same artifacts under `docs/specs/<slug>/`, stop at the same human gates
+(contract approval; failing tests under TDD), and run the review passes with the
+`verify` and `security-audit` skills. The artifacts, the gates, and the
+Definition of Done are identical; only the executor changes.
+"""
+
+# Gemini CLI / Antigravity native slash commands, generated from the same
+# de-parameterized command sources (https://geminicli.com/docs/extensions/reference/#custom-commands).
+GEMINI_COMMANDS = {
+    "spec": "plugin/commands/spec.md",
+    "feature": "plugin/commands/feature.md",
+    "fix": "plugin/commands/fix.md",
+    "verify": "plugin/commands/verify.md",
+    "audit": "plugin/commands/audit.md",
 }
 REFRAME = {  # agent markdown -> skill under a new name
     "security-audit": ("plugin/agents/security-reviewer.md",
@@ -42,7 +72,8 @@ REFRAME = {  # agent markdown -> skill under a new name
 
 # Portable always-on rules layer. Emitted as AGENTS.md (cross-tool: Codex,
 # OpenCode, Cursor, …) and GEMINI.md (Antigravity/Gemini). One source, so the
-# two never drift. Kept well under Antigravity's 12,000-char rule limit.
+# two never drift. Kept well under the 12,000-char budget we enforce in
+# validate-packaging.py so it stays cheap to load on every host.
 RULES_DOC = """# Agent operating rules
 
 > Portable rules for any coding agent (Claude Code, Codex, OpenCode, Antigravity).
@@ -74,6 +105,30 @@ Run the `security-audit` skill on anything touching auth, secrets, user data, or
 """
 
 
+def yaml_str(s):
+    """Quote a scalar for YAML frontmatter. A JSON string literal is a valid
+    YAML double-quoted scalar, so json.dumps gives safe quoting/escaping.
+    Unquoted values containing ': ' are INVALID YAML — strict parsers (the
+    skills CLI, Codex, OpenCode) silently skip such skills."""
+    return json.dumps(s, ensure_ascii=False)
+
+
+def quote_unsafe_scalars(fm_lines):
+    """Re-emit name:/description: frontmatter lines with safe quoting when the
+    raw value would break strict YAML (e.g. an unquoted ': ')."""
+    out = []
+    for line in fm_lines:
+        stripped = line.strip()
+        for key in ("name", "description"):
+            if stripped.startswith(key + ":"):
+                val = stripped[len(key) + 1:].strip()
+                if val and val[0] not in "\"'" and (": " in val or val.endswith(":")):
+                    line = f"{key}: {yaml_str(val)}"
+                break
+        out.append(line)
+    return out
+
+
 def ensure_name(text, name):
     """Codex/OpenCode SKILL.md require both name and description. Claude skills
     omit name (derived from dir), so inject it when missing."""
@@ -87,9 +142,10 @@ def ensure_name(text, name):
             fm = lines[1:close]
             if not any(l.strip().startswith("name:") for l in fm):
                 fm = [f"name: {name}"] + fm
+            fm = quote_unsafe_scalars(fm)
             rebuilt = "\n".join(["---"] + fm + ["---"] + lines[close + 1:])
             return rebuilt + ("\n" if text.endswith("\n") else "")
-    return f"---\nname: {name}\ndescription: {name}\n---\n\n" + text
+    return f"---\nname: {name}\ndescription: {yaml_str(name)}\n---\n\n" + text
 
 
 def strip_frontmatter(text):
@@ -108,11 +164,13 @@ def build_skill_bodies():
     for name, rel in PASSTHROUGH.items():
         out[name] = ensure_name(open(os.path.join(REPO, rel), encoding="utf-8").read(), name)
     for name, (rel, desc) in WRAP.items():
-        body = open(os.path.join(REPO, rel), encoding="utf-8").read()
-        out[name] = f"---\nname: {name}\ndescription: {desc}\n---\n\n" + body
+        body = strip_frontmatter(open(os.path.join(REPO, rel), encoding="utf-8").read())
+        if not body.endswith("\n"):
+            body += "\n"
+        out[name] = f"---\nname: {name}\ndescription: {yaml_str(desc)}\n---\n\n" + body + HOST_NOTE
     for name, (rel, desc) in REFRAME.items():
         body = strip_frontmatter(open(os.path.join(REPO, rel), encoding="utf-8").read())
-        out[name] = f"---\nname: {name}\ndescription: {desc}\n---\n\n" + body
+        out[name] = f"---\nname: {name}\ndescription: {yaml_str(desc)}\n---\n\n" + body
     return out
 
 
@@ -184,6 +242,29 @@ def render(dest_root):
     with open(os.path.join(dest_root, "GEMINI.md"), "w", encoding="utf-8") as f:
         f.write(RULES_DOC)
 
+    # Gemini / Antigravity native slash commands (commands/<name>.toml).
+    # TOML literal multi-line strings ('''…''') take the body verbatim — no
+    # escape processing — so the markdown passes through untouched.
+    cmd_dir = os.path.join(dest_root, "commands")
+    shutil.rmtree(cmd_dir, ignore_errors=True)
+    os.makedirs(cmd_dir, exist_ok=True)
+    for name, rel in GEMINI_COMMANDS.items():
+        raw = open(os.path.join(REPO, rel), encoding="utf-8").read()
+        desc, body = "", strip_frontmatter(raw)
+        if raw.startswith("---"):
+            for ln in raw.splitlines()[1:]:
+                if ln.strip() == "---":
+                    break
+                if ln.startswith("description:"):
+                    desc = ln.split(":", 1)[1].strip().strip('"').strip("'")
+        if "'''" in body + HOST_NOTE or "!{" in body + HOST_NOTE:
+            raise SystemExit(f"refusing to emit {name}.toml: body contains TOML/Gemini-special sequences")
+        if not body.endswith("\n"):
+            body += "\n"
+        prompt = f"User request: {{{{args}}}}\n\n{body}{HOST_NOTE}"
+        with open(os.path.join(cmd_dir, f"{name}.toml"), "w", encoding="utf-8") as f:
+            f.write(f"description = {json.dumps(desc, ensure_ascii=False)}\n\nprompt = '''\n{prompt}'''\n")
+
     # Antigravity / Gemini CLI extension manifest (install via `gemini extensions install <repo-url>`).
     extension = {
         "name": "agent-config-template",
@@ -204,7 +285,8 @@ def main():
         try:
             render(tmp)
             drift = 0
-            for rel in ("skills", "codex", os.path.join(".agents", "plugins", "marketplace.json"),
+            for rel in ("skills", "codex", "commands",
+                        os.path.join(".agents", "plugins", "marketplace.json"),
                         "AGENTS.md", "GEMINI.md", "gemini-extension.json"):
                 a, b = os.path.join(REPO, rel), os.path.join(tmp, rel)
                 cmd = os.path.exists(a) and os.path.exists(b)
@@ -228,7 +310,7 @@ def main():
         names = render(REPO)
         print(f"Generated {len(names)} skills: {', '.join(names)}")
         print("  -> skills/, codex/ (native plugin), .agents/plugins/marketplace.json")
-        print("  -> AGENTS.md + GEMINI.md (rules), gemini-extension.json (Antigravity)")
+        print("  -> AGENTS.md + GEMINI.md (rules), gemini-extension.json + commands/*.toml (Antigravity)")
 
 
 def _deep_diff(a, b):

@@ -1,3 +1,8 @@
+---
+description: Fast path for a small scoped change with an obvious cause — skips the spec and Design First, keeps the full Definition of Done.
+argument-hint: "<description>"
+---
+
 # /fix
 
 Fast path for a small, scoped change with an obvious root cause. Skips the
@@ -25,7 +30,7 @@ For a tracked fix, reference the ticket: `/fix {{branch_prefix}}-<#>` — e.g. `
 3. **Implement** the scoped change. Stay surgical — the diff traces 1:1 to the success criteria.
 4. **Run the full Definition of Done** (no shortcuts here):
    - `{{format_cmd}}` → `{{lint_cmd}}` → `{{test_cmd}}`
-   - Spawn `code-reviewer` — address all blockers
+   - Spawn `judge` — address all blockers
    - Spawn `security-reviewer` if the fix touches auth/permissions/data
 5. **Commit / open the PR** on the typed branch.
 

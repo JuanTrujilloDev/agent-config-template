@@ -58,7 +58,7 @@ Every feature touching both BE and FE ships as **two PRs** in sequence. Never a 
 - FE tests
 - Branch suffix: `-fe`
 
-When the `pm` agent decomposes a feature, it creates one BE ticket and one FE ticket (or more of each if the feature is large). The BE ticket is routed to `backend-dev`; the FE ticket to `frontend-dev`.
+When the `pmo` agent decomposes a feature, it creates one BE mini-feature and one FE mini-feature (or more of each if the feature is large). The BE ticket is routed to `backend-dev`; the FE ticket to `frontend-dev`.
 {{/enforce_layer_split}}
 
 ## Design Patterns (when warranted)
@@ -75,7 +75,7 @@ Every PR must stay under both limits:
 - **≤{{max_files_per_pr}} files changed**
 - **<{{max_loc_per_pr}} lines changed**
 
-If a feature won't fit, the `pm` agent breaks it into sequential tickets, each its own PR. Bigger ≠ better; smaller PRs review faster, merge cleaner, and roll back safely.
+If a feature won't fit, the `pmo` agent breaks it into sequential mini-features, each its own PR. Bigger ≠ better; smaller PRs review faster, merge cleaner, and roll back safely.
 
 ## Definition of Done
 
@@ -84,7 +84,7 @@ A coding task is **NOT** complete until all of these pass, in order:
 1. **Format** — `{{format_cmd}}`
 2. **Lint** — `{{lint_cmd}}` (zero new warnings)
 3. **Unit tests** — `{{test_cmd}}` green, ≥{{test_coverage_target}}% coverage maintained
-4. **Code review** — Spawn `code-reviewer` agent; address all blockers it flags.
+4. **Code review** — a `judge` review of the change (the main conversation spawns it); address all blockers it flags.
 5. **Security review** — Spawn `security-reviewer` if change touches authentication, permissions, data exposure, or external input boundaries.
 {{#has_e2e}}
 6. **Live browser verification** — For any change under `{{frontend_dir}}` OR diff exceeding 5 files / 500 lines: use `mcp__playwright__*` tools to walk through the user flow described in success criteria and confirm it works end-to-end.

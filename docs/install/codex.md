@@ -10,7 +10,7 @@ From your project root:
 npx skills add JuanTrujilloDev/agent-config-template
 ```
 
-This routes the `SKILL.md` files into Codex's skills directory. Start a new Codex session, then invoke them with `/skills` or by typing `$` to mention one.
+This installs the `SKILL.md` files into the universal `.agents/skills/` directory at your project root, which Codex reads natively (it also reads `~/.agents/skills` for personal skills). Start a new Codex session, then list them with `/skills` or type `$` to mention one.
 
 ## Native plugin
 
@@ -26,7 +26,7 @@ We'll list it in the official Plugin Directory the moment self-serve publishing 
 
 ## What you get
 
-- **Skills:** `spec`, `fix`, `verify`, `security-audit`, `principles`, `sdd-workflow`, `backend-style`, `frontend-style`.
+- **Skills:** `spec`, `feature`, `fix`, `verify`, `security-audit`, `principles`, `sdd-workflow`, `backend-style`, `frontend-style` — the full SDD loop. Each workflow skill ends with a "hosts without subagents" adaptation: you play the `pmo`/`judge` roles yourself, same artifacts, same gates.
 - **Rules:** the always-on baseline in [`AGENTS.md`](../../AGENTS.md) (Codex reads it automatically).
 - Bundled MCP config slot (`.mcp.json`) if you add servers.
 

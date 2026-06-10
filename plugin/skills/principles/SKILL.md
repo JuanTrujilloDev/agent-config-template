@@ -61,7 +61,7 @@ Every PR must stay under both limits:
 - **≤12 files changed**
 - **<3000 lines changed**
 
-If a feature won't fit, the `pm` agent breaks it into sequential tickets, each its own PR. Bigger ≠ better; smaller PRs review faster, merge cleaner, and roll back safely.
+If a feature won't fit, the `pmo` agent breaks it into sequential mini-features, each its own PR. Bigger ≠ better; smaller PRs review faster, merge cleaner, and roll back safely.
 
 ## Definition of Done
 
@@ -70,7 +70,7 @@ A coding task is **NOT** complete until all of these pass, in order:
 1. **Format** — `your project's format command`
 2. **Lint** — `your project's lint command` (zero new warnings)
 3. **Unit tests** — `your project's test command` green, ≥80% coverage maintained
-4. **Code review** — Spawn `code-reviewer` agent; address all blockers it flags.
+4. **Code review** — a `judge` review of the change (the main conversation spawns it); address all blockers it flags.
 5. **Security review** — Spawn `security-reviewer` if change touches authentication, permissions, data exposure, or external input boundaries.
 6. **Live browser verification** — For any change under `src/frontend` OR diff exceeding 5 files / 500 lines: use `mcp__playwright__*` tools to walk through the user flow described in success criteria and confirm it works end-to-end.
 

@@ -1,3 +1,7 @@
+---
+description: Conventional commit of the staged changes, with a confirmation gate. Never commits on a protected branch.
+---
+
 # /commit
 
 Create a conventional commit with the staged changes.

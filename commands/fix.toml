@@ -1,7 +1,7 @@
----
-description: Fast path for a small scoped change with an obvious cause — skips the spec and Design First, keeps the full Definition of Done.
-argument-hint: "<description>"
----
+description = "Fast path for a small scoped change with an obvious cause — skips the spec and Design First, keeps the full Definition of Done."
+
+prompt = '''
+User request: {{args}}
 
 # /fix
 
@@ -31,3 +31,17 @@ use `/feature`.
 
 - If the change grows past a small scoped edit, **stop and switch to `/feature`** and do the brief + Design First properly.
 - `/fix` skips Design First, not the Definition of Done. Review is never optional.
+
+---
+
+## On hosts without subagents
+
+On Claude Code, `pmo`, `backend-dev`/`frontend-dev`, `judge`, and
+`security-reviewer` are subagents the main conversation spawns. On hosts without
+subagents (Codex, OpenCode, Antigravity), **play each role yourself, in
+sequence, switching hats explicitly** — say which hat you're wearing. Produce
+the same artifacts under `docs/specs/<slug>/`, stop at the same human gates
+(contract approval; failing tests under TDD), and run the review passes with the
+`verify` and `security-audit` skills. The artifacts, the gates, and the
+Definition of Done are identical; only the executor changes.
+'''
