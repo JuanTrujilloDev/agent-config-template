@@ -22,8 +22,8 @@ From a tracked ticket: `/spec {{branch_prefix}}-<#>` (e.g. `/spec {{branch_prefi
 {{/branch_prefix}}
 ## What it does
 
-1. Spawns **`pmo`**, which **converses** with you — debating decisions and edge cases, recording the *why*.
-2. Writes `docs/specs/<slug>/spec.md` — problem, goal, verifiable success criteria, decisions, out-of-scope, open questions, and **Design notes** (a named design pattern where one genuinely fits).
+1. Spawns **`pmo`**, which **converses** with you — debating decisions and edge cases, recording the *why*. Where the questions are structural (what exists, what depends on what), it grounds them per `.claude/rules/code-query.md` — graph first, grep second — instead of guessing.
+2. Writes `docs/specs/<slug>/spec.md` — problem, goal, verifiable success criteria, decisions, out-of-scope, open questions, and **Design notes**: a named design pattern where one genuinely fits, plus a **Leverage** subsection — for each mini-feature, walk the leverage ladder (`.claude/rules/principles.md`): what existing code, standard library, native platform feature, or already-installed dependency covers it, and what genuinely must be written new. Code nobody writes is the cheapest to review.
 3. Distills `docs/specs/<slug>/contract.md` — Given/When/Then acceptance scenarios, one block per mini-feature.
 4. Writes `docs/specs/<slug>/features.json` — the mini-feature list (each ≤{{max_files_per_pr}} files / <{{max_loc_per_pr}} LOC), status `pending`.
 5. Asks whether to mirror the mini-features into your tracker as subtasks or as a comment on the main task.

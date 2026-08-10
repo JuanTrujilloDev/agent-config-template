@@ -21,6 +21,20 @@ Write the minimum code that solves the stated problem. **Nothing speculative.**
 - Three similar lines beats a premature abstraction.
 - Trust internal code and framework guarantees — only validate at system boundaries.
 
+**The leverage ladder.** Before writing any new code, walk down — stop at the
+first rung that solves it:
+
+1. **Does it need to exist at all?** (YAGNI — maybe the requirement dissolves on inspection)
+2. **Already in this codebase?** Reuse it — `.claude/rules/code-query.md` shows how to find it.
+3. **In the standard library?** Use the built-in.
+4. **A native platform feature?** (`<input type="date">` beats a date-picker dependency)
+5. **In an already-installed dependency?** Don't add a new one for what an existing one does.
+6. **Only then** write the minimum functional solution.
+
+Be lazy about the *solution*, never about the *requirements*: security,
+validation, error handling, and accessibility are never rungs to skip —
+minimizing them is negligence, not simplicity.
+
 ## 3. Surgical Changes
 
 Touch only what the task requires.
@@ -73,7 +87,9 @@ For non-trivial features, prefer the spec-driven flow (`/spec` → `/feature`): 
 
 Never modify code you haven't read. Before editing, read the target file end to
 end and check its callers/usages — an edit made on a pattern-match guess is how
-context gets lost and regressions ship.
+context gets lost and regressions ship. For structural questions (what depends
+on this, how are these connected), `.claude/rules/code-query.md` finds the
+callers cheaply — graph first, grep second; then read what it surfaces.
 
 - For non-trivial changes, state what you found (current behavior, who depends
   on it) before proposing the diff — that's the human's chance to catch a wrong
