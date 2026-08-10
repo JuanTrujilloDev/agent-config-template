@@ -24,6 +24,7 @@ Re-read the original request — and the contract scenarios if there are any —
 - Features nobody asked for → remove them.
 - Adjacent code you "improved" that was already fine → revert it.
 - A different (more interesting) problem solved instead of the one described → solve the right one.
+- **Over-engineering** — for each new function, class, or dependency in the diff, ask: would a lower rung of the leverage ladder (`principles` skill) have covered it — existing code, stdlib, a native platform feature, an installed dependency? If yes, replace it. (Never trim security, validation, error handling, or accessibility to get smaller — that's negligence, not simplicity.)
 
 The diff should trace 1:1 to the request and its success criteria. Anything that doesn't, justify in one line or drop.
 

@@ -73,6 +73,13 @@ Decorator, etc. — with a one-line *why*. If no pattern fits, say so explicitly
 fights Simplicity First / YAGNI. The implementer treats your named pattern as
 part of the contract.
 
+Add a **Leverage** subsection per mini-feature: walk the leverage ladder (`principles`
+skill) and record what existing code, standard library, native platform feature,
+or already-installed dependency covers it — and what genuinely must be written
+new. Ground "already in this codebase?" with the `code-query` skill (graph
+first, grep second) instead of assuming. Code nobody writes is the cheapest to
+review and the safest to ship.
+
 ## Tracker integration
 
 After the contract is drafted, ask the user:

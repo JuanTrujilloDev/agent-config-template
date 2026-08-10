@@ -1,7 +1,7 @@
 {
   "name": "agent-config-template",
-  "description": "Spec-driven Claude Code config for any stack (web, mobile, games, desktop, CLIs): orchestrated SDD/TDD workflow, pmo + judge + security + per-stack dev agents, 9 slash commands, advisory hooks (hard branch block), 5 skills incl. port-config for other hosts.",
-  "version": "0.6.0",
+  "description": "Spec-driven Claude Code config for any stack (web, mobile, games, desktop, CLIs): orchestrated SDD/TDD workflow, pmo + judge + security + per-stack dev agents, 10 slash commands, advisory hooks (hard branch block), 6 skills incl. code-query (graph-first codebase querying) and port-config for other hosts.",
+  "version": "0.7.0",
   "author": {
     "name": "Juan Trujillo",
     "url": "https://juantrujillo.dev"

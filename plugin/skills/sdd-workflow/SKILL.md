@@ -84,7 +84,15 @@ it does not get paraphrased through chat.
   contract, no orchestrator. Just the typed branch + the full Definition of Done.
 - **Design notes** in the spec name a design pattern when the problem genuinely
   warrants one (Strategy, Factory, Adapter, Repository, …) — never speculatively.
-  The implementer treats the named pattern as part of the contract.
+  The implementer treats the named pattern as part of the contract. They also
+  carry a **Leverage** subsection: per mini-feature, what existing code /
+  stdlib / native platform / installed dependency covers it (leverage ladder,
+  `principles` skill) — so the implementer reuses instead of rewriting.
+- **Structural questions** during CONVERSE, SCOPE, and implementation (what
+  exists, what depends on what, how are A and B connected) go through the
+  `code-query` skill — a codebase knowledge graph when one is available
+  (e.g. graphify), a deterministic repo map otherwise. Graph first, grep second;
+  Read Before You Write still applies to everything you edit.
 - **Definition of Done** still applies to every mini-feature (format → lint →
   tests → `judge` → `security-reviewer` when relevant).
 - **Mutation testing** (`enforce_mutation_testing`, off by default) adds a final
