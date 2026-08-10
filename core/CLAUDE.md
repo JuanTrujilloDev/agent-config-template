@@ -9,7 +9,7 @@
 Read `.claude/rules/principles.md`. The principles are **non-negotiable**:
 
 1. **Think Before Coding** — State assumptions; ask if ambiguous.
-2. **Simplicity First (YAGNI)** — Minimum code, no speculation.
+2. **Simplicity First (YAGNI)** — Minimum code, no speculation; walk the leverage ladder (reuse > stdlib > native > installed deps > new code) before writing.
 3. **Surgical Changes** — Touch only what the task requires.
 4. **Goal-Driven Execution** — Write 2–4 verifiable success criteria first; loop until they pass.
 {{#enforce_layer_split}}
@@ -51,7 +51,7 @@ Tests: `{{tests_glob}}`
 - **Formatter:** {{formatter}} — run `{{format_cmd}}`
 - **Linter:** {{linter}} — run `{{lint_cmd}}`
 
-Detailed patterns: `.claude/rules/backend-style.md`{{#has_frontend}}, `.claude/rules/frontend-style.md`{{/has_frontend}}.
+Detailed patterns: `.claude/rules/backend-style.md`{{#has_frontend}}, `.claude/rules/frontend-style.md`{{/has_frontend}}. Structural code questions (what depends on what): `.claude/rules/code-query.md` — graph first, grep second.
 
 ## Git Workflow
 
