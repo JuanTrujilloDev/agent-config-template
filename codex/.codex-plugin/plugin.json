@@ -21,6 +21,8 @@
     "displayName": "Agent Config Template",
     "shortDescription": "Spec-driven SDD/TDD workflow with review discipline",
     "developerName": "Juan Trujillo",
-    "category": "Productivity"
+    "category": "Productivity",
+    "logo": "./assets/logo.svg",
+    "composerIcon": "./assets/logo.svg"
   }
 }
