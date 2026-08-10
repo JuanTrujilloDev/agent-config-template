@@ -47,7 +47,7 @@ Inside Claude Code:
 
 Full guide (including updating): [`docs/install/claude.md`](docs/install/claude.md).
 
-> **Using Codex / OpenCode / Gemini / Cursor too?** Run the bundled **`port-config`** skill: it looks up the target host's *current* config format online and generates the equivalent rules + skills from this config — instead of this repo shipping packagings that rot.
+> **Using Codex too?** This repo is also a Codex plugin marketplace: `codex plugin marketplace add JuanTrujilloDev/agent-config-template`, then `codex plugin add agent-config-template@juantrujillodev` — see [`docs/install/codex.md`](docs/install/codex.md). For OpenCode / Gemini / Cursor, run the bundled **`port-config`** skill: it looks up the target host's *current* config format online and generates the equivalent rules + skills from this config — instead of shipping packagings that rot.
 
 ### Run a feature, spec-first
 
