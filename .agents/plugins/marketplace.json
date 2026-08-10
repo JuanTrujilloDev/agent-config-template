@@ -1,0 +1,19 @@
+{
+  "name": "juantrujillodev",
+  "interface": {
+    "displayName": "Juan Trujillo \u2014 agent configs"
+  },
+  "plugins": [
+    {
+      "name": "agent-config-template",
+      "source": {
+        "source": "local",
+        "path": "./codex"
+      },
+      "policy": {
+        "installation": "AVAILABLE"
+      },
+      "category": "Productivity"
+    }
+  ]
+}

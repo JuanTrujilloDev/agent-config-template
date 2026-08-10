@@ -1,0 +1,26 @@
+{
+  "name": "agent-config-template",
+  "version": "0.7.0",
+  "description": "Spec-driven config for any stack: SDD/TDD workflow (spec, feature, fix, verify, audit, commit, pr, design), operating principles incl. the leverage ladder, graph-first code-query, style guides. Ported from the Claude Code plugin; roles are played in sequence (no subagents).",
+  "skills": "./skills/",
+  "author": {
+    "name": "Juan Trujillo",
+    "url": "https://juantrujillo.dev"
+  },
+  "homepage": "https://github.com/JuanTrujilloDev/agent-config-template",
+  "repository": "https://github.com/JuanTrujilloDev/agent-config-template",
+  "license": "MIT",
+  "keywords": [
+    "workflow",
+    "sdd",
+    "tdd",
+    "code-review",
+    "principles"
+  ],
+  "interface": {
+    "displayName": "Agent Config Template",
+    "shortDescription": "Spec-driven SDD/TDD workflow with review discipline",
+    "developerName": "Juan Trujillo",
+    "category": "Productivity"
+  }
+}
