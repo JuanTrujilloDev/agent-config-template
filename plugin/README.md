@@ -13,6 +13,12 @@ Inside Claude Code:
 
 That's it. You now have agents, slash commands, skills, and hooks available everywhere.
 
+Then, optionally, install the companion tools (one confirmation, skips what's already there):
+
+```
+/agent-config-template:setup-companions
+```
+
 ## Two ways to use it
 
 ### 1. Just the plugin (generic defaults)
@@ -20,8 +26,8 @@ That's it. You now have agents, slash commands, skills, and hooks available ever
 After install you immediately get:
 
 - **11 agents** (`/agents` to list): `orchestrator`, `pmo`, `judge`, `security-reviewer`, `ui-designer`, plus a dev library Claude picks from per project type — `backend-dev` (web/API), `frontend-dev` (web UI), `mobile-dev`, `game-dev`, `desktop-dev`, `core-dev` (library/CLI/data). Each with an embedded "Gotchas" section.
-- **9 slash commands** namespaced under `/agent-config-template:*` — `spec`, `feature`, `fix`, `verify`, `audit`, `commit`, `pr`, `design`, **`setup-template`**.
-- **5 skills**: `principles`, `sdd-workflow`, `backend-style`, `frontend-style`, `port-config` (generate this config for another agent host from its current docs).
+- **10 slash commands** namespaced under `/agent-config-template:*` — `spec`, `feature`, `fix`, `verify`, `audit`, `commit`, `pr`, `design`, **`setup-template`**, **`setup-companions`** (install graphify + ponytail, with a confirmation gate).
+- **6 skills**: `principles` (incl. the leverage ladder — reuse > stdlib > native > installed deps > new code), `sdd-workflow`, `code-query` (graph-first codebase querying — uses a knowledge graph like [graphify](https://github.com/Graphify-Labs/graphify) when available, deterministic repo map otherwise), `backend-style`, `frontend-style`, `port-config` (generate this config for another agent host from its current docs).
 - **3 hooks**: branch discipline (hard block on protected branches), agent guidance (advisory — guides, doesn't block), targeted auto-format on Edit/Write.
 
 The hooks read environment variables with sensible defaults. Override per-project via `.envrc` (direnv) or your shell rc:
@@ -31,6 +37,13 @@ export CLAUDE_CONFIG_SRC_DIR=apps                       # default: src
 export CLAUDE_CONFIG_FRONTEND_DIR=apps/frontend         # default: (none)
 export CLAUDE_CONFIG_PROTECTED_BRANCHES="main,qa,prod"  # default: main,master
 ```
+
+### Companion tools (optional, auto-detected)
+
+Two external tools slot straight into the workflow when installed — nothing here depends on them. **`/agent-config-template:setup-companions` installs both** (with a confirmation gate; idempotent), or install by hand:
+
+- **[graphify](https://github.com/Graphify-Labs/graphify)** — codebase knowledge graph. Install with `uv tool install graphifyy && graphify install`. The `code-query` skill prefers the graph (`/graphify query|path|explain`) for structural questions during `/spec`, `/feature`, and `/fix`; without it, the skill falls back to a deterministic repo map.
+- **[ponytail](https://github.com/dietrichgebert/ponytail)** — runtime minimal-code enforcement (`/plugin marketplace add DietrichGebert/ponytail`, then `/plugin install ponytail@ponytail`). It enforces at generation time what this config's **leverage ladder** (`principles` skill) bakes into `/spec` Design notes and the `/verify` over-engineering check — the ladder keeps behavior consistent on hosts where ponytail isn't installed. To have ponytail's ruleset reach this plugin's dev subagents too, widen its matcher: `export PONYTAIL_SUBAGENT_MATCHER="dev|explore|general"`.
 
 ### 2. Plugin + `/setup-template` (fully calibrated)
 

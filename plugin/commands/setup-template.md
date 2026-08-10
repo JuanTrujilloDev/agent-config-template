@@ -89,6 +89,8 @@ After `/setup-template`, both layers are active:
 
 The project-root versions take precedence when names collide. This is intentional — the project versions have the calibrated test commands, branch prefixes, and toggles baked in.
 
+When the render succeeds, mention once (don't push): `/setup-companions` installs the optional companion tools — graphify (knowledge graph behind the `code-query` skill) and ponytail (runtime minimal-code enforcement) — if they aren't installed already.
+
 ## Pre-filled examples
 
 If the user wants to skip inference entirely and use a known-good preset, point them at `${CLAUDE_PLUGIN_ROOT}/examples/` (when present). Common stacks: `python-fastapi`, `python-django`, `node-express`, `node-nextjs`. They can copy one and run `setup.sh` directly without going through inference.

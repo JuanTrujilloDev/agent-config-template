@@ -14,8 +14,8 @@ Inside Claude Code:
 ## What you get
 
 - **Agents:** `orchestrator` (runs the SDD flow, never edits code), `pmo` (spec + Given/When/Then contract + mini-features), a per-stack dev library (`backend-dev`/`frontend-dev` for web, `mobile-dev`, `game-dev`, `desktop-dev`, `core-dev`), `ui-designer`, `judge` (reviews code + tests; adversarial mode on large diffs), `security-reviewer` (OWASP audit), plus `mutation-tester` when enabled.
-- **Commands:** `/spec`, `/feature`, `/fix`, `/verify`, `/audit`, `/commit`, `/pr`, `/design`, `/setup-template`.
-- **Skills:** `principles`, `sdd-workflow`, `backend-style`, `frontend-style`, `port-config` (generate this config for another agent host).
+- **Commands:** `/spec`, `/feature`, `/fix`, `/verify`, `/audit`, `/commit`, `/pr`, `/design`, `/setup-template`, `/setup-companions` (optional: installs graphify + ponytail, gated on your confirmation).
+- **Skills:** `principles` (incl. the leverage ladder), `sdd-workflow`, `code-query` (graph-first codebase querying), `backend-style`, `frontend-style`, `port-config` (generate this config for another agent host).
 - **Hooks:** protected-branch hard block, advisory agent guidance, targeted format-on-write.
 
 The hooks read env vars with sensible defaults — override per project:
