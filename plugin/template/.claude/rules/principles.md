@@ -113,6 +113,28 @@ Leave the codebase no worse than you found it — within the surgical-changes ru
   commented-out code (delete it — git remembers), no decorative banners.
   Docstrings for the public surface; one-liners elsewhere when needed.
 
+## Autonomy Mode
+
+A **personal** preference, read at session time from the gitignored
+`.claude/answers.local.env` (`autonomy_mode=gated|autonomous`). Absent file or
+key = `gated`. It is never rendered into committed files.
+
+- **gated** (default) — stop for user review before each micro-commit: present
+  the diff, wait for the user, then commit.
+- **autonomous** — proceed through the flow (implement → review → micro-commit)
+  without pausing at the commit step.
+- **Session keyword overrides** — "just go" switches this session to
+  autonomous; "gate me" or "stop before commit" switches it to gated. These are
+  session-scoped overrides of the stored mode: apply them immediately and
+  **never write them to any file**.
+- **Action-level confirms ALWAYS apply regardless of mode**: push, merge,
+  publish, and destructive operations require explicit user confirmation even
+  in autonomous mode.
+- **Hosts without hooks** (anywhere `coding-reminder.sh` doesn't run): at task
+  start, read `.claude/answers.local.env` if present and print the one-line
+  mode banner — `mode: gated — say 'just go' for autonomous` or
+  `mode: autonomous — say 'gate me' to switch`.
+
 ## Commits
 
 Ship small, traceable commits.

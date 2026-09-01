@@ -26,7 +26,7 @@ Then, optionally, install the companion tools (one confirmation, skips what's al
 After install you immediately get:
 
 - **11 agents** (`/agents` to list): `orchestrator`, `pmo`, `judge`, `security-reviewer`, `ui-designer`, plus a dev library Claude picks from per project type — `backend-dev` (web/API), `frontend-dev` (web UI), `mobile-dev`, `game-dev`, `desktop-dev`, `core-dev` (library/CLI/data). Each with an embedded "Gotchas" section.
-- **10 slash commands** namespaced under `/agent-config-template:*` — `spec`, `feature`, `fix`, `verify`, `audit`, `commit`, `pr`, `design`, **`setup-template`**, **`setup-companions`** (install graphify + ponytail, with a confirmation gate).
+- **11 slash commands** namespaced under `/agent-config-template:*` — `spec`, `feature`, `fix`, `integrate`, `verify`, `audit`, `commit`, `pr`, `design`, **`setup-template`**, **`setup-companions`** (install graphify + ponytail, with a confirmation gate).
 - **6 skills**: `principles` (incl. the leverage ladder — reuse > stdlib > native > installed deps > new code), `sdd-workflow`, `code-query` (graph-first codebase querying — uses a knowledge graph like [graphify](https://github.com/Graphify-Labs/graphify) when available, deterministic repo map otherwise), `backend-style`, `frontend-style`, `port-config` (generate this config for another agent host from its current docs).
 - **3 hooks**: branch discipline (hard block on protected branches), agent guidance (advisory — guides, doesn't block), targeted auto-format on Edit/Write.
 
@@ -55,12 +55,12 @@ When you want a specific project to have a `.claude/` tree calibrated to its exa
 
 Claude will:
 
-1. Read `package.json` / `pyproject.toml` / `Cargo.toml` / `go.mod` / `manage.py` / etc.
-2. Draft an `answers.env` with confidence labels (HIGH / LOW / UNKNOWN).
-3. Show it to you and **wait for approval or edits.**
-4. Run the bundled `setup.sh` to render a full `.claude/` tree + `CLAUDE.md`. It's **non-destructive** — against an existing config it shows a per-file change plan and won't write without your `--merge` / `--overwrite` choice.
-5. Add `.claude/settings.local.json`, `.claude/mcp.json`, and `answers.env` to `.gitignore`.
-6. Remind you to restart Claude Code.
+1. Infer the full project profile and cite each source with HIGH / LOW / UNKNOWN confidence.
+2. Ask only decisions in one numbered frontier round; a second appears only if an answer unlocks gated choices.
+3. Store project policy in committed `answers.env` and personal preferences in gitignored `.claude/answers.local.env`.
+4. Wait for approval, then run bundled `setup.sh` to render `.claude/` + `CLAUDE.md`. Existing configs first get a non-destructive plan and require `--merge` or `--overwrite`.
+5. Keep `.claude/settings.local.json`, `.claude/mcp.json`, and `.claude/answers.local.env` gitignored; never gitignore `answers.env`.
+6. Route an accepted companion recommendation through the separately confirmed `/setup-companions` flow, then remind you to restart Claude Code.
 
 After this, both layers are active in that project — the plugin commands stay namespaced (`/agent-config-template:feature`), and the project-root commands are unnamespaced (`/feature`). The project-root versions take precedence when names collide because they have your specifics baked in.
 

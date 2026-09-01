@@ -25,7 +25,8 @@ use `/feature`.
 2. **Check out a typed branch** — `fix/<slug>` (or `hotfix/<slug>` for urgent prod). Never edit on a protected branch.
 3. **Implement** the scoped change, surgically — the diff traces 1:1 to the success criteria.
 4. **Run the full Definition of Done:** your project's format → lint → test commands, then spawn `judge` (and `security-reviewer` if the fix touches auth/permissions/data).
-5. **Commit / open the PR** on the typed branch.
+5. **Offer one optional manual check** matched to the project type: web app → browser walk; library/CLI or desktop → run the CLI/app; mobile → simulator; anything else → artifact/screenshot review. Never make it a gate. When this fix has a `features.json` entry, record `verified_by_human`: `yes` when verified, `no` when explicitly declined, `skipped` when the user says skip or does not answer; freeform fixes only make the offer.
+6. **Commit / open the PR** on the typed branch.
 
 ## Guardrails
 

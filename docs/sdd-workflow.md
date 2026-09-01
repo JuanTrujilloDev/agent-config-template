@@ -39,6 +39,7 @@ in_progress  (per mini-feature, one at a time)
   ├─ [judge]              review code AND tests against the contract
   ├─ [security-reviewer]  when auth / permissions / data are touched
   ├─ [mutation-tester]    only if `enforce_mutation_testing` is on
+  ├─ [human]              one optional project-matched verification offer
   │
   ▼  micro-commit on the typed branch; mark the mini-feature `done`
 done  (when every mini-feature is done)
@@ -67,6 +68,12 @@ under TDD). State lives on disk, not in chat.**
   mini-feature, the implementer writes the failing tests first and stops for
   approval. Production code starts only after the tests are signed off.
 
+Whether TDD is the default comes from `workflow_mode` in the committed
+`answers.env`: `SDD+TDD` makes test-first + Gate 2 the default for every
+mini-feature (still skippable per feature); `SDD` — or the key absent, the
+back-compat default — leaves TDD opt-in per mini-feature ("with TDD"). The
+flow itself is identical either way; only the default flips.
+
 ## The anti-telephone rule
 
 When the orchestrator launches a subagent, it instructs that subagent to **write
@@ -83,6 +90,9 @@ it does not get paraphrased through chat.
   The implementer treats the named pattern as part of the contract.
 - **Definition of Done** still applies to every mini-feature (format → lint →
   tests → `judge` → `security-reviewer` when relevant).
+- **Manual verification is an offer, not a gate.** After the Definition of Done,
+  offer one project-matched check and record `verified_by_human` as
+  `yes|no|skipped` when a `features.json` entry exists.
 - **Mutation testing** (`enforce_mutation_testing`, off by default) adds a final
   gate per mini-feature: defects are injected and a test must fail, proving the
   tests bite.

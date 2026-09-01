@@ -13,6 +13,16 @@
 # Conditional sections inside template files use:
 #   {{#var_name}}...{{/var_name}}        (kept when var_name is truthy)
 #   {{^var_name}}...{{/var_name}}        (kept when var_name is falsy/empty)
+#
+# Config scopes — every config value lives in exactly one of three places:
+#   1. Project policy — `answers.env`, COMMITTED to git. Team-shared decisions
+#      that must reproduce the same render for everyone: workflow_mode,
+#      TARGET_HOSTS, micro-PR limits, and every placeholder in this file.
+#   2. Local prefs — `.claude/answers.local.env`, GITIGNORED. Personal
+#      settings read at session/task time, never rendered into files:
+#      autonomy_mode, verbosity, companions.
+#   3. Session keywords — "just go", "gate me", "stop before commit".
+#      One-session overrides; never persisted to any file.
 
 variables:
 
@@ -29,6 +39,27 @@ variables:
   - name: project_description
     prompt: "One-line project description"
     default: ""
+
+  # --- Target hosts ---
+  - name: target_hosts
+    prompt: "Which agent host(s) should the config render for? (multi-value, comma-separated)"
+    choices: [claude, cursor, codex, grok]
+    default: claude
+    # Multi-value: a comma-separated subset of the choices (e.g. "claude,cursor").
+    # Recorded in answers.env as TARGET_HOSTS so re-renders stay consistent;
+    # an explicit `setup.sh --host <list>` overrides the recorded value.
+    # `grok` is an alias for the claude tree + AGENTS.md. Unsupported hosts
+    # (opencode, gemini, windsurf, ...) are rejected — use the port-config skill.
+
+  # --- Workflow ---
+  - name: workflow_mode
+    prompt: "Workflow mode — SDD (spec-driven; TDD opt-in per mini-feature) or SDD+TDD (TDD + Gate 2 on by default per mini-feature, skippable per feature)"
+    choices: [SDD, SDD+TDD]
+    default: SDD
+    # Project policy — recorded in the committed answers.env. Absent key = SDD
+    # (back-compat: every existing answers.env keeps today's behavior).
+    # setup.sh synthesizes workflow_tdd=yes when the value is SDD+TDD, which
+    # drives the {{#workflow_tdd}} sections in feature.md / orchestrator.md.
 
   # --- Tech stack ---
   - name: project_type

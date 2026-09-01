@@ -54,6 +54,48 @@ diff -r .claude "$TMP/.claude"
 
 ---
 
+## Upgrading to v0.8.x (setup evolution)
+
+v0.8.1 separates shared project policy from personal agent preferences, batches
+setup decisions, and adds safe task-time MCP integration.
+
+1. **Commit `answers.env`.** Run `git check-ignore -v answers.env`, remove the
+   matching ignore rule from the file it reports, then add `answers.env`. Keep
+   `.claude/answers.local.env` gitignored.
+2. Add the workflow policy to `answers.env`:
+
+   ```dotenv
+   workflow_mode=SDD
+   ```
+
+   `SDD` is the backward-compatible default when absent. Use `SDD+TDD` to make
+   test-first + Gate 2 the per-mini-feature default.
+3. Create `.claude/answers.local.env` for personal preferences (do not commit it):
+
+   ```dotenv
+   autonomy_mode=gated
+   companions=not_now
+   ```
+
+   `autonomy_mode` accepts `gated` or `autonomous`; session phrases such as
+   “just go” and “gate me” override it without changing the file.
+4. Preview, then merge the new files:
+
+   ```bash
+   ./setup.sh --target . --answers ./answers.env
+   ./setup.sh --target . --answers ./answers.env --merge
+   ```
+
+   Merge preserves existing customized files. Render to a temp directory and
+   copy individual upstream updates, or use `--overwrite` only after reviewing
+   the plan, when you also want changed existing commands.
+
+Use `/integrate <tool>` (for example `/integrate linear`) to research the
+official MCP server, review the exact install/write plan, and approve it before
+anything changes.
+
+---
+
 ## Upgrading to v0.6.0 (Claude-focused + any-stack)
 
 v0.6.0 refocuses the repo on Claude Code and makes the template stack-agnostic.

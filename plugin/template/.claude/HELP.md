@@ -1,6 +1,6 @@
 # {{project_name}} — Claude Code Usage Guide
 
-Practical guide to working with Claude in this project. **Read [Core Operating Principles](rules/principles.md) first** — they're the foundation of everything below.
+Practical guide to working with the agent in this project. **Read [Core Operating Principles](rules/principles.md) first** — they're the foundation of everything below.
 
 ---
 
@@ -9,13 +9,13 @@ Practical guide to working with Claude in this project. **Read [Core Operating P
 | Situation | What to do |
 |---|---|
 {{#ticket_tracker_plane}}
-| **Plane task assigned** | `/feature {{branch_prefix}}-<#>` → Claude pulls ticket, runs full flow |
+| **Plane task assigned** | `/feature {{branch_prefix}}-<#>` → the agent pulls the ticket, runs full flow |
 {{/ticket_tracker_plane}}
 {{#ticket_tracker_jira}}
-| **Jira task assigned** | `/feature {{branch_prefix}}-<#>` → Claude pulls ticket, runs full flow |
+| **Jira task assigned** | `/feature {{branch_prefix}}-<#>` → the agent pulls the ticket, runs full flow |
 {{/ticket_tracker_jira}}
 {{#ticket_tracker_linear}}
-| **Linear task assigned** | `/feature <ticket-id>` → Claude pulls ticket, runs full flow |
+| **Linear task assigned** | `/feature <ticket-id>` → the agent pulls the ticket, runs full flow |
 {{/ticket_tracker_linear}}
 | **Spec a feature first** | `/spec <description>` → `pmo` writes spec + Given/When/Then contract + mini-features; you approve |
 | **New feature, no ticket** | `/feature <description>` → full spec-driven flow, orchestrated and gated |
@@ -28,7 +28,7 @@ Practical guide to working with Claude in this project. **Read [Core Operating P
 | **Question / investigation** | Use `Explore` agent — no code changes, no branch needed |
 | **Pre-merge check** | `/audit` or invoke `judge` + `security-reviewer` manually |
 | **Touching auth, permissions, data exposure** | `security-reviewer` is **mandatory** before merge |
-| **Reviewing teammate's PR** | *"Review PR #\<n\>"* → Claude fetches via `gh`, runs `judge` (+ `security-reviewer` if relevant) |
+| **Reviewing teammate's PR** | *"Review PR #\<n\>"* → the agent fetches via `gh`, runs `judge` (+ `security-reviewer` if relevant) |
 
 ---
 
@@ -96,7 +96,7 @@ The agent that did the work runs the checklist and reports results before declar
 ```
 You:    /feature {{#branch_prefix}}{{branch_prefix}}-87{{/branch_prefix}}{{^branch_prefix}}add CSV export to holdings list{{/branch_prefix}}
 
-Claude: [pulls ticket / converses the spec]
+Agent:  [pulls ticket / converses the spec]
         Spawning pmo...
 [spec + contract produced]
         Contract ready in docs/specs/<slug>/contract.md. Goal: <one sentence>.
@@ -105,14 +105,14 @@ Claude: [pulls ticket / converses the spec]
 
 You:    yes
 
-Claude: Contract approved. Spawning orchestrator...
+Agent:  Contract approved. Spawning orchestrator...
 [plan produced]
         Plan: BE-1 (... files, ... LOC), FE-1 (... files, ... LOC).
         {{#enforce_layer_split}}BE ships first.{{/enforce_layer_split}} Approve? (yes/edit)
 
 You:    yes
 
-Claude: Checking out branch... Spawning {{#enforce_layer_split}}backend-dev{{/enforce_layer_split}}{{^enforce_layer_split}}{{primary_dev_agent}}{{/enforce_layer_split}}.
+Agent:  Checking out branch... Spawning {{#enforce_layer_split}}backend-dev{{/enforce_layer_split}}{{^enforce_layer_split}}{{primary_dev_agent}}{{/enforce_layer_split}}.
         Design First: <design artifact>. Approve? (yes/edit)
 
 You:    yes
@@ -156,10 +156,10 @@ Only the protected-branch check hard-blocks — check out a typed branch and ret
 The size advisory (>50 lines or a new def/class) never blocks; it's a reminder to
 prefer the right agent. Trivial edits pass silently.
 
-**"Claude didn't spawn an agent."**
+**"No agent was spawned."**
 Reference `CLAUDE.md` Agent Usage Rules. If it happens repeatedly, the `coding-reminder.sh` hook may not be firing — check `.claude/settings.json`.
 
 {{#has_e2e}}
 **"`mcp__playwright__*` tools aren't available."**
-Restart Claude Code after editing config. Verify `.claude/mcp.json` has the `playwright` server entry.
+Restart the host app after editing config. Verify `.claude/mcp.json` has the `playwright` server entry.
 {{/has_e2e}}

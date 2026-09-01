@@ -1,7 +1,7 @@
 {
   "name": "agent-config-template",
-  "version": "0.7.1",
-  "description": "Spec-driven config for any stack: SDD/TDD workflow (spec, feature, fix, verify, audit, commit, pr, design), operating principles incl. the leverage ladder, graph-first code-query, style guides. Ported from the Claude Code plugin; roles are played in sequence (no subagents).",
+  "version": "0.8.1",
+  "description": "Spec-driven config for any stack: SDD/TDD workflow (spec, feature, fix, integrate, verify, audit, commit, pr, design), operating principles incl. the leverage ladder, graph-first code-query, style guides. Ported from the Claude Code plugin; roles are played in sequence (no subagents).",
   "skills": "./skills/",
   "author": {
     "name": "Juan Trujillo",
@@ -20,8 +20,15 @@
   "interface": {
     "displayName": "Agent Config Template",
     "shortDescription": "Spec-driven SDD/TDD workflow with review discipline",
+    "longDescription": "Concise, spec-driven project setup and delivery workflows for Claude Code, Cursor, Codex, and Grok-compatible projects.",
     "developerName": "Juan Trujillo",
     "category": "Productivity",
+    "capabilities": ["Interactive", "Write"],
+    "defaultPrompt": [
+      "Set up this project with concise output.",
+      "Plan and implement this feature with SDD.",
+      "Integrate an MCP tool safely."
+    ],
     "logo": "./assets/logo.svg",
     "composerIcon": "./assets/logo.svg"
   }

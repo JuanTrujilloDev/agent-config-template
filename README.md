@@ -47,7 +47,7 @@ Inside Claude Code:
 
 Full guide (including updating): [`docs/install/claude.md`](docs/install/claude.md).
 
-> **Using Codex too?** This repo is also a Codex plugin marketplace: `codex plugin marketplace add JuanTrujilloDev/agent-config-template`, then `codex plugin add agent-config-template@juantrujillodev` — see [`docs/install/codex.md`](docs/install/codex.md). For OpenCode / Gemini / Cursor, run the bundled **`port-config`** skill: it looks up the target host's *current* config format online and generates the equivalent rules + skills from this config — instead of shipping packagings that rot.
+> **Using Codex too?** This repo is also a Codex plugin marketplace: `codex plugin marketplace add JuanTrujilloDev/agent-config-template`, then `codex plugin add agent-config-template@juantrujillodev` — see [`docs/install/codex.md`](docs/install/codex.md). Cursor and Grok Build are static targets too: `setup.sh --host cursor|grok` — see [`docs/install/cursor.md`](docs/install/cursor.md), [`docs/install/grok.md`](docs/install/grok.md), and the [host capability matrix](docs/install/host-capability-matrix.md). For OpenCode / Gemini / Windsurf, run the bundled **`port-config`** skill: it looks up the target host's *current* config format online and generates the equivalent rules + skills from this config — instead of shipping packagings that rot.
 
 ### Run a feature, spec-first
 
@@ -64,7 +64,9 @@ Full guide (including updating): [`docs/install/claude.md`](docs/install/claude.
 /agent-config-template:setup-template
 ```
 
-Reads your `package.json` / `pyproject.toml` / `go.mod` / `manage.py` / etc., drafts an `answers.env`, waits for approval, then renders a calibrated `.claude/` tree + `CLAUDE.md`. **Non-destructive**: against an existing config it shows a per-file plan and won't write without your `--merge` / `--overwrite` choice, and `.claude/settings.local.json` is never touched. Old-school clone path: `setup.sh --target . --answers ./answers.env [--merge]`.
+Reads your project, shows an inferred profile with sources, and asks only decisions in one numbered frontier round (a second only when an answer unlocks gated choices), then waits for approval and renders a calibrated `.claude/` tree + `CLAUDE.md`. Shared policy goes in committed `answers.env`; personal preferences go in gitignored `.claude/answers.local.env`. **Non-destructive**: existing configs get a per-file plan and require `--merge` or `--overwrite`. Old-school clone path: `setup.sh --target . --answers ./answers.env [--merge]`.
+
+Need a tracker or another MCP tool later? Run `/integrate <tool>`; it researches the official server and stops for confirmation before installing or writing anything.
 
 ---
 
@@ -79,6 +81,7 @@ task in  →  [pmo] spec + Given/When/Then contract + mini-features
               →  [judge] review code AND tests vs the contract
               →  [security-reviewer] if auth/permissions/data
               →  [mutation-tester] if mutation testing is enabled
+              →  offer one optional project-matched human check
               →  micro-commit on a typed branch
          →  done
 ```
@@ -109,7 +112,7 @@ One mini-feature at a time. One mandatory gate (the contract), one optional gate
 │   ├── judge.md              # Reviews code + tests vs the contract (read-only)
 │   ├── security-reviewer.md  # Auth/permissions/data audit (read-only)
 │   └── mutation-tester.md    # Validates the tests bite (opt-in)
-├── commands/                 # /spec, /feature, /fix, /commit, /pr, /audit, /design
+├── commands/                 # /spec, /feature, /fix, /integrate, /verify, /commit, /pr, /audit, /design
 └── hooks/
     ├── agent-enforcement.sh  # Hard-blocks protected branches; advises (no block) on large non-agent edits
     ├── auto-format.sh        # Targeted lint autofix on write; full format runs in the Definition of Done
@@ -140,10 +143,13 @@ Every agent ships with a **Gotchas** section listing its role-specific failure m
 | `/spec` | Idea/SOW → conversed spec + Given/When/Then contract + mini-features (`pmo`) |
 | `/feature` | Full spec-driven flow (`orchestrator`): approve contract → optional TDD → implement → `judge` → micro-commit |
 | `/fix` | Small, scoped change: skips the spec + Design First, keeps the full Definition of Done |
+| `/verify` | Skeptical self-review of the current diff before `judge` and commit |
+| `/integrate <tool>` | Research and wire an official MCP server after an explicit confirmation |
 | `/audit` | Code + security review (`judge` + `security-reviewer`) |
 | `/commit`, `/pr` | Conventional commit / open PR, with confirmation gates |
 | `/design` | Wireframe + spec via `ui-designer` (folds into `/feature` for UI work) |
 | `/setup-template` | Render a calibrated `.claude/` tree into the current project (non-destructive) |
+| `/setup-companions` | Optionally install graphify + ponytail with a confirmation gate |
 
 
 ---
@@ -160,6 +166,7 @@ Every agent ships with a **Gotchas** section listing its role-specific failure m
 | `format_cmd`, `lint_cmd`, `test_cmd`, `build_cmd` | `ruff format .`, `ruff check .`, `pytest`, `npm run dev` |
 | `branch_prefix`, `default_branch` | `ACME`, `main` |
 | `max_files_per_pr`, `max_loc_per_pr` | `12`, `3000` |
+| `workflow_mode` | `SDD` (TDD opt-in) or `SDD+TDD` (TDD default per mini-feature) |
 | `has_frontend`, `has_background_jobs`, `has_e2e`, `enforce_layer_split` *(toggles)* | `yes` / `no` |
 | `use_gherkin` *(toggle)* | write contracts as real `.feature` files (needs a runner) |
 | `enforce_mutation_testing` *(toggle)* | add a mutation-testing close gate (ships `tools/mutate.py`) |
@@ -200,7 +207,7 @@ Keep your `answers.env` checked in. After pulling template updates, re-render wi
 ## 🚫 Out of scope
 
 - **Not a generic project scaffolder.** [cookiecutter](https://github.com/cookiecutter/cookiecutter) exists.
-- **Not a Claude Code plugin marketplace.** See [Claude Code plugins docs](https://docs.claude.com/en/docs/claude-code/plugins).
+- **Not a general plugin or MCP registry.** `/integrate` looks up the named tool at task time so bundled entries do not rot.
 - **Doesn't replace `/init`.** It complements it: run `/init` after rendering to add codebase-specific notes to `CLAUDE.md`.
 
 ---

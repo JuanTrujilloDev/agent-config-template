@@ -1,0 +1,25 @@
+---
+description: "Core operating principles for {{project_name}} — always loaded; full text in .claude/rules/principles.md"
+alwaysApply: true
+---
+Read and follow @.claude/rules/principles.md — the full, canonical operating
+principles for {{project_name}}. They are non-negotiable; this rule is a
+pointer, not a substitute.
+
+What it covers:
+
+1. **Think Before Coding** — state assumptions; ask when ambiguous.
+2. **Simplicity First (YAGNI)** — minimum code; walk the leverage ladder
+   (reuse > stdlib > native platform > installed deps > new code).
+3. **Surgical Changes** — touch only what the task requires.
+4. **Goal-Driven Execution** — write 2–4 verifiable success criteria first;
+   loop until they pass.
+- **Read Before You Write** — never edit code you haven't read; check callers first.
+- **Code Health** — DRY by the rule of three; small functions/files; comments explain *why*.
+- **Micro-PR Discipline** — ≤{{max_files_per_pr}} files, <{{max_loc_per_pr}} lines per PR.
+- **Definition of Done** — format → lint → unit tests → review, in order, before declaring done.
+- **Conciseness** — no filler, no recaps of visible output.
+- **Branch Discipline** — never code on `{{default_branch}}`; check out a typed branch first.
+
+When a request conflicts with a principle, surface the conflict and ask — do
+not silently override.

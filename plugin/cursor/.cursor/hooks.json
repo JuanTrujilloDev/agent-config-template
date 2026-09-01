@@ -1,0 +1,7 @@
+{
+  "version": 1,
+  "hooks": {
+    "beforeShellExecution": [{ "command": "./.cursor/hooks/branch-guard.sh" }],
+    "afterFileEdit": [{ "command": "./.cursor/hooks/format-on-edit.sh" }]
+  }
+}

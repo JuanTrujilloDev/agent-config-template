@@ -21,6 +21,7 @@ Read `.claude/rules/principles.md`. The principles are **non-negotiable**:
 - **Definition of Done** — Format → Lint → Unit tests → `judge` → `security-reviewer` (when relevant){{#has_e2e}} → live browser verification (auto for FE / big changes){{/has_e2e}}.
 - **Conciseness** — Be brief. No filler, no recaps of visible output, no preambles.
 - **Branch Discipline** — Never code on `{{default_branch}}`. Always check out a typed branch first.
+- **Autonomy Mode** — read `.claude/answers.local.env` if present (gitignored; absent = `gated`) and print the one-line mode banner at task start on hosts without hooks. `gated` = pause for review before each micro-commit; `autonomous` = proceed through the flow. Session keywords "just go" / "gate me" override for this session only — never persist them. Push, merge, publish, and destructive ops ALWAYS require confirmation regardless of mode. Full text: `.claude/rules/principles.md`.
 
 Before any coding task: restate the goal in one sentence + list 2–4 verifiable success criteria.
 
@@ -168,7 +169,7 @@ Never code on `{{default_branch}}`. Always check out a typed branch first.
 
 ## Dynamic Context (optional)
 
-Claude Code expands `` !`shell command` `` in this file at session start, injecting the live output into context. Useful for keeping the model oriented to the current state of the repo without you having to mention it.
+Claude Code only: the Claude Code host expands `` !`shell command` `` in this file at session start, injecting the live output into context (other hosts treat these lines as plain text). Useful for keeping the model oriented to the current state of the repo without you having to mention it.
 
 Pick the lines that are useful for your team and uncomment them. Skip everything that's noise.
 
