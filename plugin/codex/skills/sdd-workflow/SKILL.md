@@ -44,6 +44,7 @@ in_progress  (per mini-feature, one at a time)
   ├─ [judge]              review code AND tests against the contract
   ├─ [security-reviewer]  when auth / permissions / data are touched
   ├─ [mutation-tester]    only if `enforce_mutation_testing` is on
+  ├─ [human]              one optional project-matched verification offer
   │
   ▼  micro-commit on the typed branch; mark the mini-feature `done`
 done  (when every mini-feature is done)
@@ -96,6 +97,9 @@ it does not get paraphrased through chat.
   Read Before You Write still applies to everything you edit.
 - **Definition of Done** still applies to every mini-feature (format → lint →
   tests → `judge` → `security-reviewer` when relevant).
+- **Manual verification is an offer, not a gate.** After the Definition of Done,
+  offer one project-matched check and record `verified_by_human` as
+  `yes|no|skipped` when a `features.json` entry exists.
 - **Mutation testing** (`enforce_mutation_testing`, off by default) adds a final
   gate per mini-feature: defects are injected and a test must fail, proving the
   tests bite.

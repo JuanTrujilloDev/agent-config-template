@@ -41,6 +41,7 @@ If there's no approved contract for this work, spawn `pmo`
 - Spawn the dev specialist that matches the project type (`backend-dev` web/API · `frontend-dev` web UI · `mobile-dev` · `game-dev` · `desktop-dev` · `core-dev` library/CLI/data), with `ui-designer` first for new UI; implement to green, honoring the Design-notes pattern and its **Leverage** subsection (reuse before writing — leverage ladder in the `principles` skill). For impact analysis before an edit, the `code-query` skill finds dependents cheaply.
 - Spawn `judge` — reviews code **and** tests against the contract scenarios.
 - Spawn `security-reviewer` if the mini-feature touches auth, permissions, or data.
+- After the Definition of Done passes, offer exactly one optional manual check matched to the project type: web app → browser walk; library/CLI or desktop → run the CLI/app; mobile → simulator; anything else → artifact/screenshot review. This is never a gate and never delays the commit. Record `verified_by_human` in this mini-feature's `features.json` entry: `yes` when verified, `no` when explicitly declined, `skipped` when the user says skip or does not answer.
 - Micro-commit on the typed branch; mark `done`.
 
 ## Approval gates (never skipped)

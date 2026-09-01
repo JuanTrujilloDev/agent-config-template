@@ -33,7 +33,8 @@ For a tracked fix, reference the ticket: `/fix {{branch_prefix}}-<#>` — e.g. `
    - `{{format_cmd}}` → `{{lint_cmd}}` → `{{test_cmd}}`
    - Spawn `judge` — address all blockers
    - Spawn `security-reviewer` if the fix touches auth/permissions/data
-5. **Commit / open the PR** on the typed branch.
+5. **Offer one optional manual check** matched to `{{project_type}}`: `web-app` → browser walk; `library-cli` or `desktop-app` → run the CLI/app; `mobile-app` → simulator; anything else → artifact/screenshot review. Never make it a gate. When this fix has a `features.json` entry, record `verified_by_human`: `yes` when verified, `no` when explicitly declined, `skipped` when the user says skip or does not answer; freeform fixes only make the offer.
+6. **Commit / open the PR** on the typed branch.
 
 ## Guardrails
 

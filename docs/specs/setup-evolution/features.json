@@ -103,9 +103,10 @@
         "core/.claude/commands/fix.md",
         "docs/sdd-workflow.md"
       ],
-      "max_files": 5,
+      "max_files": 7,
       "max_loc": 200,
-      "status": "pending"
+      "status": "done",
+      "verified_by_human": "skipped"
     },
     {
       "id": 6,
