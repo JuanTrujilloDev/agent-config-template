@@ -13,7 +13,7 @@
       "scenarios": ["@s1", "@s2", "@s3", "@s4"],
       "max_files": 8,
       "max_loc": 600,
-      "status": "pending",
+      "status": "done",
       "notes": "build.sh codex generation + hosts/codex/ overrides + SYNC_NOTE rewrite; CI covered by existing plugin-mirror job"
     },
     {
