@@ -16,10 +16,10 @@ cp examples/<stack>/answers.env ./answers.env   # edit to your project
 ./setup.sh --host cursor --target /path/to/project --answers ./answers.env
 ```
 
-Or via the Claude Code plugin: `/setup-template`'s interview asks one
-multi-select host question — pick `cursor` (added by default when your project
-has a `.cursor/` directory). The choice is recorded as `TARGET_HOSTS` in
-`answers.env`, so re-renders stay consistent. `--host` on the CLI overrides it.
+Or via the Claude Code plugin: `/setup-template` batches target hosts with the
+other setup decisions — keep `cursor` selected (recommended when `.cursor/`
+exists). The choice is recorded as `TARGET_HOSTS` in committed `answers.env`,
+so re-renders stay consistent. `--host` on the CLI overrides it.
 
 ## What you get
 
@@ -28,7 +28,7 @@ has a `.cursor/` directory). The choice is recorded as `TARGET_HOSTS` in
 - **`.cursor/mcp.json`** — derived from the Claude MCP example config.
 - **`.cursor/hooks.json`** + two hook adapters (below).
 - **`.claude/agents/`** — the full agent library, read natively by Cursor.
-- **`.claude/skills/`** — every slash command (`spec`, `feature`, `fix`, `verify`, `audit`, `commit`, `pr`, `design`) as a skill with `disable-model-invocation: true`: invoke them by name, they never auto-trigger.
+- **`.claude/skills/`** — every slash command (`spec`, `feature`, `fix`, `integrate`, `verify`, `audit`, `commit`, `pr`, `design`) as a skill with `disable-model-invocation: true`: invoke them by name, they never auto-trigger.
 - **No Claude hooks surface.** The cursor render ships no `.claude/settings.json` hooks block, so a dual-host render (`--host claude,cursor`) never double-fires an event.
 
 ## Agents: `tools:` is ignored

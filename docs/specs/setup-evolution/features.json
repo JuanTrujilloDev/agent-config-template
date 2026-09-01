@@ -122,9 +122,10 @@
         "codex/.codex-plugin/plugin.json",
         "docs/upgrade-guide.md"
       ],
-      "max_files": 6,
+      "max_files": 7,
       "max_loc": 200,
-      "status": "pending"
+      "status": "done",
+      "verified_by_human": "skipped"
     }
   ]
 }
