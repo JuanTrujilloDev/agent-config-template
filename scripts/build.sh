@@ -81,6 +81,16 @@ build_codex_skills() {
 # - .cursor/mcp.json derived from core/.claude/mcp.json.example (comment reworded).
 # - .claude/agents/ and .claude/rules/ are byte copies from core/ so the
 #   rendered target is self-contained (Cursor reads them natively).
+# - .cursor/hooks.json + .cursor/hooks/ come from hosts/cursor/ — two
+#   hand-authored adapters (branch-guard on beforeShellExecution, format-on-edit
+#   on afterFileEdit) over the core hook logic. coding-reminder.sh is
+#   deliberately not ported (D9 — alwaysApply principles rule covers it).
+# - core/.claude/commands/<c>.md -> .claude/skills/<c>/SKILL.md, frontmatter
+#   reduced to name + quoted description + disable-model-invocation: true,
+#   body verbatim (D6 — Cursor has subagents, spawning language stays). A
+#   <!-- requires: --> directive stays on line 1 so setup.sh still drops the
+#   file when the var is falsy. No exclusions: setup-template lives only in
+#   plugin/commands/, not core/.
 # - No .claude/settings.json is emitted: a cursor render never contains a
 #   Claude hook registration (double-fire prevented structurally).
 
@@ -111,6 +121,23 @@ build_cursor_tree() {
     core/.claude/mcp.json.example > "$out/.cursor/mcp.json"
   cp -R core/.claude/agents "$out/.claude/agents"
   cp -R core/.claude/rules "$out/.claude/rules"
+  mkdir -p "$out/.cursor/hooks"
+  cp hosts/cursor/hooks.json "$out/.cursor/hooks.json"
+  cp hosts/cursor/hooks/branch-guard.sh hosts/cursor/hooks/format-on-edit.sh "$out/.cursor/hooks/"
+  chmod +x "$out/.cursor/hooks/branch-guard.sh" "$out/.cursor/hooks/format-on-edit.sh"
+  for c in core/.claude/commands/*.md; do
+    name="$(basename "$c" .md)"
+    desc="$(sed -n 's/^description: //p' "$c" | head -1)"
+    desc="${desc#\"}"; desc="${desc%\"}"
+    mkdir -p "$out/.claude/skills/$name"
+    {
+      if head -n 1 "$c" | grep -q '^<!-- requires:'; then
+        head -n 1 "$c"
+      fi
+      printf -- '---\nname: %s\ndescription: "%s"\ndisable-model-invocation: true\n---\n' "$name" "$desc"
+      awk '/^---$/{seen++; if(seen<=2) next} seen>=2{print}' "$c"
+    } > "$out/.claude/skills/$name/SKILL.md"
+  done
 }
 
 if [ "${1:-}" = "--check" ]; then

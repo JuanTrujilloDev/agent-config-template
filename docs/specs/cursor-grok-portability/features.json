@@ -40,7 +40,7 @@
       "scenarios": ["@s11", "@s12", "@s13", "@s14"],
       "max_files": 8,
       "max_loc": 800,
-      "status": "pending",
+      "status": "done",
       "notes": "hooks.json (native events only) + 2 adapter scripts + commands-to-skills transform. setup.sh flag moved to mini-feature 5 (Gate-1 amendment)"
     },
     {
