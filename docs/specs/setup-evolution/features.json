@@ -1,0 +1,55 @@
+{
+  "feature": "setup-evolution",
+  "rules": { "one_at_a_time": true, "require_approved_contract": true },
+  "notes": "max_files counts hand-authored files only; generated mirrors (plugin/template, cursor/, codex/) ride along per spec D10.",
+  "mini_features": [
+    {
+      "id": 1,
+      "name": "config-scopes-workflow-mode",
+      "scenarios": ["@s1", "@s2", "@s3", "@s4", "@s5", "@s6"],
+      "files_hint": ["template.config.yaml", "setup.sh", "core/.claude/commands/feature.md", "plugin/commands/setup-template.md", "docs/upgrade-guide.md", "docs/sdd-workflow.md"],
+      "max_files": 8, "max_loc": 400,
+      "status": "pending"
+    },
+    {
+      "id": 2,
+      "name": "autonomy-mode",
+      "scenarios": ["@s7", "@s8", "@s9", "@s10", "@s11", "@s12"],
+      "files_hint": ["core/.claude/hooks/coding-reminder.sh", "core/.claude/rules/principles.md", "core/CLAUDE.md", "core/.claude/commands/pr.md", "core/.claude/commands/commit.md", "docs/install/host-capability-matrix.md"],
+      "max_files": 8, "max_loc": 350,
+      "status": "pending"
+    },
+    {
+      "id": 3,
+      "name": "zero-question-setup",
+      "scenarios": ["@s13", "@s14", "@s15", "@s16", "@s17", "@s18"],
+      "files_hint": ["plugin/commands/setup-template.md"],
+      "max_files": 4, "max_loc": 500,
+      "status": "pending"
+    },
+    {
+      "id": 4,
+      "name": "integrate-command",
+      "scenarios": ["@s19", "@s20", "@s21", "@s22", "@s23"],
+      "files_hint": ["core/.claude/commands/integrate.md", "core/CLAUDE.md", "core/.claude/HELP.md", "README.md"],
+      "max_files": 6, "max_loc": 500,
+      "status": "pending"
+    },
+    {
+      "id": 5,
+      "name": "human-verification-offer",
+      "scenarios": ["@s24", "@s25", "@s26"],
+      "files_hint": ["core/.claude/commands/feature.md", "core/.claude/commands/fix.md", "docs/sdd-workflow.md"],
+      "max_files": 5, "max_loc": 200,
+      "status": "pending"
+    },
+    {
+      "id": 6,
+      "name": "release-docs-version",
+      "scenarios": ["@s27", "@s28", "@s29"],
+      "files_hint": ["plugin/.claude-plugin/plugin.json", ".claude-plugin/marketplace.json", "codex/.codex-plugin/plugin.json", "docs/upgrade-guide.md"],
+      "max_files": 6, "max_loc": 200,
+      "status": "pending"
+    }
+  ]
+}
