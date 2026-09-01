@@ -11,6 +11,7 @@
 #   plugin/template.config.yaml <- template.config.yaml
 #   plugin/examples/            <- examples/
 #   codex/skills/               <- plugin/skills/ + plugin/commands/ + hosts/codex/
+#   cursor/                     <- core/ + hosts/cursor/
 #
 # The plugin's own agents/, commands/, hooks/, and skills/ are hand-authored,
 # stack-agnostic variants — not mirrors of core/, and not touched by this build.
@@ -71,6 +72,47 @@ build_codex_skills() {
   done
 }
 
+# Cursor derivation (D3 — self-contained, no Claude hooks surface):
+# - hosts/cursor/AGENTS.md and principles.mdc are hand-authored sources.
+# - backend/frontend-style .mdc = frontmatter (description + globs from
+#   {{src_dir}}/{{frontend_dir}}) prepended to the core/.claude/rules/* body;
+#   a file-level <!-- requires: --> directive stays on line 1 so setup.sh
+#   still drops the file when the var is falsy.
+# - .cursor/mcp.json derived from core/.claude/mcp.json.example (comment reworded).
+# - .claude/agents/ and .claude/rules/ are byte copies from core/ so the
+#   rendered target is self-contained (Cursor reads them natively).
+# - No .claude/settings.json is emitted: a cursor render never contains a
+#   Claude hook registration (double-fire prevented structurally).
+
+mdc_rule() { # src.md dst.mdc description globs
+  src="$1"; dst="$2"
+  {
+    body_from=1
+    if head -n 1 "$src" | grep -q '^<!-- requires:'; then
+      head -n 1 "$src"
+      body_from=2
+    fi
+    printf -- '---\ndescription: "%s"\nglobs: "%s"\n---\n' "$3" "$4"
+    tail -n "+$body_from" "$src"
+  } > "$dst"
+}
+
+build_cursor_tree() {
+  out="$1"
+  rm -rf "$out"
+  mkdir -p "$out/.cursor/rules" "$out/.claude"
+  cp hosts/cursor/AGENTS.md "$out/AGENTS.md"
+  cp hosts/cursor/principles.mdc "$out/.cursor/rules/principles.mdc"
+  mdc_rule core/.claude/rules/backend-style.md "$out/.cursor/rules/backend-style.mdc" \
+    "Backend code style — auto-attached for {{src_dir}}" "{{src_dir}}/**"
+  mdc_rule core/.claude/rules/frontend-style.md "$out/.cursor/rules/frontend-style.mdc" \
+    "Frontend code style — auto-attached for {{frontend_dir}}" "{{frontend_dir}}**"
+  sed 's|^  "//": .*|  "//": "Cursor MCP config (generated from core/.claude/mcp.json.example) — fill in real values after render.",|' \
+    core/.claude/mcp.json.example > "$out/.cursor/mcp.json"
+  cp -R core/.claude/agents "$out/.claude/agents"
+  cp -R core/.claude/rules "$out/.claude/rules"
+}
+
 if [ "${1:-}" = "--check" ]; then
   drift=0
   diff -r core plugin/template >/dev/null 2>&1 || { echo "DRIFT: plugin/template != core/"; drift=1; }
@@ -81,6 +123,8 @@ if [ "${1:-}" = "--check" ]; then
   trap 'rm -rf "$tmp"' EXIT
   build_codex_skills "$tmp/skills"
   diff -r "$tmp/skills" codex/skills >/dev/null 2>&1 || { echo "DRIFT: codex/skills != generated (plugin/ + hosts/codex/)"; drift=1; }
+  build_cursor_tree "$tmp/cursor"
+  diff -r "$tmp/cursor" cursor >/dev/null 2>&1 || { echo "DRIFT: cursor/ != generated (core/ + hosts/cursor/)"; drift=1; }
   if [ "$drift" = "0" ]; then
     echo "generated trees in sync ✓"
     exit 0
@@ -95,5 +139,6 @@ cp -R examples plugin/examples
 cp setup.sh plugin/setup.sh
 cp template.config.yaml plugin/template.config.yaml
 build_codex_skills codex/skills
+build_cursor_tree cursor
 
-echo "Built: plugin/template + plugin/setup.sh + plugin/template.config.yaml from core/, codex/skills from plugin/ + hosts/codex/."
+echo "Built: plugin/template + plugin/setup.sh + plugin/template.config.yaml from core/, codex/skills from plugin/ + hosts/codex/, cursor/ from core/ + hosts/cursor/."

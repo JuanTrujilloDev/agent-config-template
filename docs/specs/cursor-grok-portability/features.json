@@ -31,7 +31,7 @@
       "scenarios": ["@s7", "@s8", "@s9", "@s10"],
       "max_files": 8,
       "max_loc": 800,
-      "status": "pending",
+      "status": "done",
       "notes": "build.sh emits cursor/ (AGENTS.md, rules .mdc, mcp.json, agents+rules copies) from core/ + hosts/cursor/ sources; --check drift"
     },
     {
