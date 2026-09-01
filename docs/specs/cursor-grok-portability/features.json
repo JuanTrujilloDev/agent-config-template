@@ -58,7 +58,7 @@
       "scenarios": ["@s16", "@s17", "@s18"],
       "max_files": 5,
       "max_loc": 900,
-      "status": "pending",
+      "status": "done",
       "notes": "docs/install/cursor.md, docs/install/grok.md (incl. --host grok shortcut), docs/install/host-capability-matrix.md + README pointer"
     },
     {
