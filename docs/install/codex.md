@@ -27,7 +27,7 @@ Restart Codex (or start a new thread) to load it.
   Codex; Branch Discipline is a written rule in `principles`. For always-on
   weight, add one line to your project's `AGENTS.md`:
   `Follow the agent-config-template principles skill for every coding task.`
-- **No `setup-template`.** It renders a `.claude/` project tree — Claude-only.
+- **No `setup-template`.** The interactive calibration runs from Claude Code; from a clone you can still render a Codex-ready tree with `./setup.sh --host codex` (see `docs/install/host-capability-matrix.md`).
 
 ## Companions
 
