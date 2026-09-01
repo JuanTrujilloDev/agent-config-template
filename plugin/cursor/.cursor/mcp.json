@@ -1,0 +1,34 @@
+{
+  "//": "Cursor MCP config (generated from core/.claude/mcp.json.example) — fill in real values after render.",
+  "mcpServers": {
+{{#has_e2e}}
+    "playwright": {
+      "command": "npx",
+      "args": ["-y", "@playwright/mcp@latest"]
+    }{{#ticket_tracker_plane}},{{/ticket_tracker_plane}}{{#ticket_tracker_jira}},{{/ticket_tracker_jira}}{{#ticket_tracker_linear}},{{/ticket_tracker_linear}}
+{{/has_e2e}}
+{{#ticket_tracker_plane}}
+    "plane": {
+      "command": "npx",
+      "args": ["-y", "@makeplane/plane-mcp-server"],
+      "env": {
+        "PLANE_API_KEY": "${PLANE_API_KEY}",
+        "PLANE_WORKSPACE_SLUG": "{{mcp_plane_workspace}}",
+        "PLANE_API_HOST_URL": "{{mcp_plane_host}}"
+      }
+    }
+{{/ticket_tracker_plane}}
+{{#ticket_tracker_jira}}
+    "atlassian": {
+      "command": "npx",
+      "args": ["-y", "mcp-remote", "https://mcp.atlassian.com/v1/sse"]
+    }
+{{/ticket_tracker_jira}}
+{{#ticket_tracker_linear}}
+    "linear": {
+      "command": "npx",
+      "args": ["-y", "mcp-remote", "https://mcp.linear.app/sse"]
+    }
+{{/ticket_tracker_linear}}
+  }
+}

@@ -30,6 +30,17 @@ variables:
     prompt: "One-line project description"
     default: ""
 
+  # --- Target hosts ---
+  - name: target_hosts
+    prompt: "Which agent host(s) should the config render for? (multi-value, comma-separated)"
+    choices: [claude, cursor, codex, grok]
+    default: claude
+    # Multi-value: a comma-separated subset of the choices (e.g. "claude,cursor").
+    # Recorded in answers.env as TARGET_HOSTS so re-renders stay consistent;
+    # an explicit `setup.sh --host <list>` overrides the recorded value.
+    # `grok` is an alias for the claude tree + AGENTS.md. Unsupported hosts
+    # (opencode, gemini, windsurf, ...) are rejected — use the port-config skill.
+
   # --- Tech stack ---
   - name: project_type
     prompt: "Project type"

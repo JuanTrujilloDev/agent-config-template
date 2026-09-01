@@ -49,7 +49,7 @@
       "scenarios": ["@s15", "@s22", "@s23", "@s24"],
       "max_files": 6,
       "max_loc": 500,
-      "status": "pending",
+      "status": "done",
       "notes": "Gate-1 amendment (spec D4/D11): setup.sh --host <list> over {claude,cursor,codex}+grok alias, unsupported hosts -> port-config message, TARGET_HOSTS in template.config.yaml/answers.env, one multi-select host question in setup-template.md. Runs after 3 and 4 (needs cursor tree + codex generation)"
     },
     {

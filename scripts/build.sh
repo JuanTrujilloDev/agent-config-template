@@ -12,6 +12,8 @@
 #   plugin/examples/            <- examples/
 #   codex/skills/               <- plugin/skills/ + plugin/commands/ + hosts/codex/
 #   cursor/                     <- core/ + hosts/cursor/
+#   plugin/cursor/              <- cursor/        (so plugin/setup.sh --host cursor|grok works)
+#   plugin/codex/skills/        <- codex/skills/  (so plugin/setup.sh --host codex works)
 #
 # The plugin's own agents/, commands/, hooks/, and skills/ are hand-authored,
 # stack-agnostic variants — not mirrors of core/, and not touched by this build.
@@ -152,6 +154,8 @@ if [ "${1:-}" = "--check" ]; then
   diff -r "$tmp/skills" codex/skills >/dev/null 2>&1 || { echo "DRIFT: codex/skills != generated (plugin/ + hosts/codex/)"; drift=1; }
   build_cursor_tree "$tmp/cursor"
   diff -r "$tmp/cursor" cursor >/dev/null 2>&1 || { echo "DRIFT: cursor/ != generated (core/ + hosts/cursor/)"; drift=1; }
+  diff -r cursor plugin/cursor >/dev/null 2>&1 || { echo "DRIFT: plugin/cursor != cursor/"; drift=1; }
+  diff -r codex/skills plugin/codex/skills >/dev/null 2>&1 || { echo "DRIFT: plugin/codex/skills != codex/skills/"; drift=1; }
   if [ "$drift" = "0" ]; then
     echo "generated trees in sync ✓"
     exit 0
@@ -160,12 +164,15 @@ if [ "${1:-}" = "--check" ]; then
   exit 1
 fi
 
-rm -rf plugin/template plugin/examples
+rm -rf plugin/template plugin/examples plugin/cursor plugin/codex
 cp -R core plugin/template
 cp -R examples plugin/examples
 cp setup.sh plugin/setup.sh
 cp template.config.yaml plugin/template.config.yaml
 build_codex_skills codex/skills
 build_cursor_tree cursor
+cp -R cursor plugin/cursor
+mkdir -p plugin/codex
+cp -R codex/skills plugin/codex/skills
 
-echo "Built: plugin/template + plugin/setup.sh + plugin/template.config.yaml from core/, codex/skills from plugin/ + hosts/codex/, cursor/ from core/ + hosts/cursor/."
+echo "Built: plugin/template + plugin/setup.sh + plugin/template.config.yaml from core/, codex/skills from plugin/ + hosts/codex/, cursor/ from core/ + hosts/cursor/, plugin/{cursor,codex/skills} bundles."

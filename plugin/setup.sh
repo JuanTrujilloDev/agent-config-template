@@ -36,6 +36,17 @@
 # Usage:
 #   setup.sh --target <dir> --answers <file> [--merge|--overwrite|--abort]
 #   setup.sh --target <dir> --answers -        # read answers from stdin
+#   setup.sh --host <list> ...                  # comma-separated target hosts
+#
+# Hosts (--host, or TARGET_HOSTS=<list> in the answers file; --host wins):
+#   claude   default — the .claude/ tree + CLAUDE.md (byte-identical to a
+#            render without --host)
+#   cursor   the generated cursor/ tree (AGENTS.md, .cursor/, .claude/ agents+
+#            rules+skills — no Claude hooks surface)
+#   codex    AGENTS.md + the generated codex skills under .agents/skills/
+#   grok     alias: claude tree + AGENTS.md (Grok Build reads .claude natively)
+# Anything else (opencode, gemini, windsurf, ...) is unsupported — use the
+# port-config skill to generate a port for that host.
 #
 # Requires: bash 3.2+ (works on stock macOS bash) and python3.
 # All non-trivial logic runs in python3 to stay portable across shells.
@@ -54,11 +65,13 @@ fi
 TARGET=""
 ANSWERS_FILE=""
 MODE=""
+HOST_ARG=""
 
 while [ $# -gt 0 ]; do
   case "$1" in
     --target) TARGET="$2"; shift 2 ;;
     --answers) ANSWERS_FILE="$2"; shift 2 ;;
+    --host) HOST_ARG="$2"; shift 2 ;;
     --merge) MODE="merge"; shift ;;
     --overwrite) MODE="overwrite"; shift ;;
     --abort) MODE="abort"; shift ;;
@@ -119,6 +132,48 @@ else
   ANSWERS_INPUT="$(cat "$ANSWERS_FILE")"
 fi
 
+# Host selection (D4/D11): --host wins; else TARGET_HOSTS recorded in the
+# answers file; else claude. Comma-separated, order-insensitive, deduped.
+HOSTS_RAW="$HOST_ARG"
+if [ -z "$HOSTS_RAW" ]; then
+  HOSTS_RAW="$(printf '%s\n' "$ANSWERS_INPUT" | sed -n 's/^TARGET_HOSTS=//p' | tail -1)"
+fi
+HOSTS_RAW="${HOSTS_RAW:-claude}"
+WANT_CLAUDE=""; WANT_CURSOR=""; WANT_CODEX=""; WANT_GROK=""
+for h in $(printf '%s' "$HOSTS_RAW" | tr ',' ' '); do
+  case "$h" in
+    claude) WANT_CLAUDE=1 ;;
+    cursor) WANT_CURSOR=1 ;;
+    codex)  WANT_CODEX=1 ;;
+    grok)   WANT_GROK=1 ;;
+    *)
+      echo "Error: unsupported host '$h'. Supported hosts: claude, cursor, codex (alias: grok)." >&2
+      echo "For other hosts (opencode, gemini, windsurf, ...) use the port-config skill" >&2
+      echo "to generate a port of this config for that host." >&2
+      exit 1
+      ;;
+  esac
+done
+HOSTS=""
+[ -n "$WANT_CLAUDE" ] && HOSTS="$HOSTS claude"
+[ -n "$WANT_GROK" ]   && HOSTS="$HOSTS grok"
+[ -n "$WANT_CURSOR" ] && HOSTS="$HOSTS cursor"
+[ -n "$WANT_CODEX" ]  && HOSTS="$HOSTS codex"
+HOSTS="${HOSTS# }"
+
+# Non-claude hosts render from the generated trees shipped next to this script
+# (repo root: cursor/, codex/skills/; plugin bundle: same relative paths).
+CURSOR_DIR="$SCRIPT_DIR/cursor"
+CODEX_SKILLS_DIR="$SCRIPT_DIR/codex/skills"
+if [ -n "$WANT_CURSOR$WANT_GROK$WANT_CODEX" ] && [ ! -f "$CURSOR_DIR/AGENTS.md" ]; then
+  echo "Error: cursor source tree not found at $CURSOR_DIR (run scripts/build.sh first)." >&2
+  exit 1
+fi
+if [ -n "$WANT_CODEX" ] && [ ! -d "$CODEX_SKILLS_DIR" ]; then
+  echo "Error: codex skills tree not found at $CODEX_SKILLS_DIR (run scripts/build.sh first)." >&2
+  exit 1
+fi
+
 # All real work happens in python3 — works on macOS bash 3.2 because we
 # never use associative arrays in bash itself. Python renders into a staging
 # dir, detects any existing config, then applies per MODE.
@@ -127,6 +182,9 @@ ANSWERS_INPUT="$ANSWERS_INPUT" \
   TEMPLATE_DIR="$TEMPLATE_DIR" \
   TARGET="$TARGET" \
   MODE="$MODE" \
+  HOSTS="$HOSTS" \
+  CURSOR_DIR="$CURSOR_DIR" \
+  CODEX_SKILLS_DIR="$CODEX_SKILLS_DIR" \
   python3 - <<'PYEOF' || PY_RC=$?
 import os, re, sys, shutil, stat, json, tempfile
 
@@ -134,6 +192,9 @@ TEMPLATE_DIR = os.environ["TEMPLATE_DIR"]
 TARGET = os.environ["TARGET"]
 ANSWERS_INPUT = os.environ["ANSWERS_INPUT"]
 MODE = os.environ.get("MODE", "")
+HOSTS = (os.environ.get("HOSTS") or "claude").split()
+CURSOR_DIR = os.environ.get("CURSOR_DIR", "")
+CODEX_SKILLS_DIR = os.environ.get("CODEX_SKILLS_DIR", "")
 
 # 1. Parse KEY=VALUE answers (skip blank lines + #-comments).
 ANS = {}
@@ -215,37 +276,74 @@ def render(text):
     text = VAR_RE.sub(lambda m: ANS.get(m.group(1), ""), text)
     return text
 
-# 5. Render template/ into a staging dir, honoring <!-- requires: var --> directives.
+# 5. Render each selected host's source tree(s) into ONE staging dir, honoring
+#    <!-- requires: var --> directives. Every host goes through this same
+#    renderer. A file emitted by more than one selected host must render
+#    byte-identical — a differing collision aborts (D4 invariant).
 STAGING = tempfile.mkdtemp(prefix="cct-render-")
 try:
     skipped = 0
-    for root, dirs, files in os.walk(TEMPLATE_DIR):
-        rel = os.path.relpath(root, TEMPLATE_DIR)
-        out_dir = STAGING if rel == "." else os.path.join(STAGING, rel)
-        os.makedirs(out_dir, exist_ok=True)
-        for name in files:
-            src = os.path.join(root, name)
-            dst = os.path.join(out_dir, name)
-            try:
-                with open(src, "r", encoding="utf-8") as f:
-                    content = f.read()
-                first_nl = content.find("\n")
-                if first_nl > 0:
-                    first_line = content[:first_nl]
-                    req_match = re.match(r"\s*<!--\s*requires:\s*(\w+)\s*-->\s*$", first_line)
-                    if req_match and not truthy(ANS.get(req_match.group(1))):
-                        skipped += 1
-                        continue
-                    if req_match:
-                        content = content[first_nl + 1:]
-                rendered = render(content)
-            except UnicodeDecodeError:
-                shutil.copy2(src, dst)
-                continue
-            with open(dst, "w", encoding="utf-8") as f:
-                f.write(rendered)
-            if name.endswith(".sh"):
-                os.chmod(dst, os.stat(dst).st_mode | stat.S_IXUSR | stat.S_IXGRP | stat.S_IXOTH)
+
+    def collide(rel):
+        print(f"Error: host collision on {rel} — the selected hosts render different content for the same path.", file=sys.stderr)
+        sys.exit(1)
+
+    def stage_file(src, rel):
+        global skipped
+        dst = os.path.join(STAGING, rel)
+        d = os.path.dirname(dst)
+        if d:
+            os.makedirs(d, exist_ok=True)
+        try:
+            with open(src, "r", encoding="utf-8") as f:
+                content = f.read()
+            first_nl = content.find("\n")
+            if first_nl > 0:
+                first_line = content[:first_nl]
+                req_match = re.match(r"\s*<!--\s*requires:\s*(\w+)\s*-->\s*$", first_line)
+                if req_match and not truthy(ANS.get(req_match.group(1))):
+                    skipped += 1
+                    return
+                if req_match:
+                    content = content[first_nl + 1:]
+            rendered = render(content)
+        except UnicodeDecodeError:
+            if os.path.exists(dst):
+                with open(src, "rb") as a, open(dst, "rb") as b:
+                    if a.read() != b.read():
+                        collide(rel)
+                return
+            shutil.copy2(src, dst)
+            return
+        if os.path.exists(dst):
+            with open(dst, "r", encoding="utf-8") as f:
+                if f.read() != rendered:
+                    collide(rel)
+            return
+        with open(dst, "w", encoding="utf-8") as f:
+            f.write(rendered)
+        if rel.endswith(".sh"):
+            os.chmod(dst, os.stat(dst).st_mode | stat.S_IXUSR | stat.S_IXGRP | stat.S_IXOTH)
+
+    def stage_tree(src_root, prefix=""):
+        for root, dirs, files in os.walk(src_root):
+            rel_dir = os.path.relpath(root, src_root)
+            for name in files:
+                rel = name if rel_dir == "." else os.path.join(rel_dir, name)
+                if prefix:
+                    rel = os.path.join(prefix, rel)
+                stage_file(os.path.join(root, name), rel)
+
+    # Host -> source mapping (D4 alias for grok; Q4 mapping for codex).
+    for h in HOSTS:
+        if h in ("claude", "grok"):
+            stage_tree(TEMPLATE_DIR)
+        if h == "cursor":
+            stage_tree(CURSOR_DIR)
+        if h in ("grok", "codex"):
+            stage_file(os.path.join(CURSOR_DIR, "AGENTS.md"), "AGENTS.md")
+        if h == "codex":
+            stage_tree(CODEX_SKILLS_DIR, os.path.join(".agents", "skills"))
 
     # 6. List staged files (relative paths).
     staged = []
@@ -277,6 +375,13 @@ try:
         os.path.join(".claude", "agents"), os.path.join(".claude", "commands"),
         os.path.join(".claude", "hooks"), os.path.join(".claude", "rules"),
     ]
+    # Non-destructive detection extends to every selected host's surface.
+    if any(h in ("cursor", "grok", "codex") for h in HOSTS):
+        markers.append("AGENTS.md")
+    if "cursor" in HOSTS:
+        markers += [os.path.join(".cursor", "rules"), os.path.join(".cursor", "hooks.json")]
+    if "codex" in HOSTS:
+        markers.append(os.path.join(".agents", "skills"))
     present = [m for m in markers if os.path.exists(tpath(m))]
 
     def write_file(rel):

@@ -17,6 +17,12 @@ This is the **opt-in calibration step** for users who installed the plugin and w
    - **LOW** — best guess; show the alternative.
    - **UNKNOWN** — left blank with a `# TODO: <what's missing>` line above.
 
+   Ask exactly one multi-select question here — the target hosts:
+
+   > Which agent hosts should this config render for? (multi-select: `claude`, `cursor`, `codex`; `grok` = claude tree + AGENTS.md)
+
+   Inferred default: `claude` is always included; add `cursor` when a `.cursor/` directory exists in the target project; add `codex` when Codex project config exists (a `.codex/` or `.agents/` directory). The user may deselect any. Record the choice in the drafted `answers.env` as `TARGET_HOSTS=<comma-separated list>` — the renderer defaults to `claude` when the line is absent, and `setup.sh --host` overrides it.
+
 3. **Shows the draft to the user**, grouped by confidence level, and **WAITS for approval or edits.** Do not run the renderer until the user explicitly approves with "yes," "go," "render," or equivalent.
 
 4. **After approval, runs the renderer.** The renderer is **non-destructive**: against a project that already has a Claude config it writes nothing and prints a per-file change plan until you pass an explicit mode.
