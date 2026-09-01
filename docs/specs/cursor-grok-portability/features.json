@@ -22,7 +22,7 @@
       "scenarios": ["@s5", "@s6"],
       "max_files": 12,
       "max_loc": 400,
-      "status": "pending",
+      "status": "done",
       "notes": "surgical reword of Claude-as-actor idioms in core/ (grep found 14 candidate files; most mentions are host mechanics that stay). If >12 source files genuinely need edits, split rules+commands / agents"
     },
     {

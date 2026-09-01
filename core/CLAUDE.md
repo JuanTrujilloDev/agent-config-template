@@ -168,7 +168,7 @@ Never code on `{{default_branch}}`. Always check out a typed branch first.
 
 ## Dynamic Context (optional)
 
-Claude Code expands `` !`shell command` `` in this file at session start, injecting the live output into context. Useful for keeping the model oriented to the current state of the repo without you having to mention it.
+Claude Code only: the Claude Code host expands `` !`shell command` `` in this file at session start, injecting the live output into context (other hosts treat these lines as plain text). Useful for keeping the model oriented to the current state of the repo without you having to mention it.
 
 Pick the lines that are useful for your team and uncomment them. Skip everything that's noise.
 
