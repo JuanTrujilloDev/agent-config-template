@@ -218,6 +218,10 @@ flag_map = {
 if tt in flag_map:
     ANS[flag_map[tt]] = "yes"
 
+# 2a. Synthesize workflow_tdd=yes when workflow_mode is SDD+TDD (absent = SDD).
+if ANS.get("workflow_mode", "").strip() == "SDD+TDD":
+    ANS["workflow_tdd"] = "yes"
+
 # 2b. Synthesize project-type flags + the primary dev agent for this stack.
 #     {{primary_dev_agent}} lets every reference to "the implementer" render
 #     to the right specialist; {{#is_*}} sections gate type-specific files.

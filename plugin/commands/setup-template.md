@@ -43,8 +43,22 @@ This is the **opt-in calibration step** for users who installed the plugin and w
    ```
    .claude/settings.local.json
    .claude/mcp.json
-   answers.env
+   .claude/answers.local.env
    ```
+   `answers.env` is **committed** — never gitignore it. It is project policy and
+   the source of truth for reproducible re-renders (`setup.sh --answers
+   ./answers.env --merge`; see `docs/upgrade-guide.md`). Personal preferences go
+   in the gitignored `.claude/answers.local.env` instead.
+
+## Config scopes
+
+Every config value lives in exactly one of three scopes:
+
+| Scope | File | Committed? | Holds |
+|---|---|---|---|
+| Project policy | `answers.env` | yes | `workflow_mode`, `TARGET_HOSTS`, micro-PR limits — everything in `template.config.yaml` |
+| Local prefs | `.claude/answers.local.env` | no (gitignored) | personal settings read at session time (`autonomy_mode`, `verbosity`, `companions`) — never rendered into files |
+| Session keywords | — | never persisted | one-session overrides like "just go" / "gate me" |
 
 6. **Reminds the user** that Claude Code needs to be restarted to pick up the new project-root hooks and slash commands. The plugin-level commands and agents remain available regardless.
 

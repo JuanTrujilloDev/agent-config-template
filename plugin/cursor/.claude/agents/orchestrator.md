@@ -65,9 +65,16 @@ pending
    > to start, or ask for changes."
 2. **After the human approves the contract**, take the first mini-feature that is
    not `done`/`blocked`. Set its status to `in_progress` in `features.json`.
-3. **Ask: apply TDD to this mini-feature?** If yes, launch the implementer in
+{{#workflow_tdd}}
+3. **TDD is on by default** (`workflow_mode=SDD+TDD`): launch the implementer in
    test-first mode (write the failing tests, then **STOP** at Gate 2 for
-   approval). If no, proceed.
+   approval) — unless the human skips TDD for this mini-feature.
+{{/workflow_tdd}}
+{{^workflow_tdd}}
+3. **Ask: apply TDD to this mini-feature?** (TDD is off by default; opt in with
+   "with TDD".) If yes, launch the implementer in test-first mode (write the
+   failing tests, then **STOP** at Gate 2 for approval). If no, proceed.
+{{/workflow_tdd}}
 4. **Check out the typed branch** for the mini-feature (never `{{default_branch}}`).
 5. **Launch the specialist** — `{{primary_dev_agent}}`{{#has_frontend}} or `frontend-dev`{{/has_frontend}}{{#has_ui}} (with `ui-designer` first for new UI){{/has_ui}} — passing the relevant `contract.md` scenarios and the spec's Design notes.
 6. **Launch `judge`** (reviews code + tests against the contract). If it requests

@@ -67,6 +67,12 @@ under TDD). State lives on disk, not in chat.**
   mini-feature, the implementer writes the failing tests first and stops for
   approval. Production code starts only after the tests are signed off.
 
+Whether TDD is the default comes from `workflow_mode` in the committed
+`answers.env`: `SDD+TDD` makes test-first + Gate 2 the default for every
+mini-feature (still skippable per feature); `SDD` — or the key absent, the
+back-compat default — leaves TDD opt-in per mini-feature ("with TDD"). The
+flow itself is identical either way; only the default flips.
+
 ## The anti-telephone rule
 
 When the orchestrator launches a subagent, it instructs that subagent to **write

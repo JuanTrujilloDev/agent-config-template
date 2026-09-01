@@ -31,7 +31,12 @@ If there's no approved contract for this work, spawn `pmo`
 
 ### 2. Per mini-feature (one at a time)
 - Set `in_progress`; check out the typed branch (never `{{default_branch}}`).
-- **Apply TDD?** If yes, the implementer writes the failing tests first → **Gate 2: you approve the tests** before production code.
+{{#workflow_tdd}}
+- **TDD is on by default** (project policy: `workflow_mode=SDD+TDD`): the implementer writes the failing tests first → **Gate 2: you approve the tests** before production code — applied per mini-feature, skippable per mini-feature on request ("skip TDD").
+{{/workflow_tdd}}
+{{^workflow_tdd}}
+- **TDD is off by default** and available on request ("with TDD"): if opted in for this mini-feature, the implementer writes the failing tests first → **Gate 2: you approve the tests** before production code.
+{{/workflow_tdd}}
 - Spawn `{{primary_dev_agent}}`{{#has_frontend}} / `frontend-dev`{{/has_frontend}}{{#has_ui}} (with `ui-designer` first for new UI){{/has_ui}} to implement to green, honoring the Design-notes pattern and its **Leverage** subsection (reuse before writing — leverage ladder in `.claude/rules/principles.md`). For impact analysis before an edit, `.claude/rules/code-query.md` finds dependents cheaply.
 - Spawn `judge` — reviews code **and** tests against the contract scenarios.
 - Spawn `security-reviewer` if the mini-feature touches auth, permissions, or data.{{#enforce_mutation_testing}}
