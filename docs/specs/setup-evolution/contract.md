@@ -9,7 +9,7 @@ hook, or grepping the named file. "Rendered" = output of
 - @s1 Given `answers.env` with `workflow_mode=SDD+TDD`, When `setup.sh` renders, Then the rendered `.claude/commands/feature.md` states TDD is on by default and Gate 2 (test approval) applies per mini-feature.
 - @s2 Given `answers.env` with `workflow_mode=SDD` **or with the key absent**, When rendered, Then `feature.md` states TDD is off by default and available on request ("with TDD") — back-compat for every existing `answers.env`.
 - @s3 Given `template.config.yaml`, Then it defines `workflow_mode` (choices `SDD`, `SDD+TDD`, default `SDD`) and its header comments document the three scopes: committed `answers.env` (project policy: workflow_mode, TARGET_HOSTS, limits), gitignored `.claude/answers.local.env` (personal: autonomy_mode, verbosity, companions), session keywords (never persisted).
-- @s4 Given `plugin/commands/setup-template.md` step 5 and `docs/upgrade-guide.md`, Then both say `answers.env` is committed; the gitignore block lists `.claude/answers.local.env` and does NOT list `answers.env`.
+- @s4 Given `plugin/commands/setup-template.md` step 6 and `docs/upgrade-guide.md`, Then both say `answers.env` is committed; the gitignore block lists `.claude/answers.local.env` and does NOT list `answers.env`.
 - @s5 Given `setup.sh`, Then the only change is the synthetic flag (`workflow_tdd=yes` when `workflow_mode` is `SDD+TDD`), following the existing `ticket_tracker_plane` pattern; two consecutive renders with identical inputs produce byte-identical output.
 - @s6 Given `docs/sdd-workflow.md`, Then it names `workflow_mode` as the source of the TDD default (one paragraph, no flow change).
 

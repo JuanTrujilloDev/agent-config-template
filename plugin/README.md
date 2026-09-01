@@ -59,7 +59,7 @@ Claude will:
 2. Draft an `answers.env` with confidence labels (HIGH / LOW / UNKNOWN).
 3. Show it to you and **wait for approval or edits.**
 4. Run the bundled `setup.sh` to render a full `.claude/` tree + `CLAUDE.md`. It's **non-destructive** — against an existing config it shows a per-file change plan and won't write without your `--merge` / `--overwrite` choice.
-5. Add `.claude/settings.local.json`, `.claude/mcp.json`, and `answers.env` to `.gitignore`.
+5. Add `.claude/settings.local.json`, `.claude/mcp.json`, and `.claude/answers.local.env` to `.gitignore` (`answers.env` is committed project policy).
 6. Remind you to restart Claude Code.
 
 After this, both layers are active in that project — the plugin commands stay namespaced (`/agent-config-template:feature`), and the project-root commands are unnamespaced (`/feature`). The project-root versions take precedence when names collide because they have your specifics baked in.
