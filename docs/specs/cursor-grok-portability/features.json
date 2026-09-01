@@ -65,9 +65,10 @@
       "id": 7,
       "name": "packaging-validation-ci",
       "scenarios": ["@s19", "@s20", "@s21"],
-      "max_files": 4,
+      "max_files": 6,
       "max_loc": 400,
-      "status": "pending",
+      "status": "done",
+      "budget_note": "max_files corrected 4->6 at close per mf7 judge ruling: the three contract-mandated manifest version bumps made 4 unattainable at planning time",
       "notes": "validate-packaging.py cursor/codex checks, ci.yml render-smoke cursor iteration, version bump to 0.8.0 (Q2)"
     }
   ]
