@@ -82,8 +82,13 @@ pending
 7. **Launch `security-reviewer`** if the mini-feature touches auth, permissions,
    data exposure, or external input.{{#enforce_mutation_testing}}
 8. **Launch `mutation-tester`**; only a passing score closes the mini-feature.{{/enforce_mutation_testing}}
-9. **Micro-commit** on the typed branch and mark the mini-feature `done`. Move to
-   the next one.
+9. **Micro-commit** on the typed branch, honoring the autonomy mode
+   (`.claude/rules/principles.md`, "Autonomy Mode"; default `gated`; session
+   keywords "just go" / "gate me" override without persisting): **gated** →
+   pause and present the diff for user review before committing;
+   **autonomous** → commit and continue. Push, merge, and publish ALWAYS
+   require explicit confirmation regardless of mode. Mark the mini-feature
+   `done` and move to the next one.
 
 ## Effort scaling
 

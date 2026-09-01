@@ -22,7 +22,7 @@ Create a conventional commit with the staged changes.
    - `style(scope): description`
    - `chore(scope): description`
 5. **One logical change per commit.** If the staged diff mixes unrelated changes, say so and offer to split it before going on.
-6. **Ask the user to confirm** the commit message before committing.
-7. Run `git commit -m "<message>"` only after explicit confirmation.
+6. **Ask the user to confirm** the commit message before committing — in `gated` mode (the default). In `autonomous` mode this confirmation is skipped: micro-commits proceed after `judge` review (`.claude/rules/principles.md`, "Autonomy Mode"). Push and PR confirmations are NOT skipped in any mode.
+7. Run `git commit -m "<message>"` only after explicit confirmation (or, in `autonomous` mode, after the judge review passes).
 
 Never commit on `{{default_branch}}`. If on `{{default_branch}}`, stop and tell the user to check out a typed branch first.

@@ -18,7 +18,7 @@ Open a pull request for the current branch.
    - <{{max_loc_per_pr}} lines changed?
    - Branch name typed correctly?
 5. Draft PR title (conventional) + body (Goal, Changes, Tests, Screenshots if FE)
-6. **Ask the user to confirm** title, body, target branch (default: `{{default_branch}}`), and whether to push first.
+6. **Ask the user to confirm** title, body, target branch (default: `{{default_branch}}`), and whether to push first. This confirmation ALWAYS applies regardless of autonomy mode — push, merge, and publish are action-level confirms that `autonomous` never skips (`.claude/rules/principles.md`, "Autonomy Mode").
 7. Only after confirmation:
    ```bash
    git push -u origin <branch-name>

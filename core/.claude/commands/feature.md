@@ -40,7 +40,7 @@ If there's no approved contract for this work, spawn `pmo`
 - Spawn `judge` — reviews code **and** tests against the contract scenarios.
 - Spawn `security-reviewer` if the mini-feature touches auth, permissions, or data.{{#enforce_mutation_testing}}
 - Spawn `mutation-tester`; only a passing mutation score closes the mini-feature.{{/enforce_mutation_testing}}
-- Micro-commit on the typed branch; mark `done`.
+- Micro-commit on the typed branch, honoring the autonomy mode (`.claude/rules/principles.md`, "Autonomy Mode"; default `gated`; session keywords "just go" / "gate me" override without persisting): **gated** → pause and present the diff for user review before the micro-commit; **autonomous** → commit and continue. Mark `done`. Push, merge, and publish ALWAYS require explicit confirmation regardless of mode.
 {{#enforce_layer_split}}
 
 ### 3. Layer order

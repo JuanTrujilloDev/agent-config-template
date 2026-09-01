@@ -533,7 +533,7 @@ try:
     print("Next steps:")
     print("  1. Review CLAUDE.md and .claude/HELP.md — adjust if needed")
     print("  2. cp .claude/mcp.json.example .claude/mcp.json  (if you use MCPs)")
-    print("  3. Add to .gitignore:  .claude/settings.local.json, .claude/mcp.json")
+    print("  3. Add to .gitignore:  .claude/settings.local.json, .claude/mcp.json, .claude/answers.local.env")
     print("  4. (Re)start Claude Code to load the new config")
 finally:
     shutil.rmtree(STAGING, ignore_errors=True)

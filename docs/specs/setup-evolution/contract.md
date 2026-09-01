@@ -23,7 +23,7 @@ hook, or grepping the named file. "Rendered" = output of
 - @s9 Given a session where the user says "just go" (or "gate me" / "stop before commit"), Then instructions in `principles.md` direct the agent to treat the keyword as a session-scoped override of the stored mode and never write it to any file.
 - @s10 Given `autonomous` mode, Then `principles.md` and the commands that push/merge/publish state that action-level confirms (push, merge, publish, destructive ops) ALWAYS apply regardless of mode — grep-verifiable wording.
 - @s11 Given a non-Claude host (no hooks), Then `principles.md`/CLAUDE.md carry the instruction-only fallback: read `.claude/answers.local.env` if present and print the mode banner at task start — works everywhere per the host capability matrix.
-- @s12 Given a malformed or unreadable local prefs file, When the hook runs, Then it exits 0 with no banner and no error output (never blocks a prompt).
+- @s12 Given a local prefs file with an unrecognized `autonomy_mode` value, When the hook runs, Then it exits 0 with no banner and no error output; an unreadable or garbled file (indistinguishable from an absent key) falls back to the gated banner, still exit 0, no error output (never blocks a prompt). *(Amended at mf2 review per judge ruling — gated default governs indistinguishable states.)*
 
 **Design notes:** no pattern — one `sed` read + one heredoc line in an existing hook; the rest is instructions.
 **Leverage:** `coding-reminder.sh` already fires on coding prompts with a heredoc to append to; `sed -n 's/^autonomy_mode=//p'` matches how setup.sh reads `TARGET_HOSTS`; v0.8.0 D9 already settled that Cursor gets instruction-only.

@@ -34,6 +34,15 @@ if ! printf '%s' "$LOWER" | grep -qE '(implement|fix|refactor|add|create|update|
     exit 0
 fi
 
+# Autonomy banner — personal pref from the gitignored local prefs file (see
+# .claude/rules/principles.md, "Autonomy Mode"). Defensive: absent file/key =
+# gated; unrecognized value = no banner; never blocks the prompt.
+AUTONOMY=$(sed -n 's/^autonomy_mode=//p' "${CLAUDE_PROJECT_DIR:-.}/.claude/answers.local.env" 2>/dev/null | head -1)
+case "$AUTONOMY" in
+    autonomous) echo "mode: autonomous — say 'gate me' to switch" ;;
+    gated|"")   echo "mode: gated — say 'just go' for autonomous" ;;
+esac
+
 cat <<'HEREDOC'
 [reminder — operating principles, see .claude/rules/principles.md]
 
