@@ -1,0 +1,174 @@
+{
+  "feature": "adaptive-skills",
+  "version": "0.8.2",
+  "rules": {
+    "one_at_a_time": true,
+    "require_approved_contract": true,
+    "workflow_mode": "SDD+TDD",
+    "autonomy_mode": "gated",
+    "generated_mirrors_excluded_from_budget": true,
+    "order": "array order; ids are stable, not positional (MF8 runs second)"
+  },
+  "mini_features": [
+    {
+      "id": 1,
+      "name": "output-style",
+      "scenarios": ["@s1", "@s2", "@s3", "@s4", "@s5", "@s6", "@s7", "@s8", "@s9"],
+      "files": [
+        "core/.claude/hooks/coding-reminder.sh",
+        "core/.claude/rules/principles.md",
+        "core/CLAUDE.md",
+        "hosts/cursor/principles.mdc",
+        "plugin/hooks/coding-reminder.sh",
+        "plugin/skills/principles/SKILL.md",
+        "plugin/commands/setup-template.md",
+        "template.config.yaml",
+        "scripts/smoke.sh"
+      ],
+      "max_files": 12, "max_loc": 3000,
+      "reviews": ["judge", "security-reviewer"],
+      "status": "pending"
+    },
+    {
+      "id": 8,
+      "name": "agent-style",
+      "after": 1,
+      "scenarios": ["@s58", "@s59", "@s60", "@s61", "@s62", "@s63", "@s64", "@s65", "@s66"],
+      "files": [
+        "core/.claude/rules/principles.md",
+        "core/.claude/commands/feature.md",
+        "core/.claude/agents/orchestrator.md",
+        "plugin/skills/principles/SKILL.md",
+        "plugin/commands/feature.md",
+        "plugin/agents/orchestrator.md",
+        "template.config.yaml",
+        "plugin/commands/setup-template.md"
+      ],
+      "max_files": 12, "max_loc": 3000,
+      "reviews": ["judge"],
+      "human_verified_scenarios": ["@s66"],
+      "status": "pending"
+    },
+    {
+      "id": 2,
+      "name": "patterns-rule",
+      "scenarios": ["@s10", "@s11", "@s12", "@s13", "@s14", "@s15", "@s16", "@s17"],
+      "files": [
+        "core/.claude/rules/patterns.md",
+        "core/.claude/patterns/backend-api-persistence.md",
+        "core/.claude/patterns/frontend-ui-state.md",
+        "core/.claude/patterns/mobile.md",
+        "core/.claude/patterns/game-unity.md",
+        "core/.claude/patterns/desktop.md",
+        "core/.claude/patterns/concurrency-distributed.md",
+        "plugin/skills/patterns/SKILL.md",
+        "scripts/build.sh",
+        "README.md",
+        "plugin/README.md"
+      ],
+      "max_files": 12, "max_loc": 3000,
+      "reviews": ["judge"],
+      "human_verified_scenarios": ["@s17"],
+      "status": "pending"
+    },
+    {
+      "id": 3,
+      "name": "pattern-ledger-integration",
+      "scenarios": ["@s18", "@s19", "@s20", "@s21", "@s22", "@s23", "@s24"],
+      "files": [
+        "core/.claude/rules/principles.md",
+        "core/.claude/agents/pmo.md",
+        "core/.claude/agents/judge.md",
+        "core/.claude/commands/verify.md",
+        "plugin/skills/principles/SKILL.md",
+        "plugin/agents/pmo.md",
+        "plugin/agents/judge.md",
+        "plugin/commands/verify.md"
+      ],
+      "max_files": 12, "max_loc": 3000,
+      "reviews": ["judge"],
+      "human_verified_scenarios": ["@s23", "@s24"],
+      "status": "pending"
+    },
+    {
+      "id": 4,
+      "name": "brand-system",
+      "scenarios": ["@s25", "@s26", "@s27", "@s28", "@s29", "@s30", "@s31", "@s32"],
+      "files": [
+        "core/docs/design-system/MASTER.md",
+        "core/.claude/agents/ui-designer.md",
+        "core/.claude/agents/frontend-dev.md",
+        "core/.claude/agents/mobile-dev.md",
+        "core/.claude/agents/judge.md",
+        "core/.claude/commands/design.md",
+        "plugin/agents/ui-designer.md",
+        "plugin/agents/frontend-dev.md",
+        "plugin/agents/mobile-dev.md",
+        "plugin/agents/judge.md",
+        "plugin/commands/design.md",
+        "scripts/build.sh"
+      ],
+      "max_files": 12, "max_loc": 3000,
+      "reviews": ["judge"],
+      "status": "pending"
+    },
+    {
+      "id": 5,
+      "name": "workflow-vocabulary",
+      "scenarios": ["@s33", "@s34", "@s35", "@s36", "@s37", "@s38", "@s39"],
+      "files": [
+        "core/.claude/agents/pmo.md",
+        "core/.claude/commands/fix.md",
+        "core/.claude/commands/spec.md",
+        "core/.claude/commands/feature.md",
+        "docs/sdd-workflow.md",
+        "docs/upgrade-guide.md",
+        "plugin/agents/pmo.md",
+        "plugin/commands/fix.md",
+        "plugin/commands/spec.md",
+        "plugin/commands/feature.md",
+        "plugin/skills/sdd-workflow/SKILL.md",
+        "hosts/codex/skills/sdd-workflow/SKILL.md"
+      ],
+      "max_files": 12, "max_loc": 3000,
+      "reviews": ["judge"],
+      "human_verified_scenarios": ["@s39"],
+      "status": "pending"
+    },
+    {
+      "id": 6,
+      "name": "companions",
+      "scenarios": ["@s40", "@s41", "@s42", "@s43", "@s44", "@s45", "@s46", "@s47"],
+      "files": [
+        "plugin/commands/setup-template.md",
+        "plugin/commands/setup-companions.md",
+        "hosts/codex/skills/setup-companions/SKILL.md",
+        "core/.claude/agents/orchestrator.md",
+        "plugin/agents/orchestrator.md",
+        "README.md",
+        "plugin/README.md",
+        "docs/upgrade-guide.md"
+      ],
+      "max_files": 12, "max_loc": 3000,
+      "reviews": ["judge"],
+      "status": "pending"
+    },
+    {
+      "id": 7,
+      "name": "merge-reporting-release",
+      "scenarios": ["@s48", "@s49", "@s50", "@s51", "@s52", "@s53", "@s54", "@s55", "@s56", "@s57"],
+      "files": [
+        "setup.sh",
+        "scripts/smoke.sh",
+        ".github/workflows/ci.yml",
+        "docs/upgrade-guide.md",
+        "plugin/.claude-plugin/plugin.json",
+        ".claude-plugin/marketplace.json",
+        "codex/.codex-plugin/plugin.json"
+      ],
+      "max_files": 12, "max_loc": 3000,
+      "reviews": ["judge", "security-reviewer"],
+      "status": "pending"
+    }
+  ]
+}
