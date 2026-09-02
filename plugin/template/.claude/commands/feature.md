@@ -57,3 +57,5 @@ BE mini-features ship (and merge) before their FE counterparts.
 
 For a small scoped change with an obvious cause, use `/fix` instead — it skips the
 spec/contract/orchestration but keeps the full Definition of Done.
+
+A template upgrade (`setup.sh --merge`) is its own `chore:` commit — never mixed into a feature PR.

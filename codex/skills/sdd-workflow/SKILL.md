@@ -59,6 +59,7 @@ under TDD). State lives on disk, not in chat.**
 |---|---|---|
 | `docs/specs/<slug>/spec.md` | `pmo` | Problem, goal, verifiable success criteria, decisions + *why*, out-of-scope, open questions, **Design notes** |
 | `docs/specs/<slug>/contract.md` | `pmo` | Given/When/Then acceptance scenarios — the signed contract (or `.feature` files if Gherkin is enabled) |
+| `docs/CONTEXT.md` | `pmo` | Project glossary, created lazily on the first coined project term: `**Term** — what it IS (1–2 sentences). Avoid: <synonyms>` |
 | `docs/specs/<slug>/features.json` | `orchestrator` / `pmo` | Mini-feature list + state machine: `pending → spec_ready → in_progress → done / blocked` |
 | `docs/specs/<slug>/progress/<feature>.tdd.md` | implementer | Red→Green→Refactor log + `scenario → test` map (TDD on) |
 | `docs/specs/<slug>/progress/<feature>.judge.md` | `judge` | Review verdict + blockers/nits |
@@ -79,6 +80,12 @@ When the orchestrator launches a subagent, it instructs that subagent to **write
 its output to a file** under `docs/specs/<slug>/` and return only a one-line
 reference. Content lives on disk and survives restarts and blown context windows;
 it does not get paraphrased through chat.
+
+## Skill taxonomy
+
+- **Commands** (`/spec`, `/feature`, `/fix`, …) are **user-invoked**: a person types them. On Cursor they render with `disable-model-invocation: true` so the model cannot fire them.
+- **Rules and skills** (`principles`, `patterns`, `code-query`, `sdd-workflow`) are **model-invoked**: loaded as reference when the task matches.
+- A command may **suggest** another command to the user ("for a small change, use `/fix`") but never instructs the model to invoke one — user-invoked may call model-invoked, never another user-invoked.
 
 ## How it relates to the rest of the config
 

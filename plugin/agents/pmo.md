@@ -58,6 +58,12 @@ source of truth (see `the `sdd-workflow` skill`):
    ```
    Valid status: `pending → spec_ready → in_progress → done | blocked`.
 
+## CONVERSE
+
+- **Intent** first — the user-observable change, stated in one sentence before any implementation talk. If you cannot say what the user will see differently, keep conversing.
+- **Brownfield** (an existing codebase): survey the touched modules per the `code-query` skill before framing; the spec defines the change, not a retro-spec of the system.
+- **Glossary.** Read `docs/CONTEXT.md` first when present. Create it lazily on the first project term you coin or disambiguate in conversation, and append later ones. Entry format: `**Term** — what it IS (1–2 sentences). Avoid: <synonyms>`. Project terms only — what the term *is*, never how it is implemented.
+
 ## Decomposition rules
 
 - Each mini-feature must fit in one micro-PR (≤12 files / <3000 LOC). If it won't, split it.

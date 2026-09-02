@@ -44,6 +44,8 @@ cd ~/code/my-project
 git add .claude/ CLAUDE.md docs/ && git commit -m "chore: upgrade agent-config-template to v0.4.0"
 ```
 
+A template upgrade (`setup.sh --merge`) is its own `chore:` commit — never mixed into a feature PR.
+
 For fine-grained control, render into a temp dir and cherry-pick:
 
 ```bash

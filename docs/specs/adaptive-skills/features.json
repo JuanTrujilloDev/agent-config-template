@@ -136,7 +136,7 @@
       "max_files": 12, "max_loc": 3000,
       "reviews": ["judge"],
       "human_verified_scenarios": ["@s39"],
-      "status": "in_progress"
+      "status": "done"
     },
     {
       "id": 6,
@@ -154,7 +154,7 @@
       ],
       "max_files": 12, "max_loc": 3000,
       "reviews": ["judge"],
-      "status": "pending"
+      "status": "in_progress"
     },
     {
       "id": 7,
