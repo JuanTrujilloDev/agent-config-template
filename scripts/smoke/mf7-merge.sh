@@ -1,19 +1,17 @@
 # MF7 merge-reporting + release (@s48..@s57) — the `--merge` plan labels DIFFERS files
 # (STALE-MANAGED / CUSTOMIZED / SYMLINK-CONFLICT) and prints one copy-pasteable
 # `--merge --overwrite-files a,b` line; the flag overwrites only what is listed.
-# Fixture replicates the read-only portfolio evidence in mktemp: render examples/python-django,
-# then (a) old-style hand-written agent, (b) project paragraph appended to a rule,
-# (c) `.claude/CLAUDE.md` symlink replaced by a differing regular file, (d) everything else identical.
+# The checked-in fixture overlays two stale agents, one stale rule, and a regular
+# `.claude/CLAUDE.md` onto a clean render; everything else stays identical.
 SETUP="$ROOT/setup.sh"; DJ="$ROOT/examples/python-django/answers.env"
-CLEAN="$WORK/mf7-clean"; FIX="$WORK/mf7-fixture"
+CLEAN="$WORK/mf7-clean"; FIX="$WORK/mf7-fixture"; STALE_FIXTURE="$ROOT/scripts/smoke/fixtures/stale-render"
 bash "$SETUP" --target "$CLEAN" --answers "$DJ" >/dev/null 2>&1 || { echo "FAIL @s48 render python-django"; FAIL=1; }
-BD=.claude/agents/backend-dev.md; BS=.claude/rules/backend-style.md; DCM=.claude/CLAUDE.md; SL=.claude/settings.local.json
+BD=.claude/agents/backend-dev.md; FD=.claude/agents/frontend-dev.md; BS=.claude/rules/backend-style.md; DCM=.claude/CLAUDE.md; SL=.claude/settings.local.json
 cp -R "$CLEAN" "$FIX"
-printf '# backend-dev\n\nYou write Django code. Follow PEP 8.\n' >"$FIX/$BD"                 # (a) stale managed
-printf '\n## Project-specific\n\nAll money columns use DecimalField(19,4).\n' >>"$FIX/$BS"    # (b) customized rule
+rm "$FIX/$DCM"
+cp -R "$STALE_FIXTURE/.claude/." "$FIX/.claude/"
 printf '\n## Team conventions\n\nWe deploy on Fridays. Really.\n' >>"$FIX/CLAUDE.md"           # root CLAUDE.md differs
 MASTER=docs/design-system/MASTER.md; printf '\n## Colors\n\nprimary: #0044cc\n' >>"$FIX/$MASTER"  # D13 user-filled brand file
-rm "$FIX/$DCM"; printf '# Old .claude/CLAUDE.md\n\nJan-2026 render.\n' >"$FIX/$DCM"           # (c) symlink conflict
 printf '{"permissions":{"allow":["Bash(make:*)"]}}\n' >"$FIX/$SL"
 md5f() { md5 -q "$1" 2>/dev/null || md5sum "$1" | cut -d' ' -f1; }
 SL_MD5=$(md5f "$FIX/$SL"); ROOT_MD5=$(md5f "$FIX/CLAUDE.md"); BS_MD5=$(md5f "$FIX/$BS"); DCM_MD5=$(md5f "$FIX/$DCM")
@@ -30,6 +28,7 @@ untouched() { # NAME — asserts the three untouchable files in $F are byte-iden
 fresh_fix; run_setup
 check "@s48 plan exits 1" "1" "$RC"
 grep_case "@s48 STALE-MANAGED backend-dev.md" <(printf '%s\n' "$OUT") "STALE-MANAGED +$BD"
+grep_case "@s48 STALE-MANAGED frontend-dev.md" <(printf '%s\n' "$OUT") "STALE-MANAGED +$FD"
 grep_case "@s48 STALE-MANAGED backend-style.md (rules/ is template-managed)" <(printf '%s\n' "$OUT") "STALE-MANAGED +$BS"
 grep_case "@s48 SYMLINK-CONFLICT .claude/CLAUDE.md" <(printf '%s\n' "$OUT") "SYMLINK-CONFLICT +$DCM"
 grep_case "@s48 CUSTOMIZED CLAUDE.md with keep hint" <(printf '%s\n' "$OUT") 'CUSTOMIZED +CLAUDE\.md.*keep'
@@ -43,7 +42,7 @@ LINE=$(printf '%s\n' "$OUT" | grep -E -e '--merge --overwrite-files ' | tail -1)
 check "@s49 exactly one --overwrite-files line" "1" "$(printf '%s\n' "$OUT" | grep -cE -e '--merge --overwrite-files '; true)"
 grep_case "@s49 line is copy-pasteable (setup.sh --target … --answers … --merge --overwrite-files …)" <(printf '%s\n' "$LINE") "setup\.sh --target .* --answers .* --merge --overwrite-files [^ ]+$"
 LIST=$(printf '%s\n' "$LINE" | sed -E 's/.*--overwrite-files ([^ ]+).*/\1/' | tr ',' '\n' | sort | paste -sd, -)
-check "@s49 list = exactly the STALE-MANAGED files, no CUSTOMIZED path (MASTER.md absent)" "$BD,$BS" "$LIST"
+check "@s49 list = exactly the STALE-MANAGED files, no CUSTOMIZED path (MASTER.md absent)" "$BD,$FD,$BS" "$LIST"
 # v0.8.3 @s3 — stdin plans keep `-` but explain that replay needs the same pipe.
 fresh_fix
 OUT=$(bash "$SETUP" --target "$F" --answers - <"$DJ" 2>&1); RC=$?
@@ -54,6 +53,7 @@ grep_case "v0.8.3 @s3 stdin plan explains replay" <(printf '%s\n' "$OUT") '[Pp]i
 fresh_fix; run_setup --merge
 check "@s50 --merge alone exits 0" "0" "$RC"
 check "@s50 --merge alone keeps stale backend-dev.md" "$(md5f "$FIX/$BD")" "$(md5f "$F/$BD")"
+check "@s50 --merge alone keeps stale frontend-dev.md" "$(md5f "$FIX/$FD")" "$(md5f "$F/$FD")"
 check "@s50 --merge alone keeps customized rule" "$BS_MD5" "$(md5f "$F/$BS")"
 check "@s50 --merge alone keeps regular .claude/CLAUDE.md" "regular|$DCM_MD5" "$([ -L "$F/$DCM" ] && echo link || echo regular)|$(md5f "$F/$DCM")"
 grep_case "@s50 --merge alone summary counts 0 overwritten" <(printf '%s\n' "$OUT") '0 overwritten'
@@ -142,5 +142,3 @@ for m in plugin/.claude-plugin/plugin.json .claude-plugin/marketplace.json codex
   grep_case "@s57 $m version 0.8.2" "$ROOT/$m" '"version": *"0\.8\.2"'
 done
 check "@s57 validate-packaging reports v0.8.2" "1" "$(cd "$ROOT" && python3 scripts/validate-packaging.py 2>&1 | grep -c 'packaging valid @ v0\.8\.2'; true)"
-# MANUAL: run the plan against the real portfolio checkout (read-only), confirm the three labels match
-# MANUAL: the human diffs .claude/CLAUDE.md vs root CLAUDE.md before relinking; the smoke cannot judge which content wins

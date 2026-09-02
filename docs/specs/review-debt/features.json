@@ -103,7 +103,8 @@
       "max_loc": 3000,
       "budget_note": "Gate 1 exception: the maintainer-defined MF includes six hand-authored command surfaces plus four fixture files; splitting would change the ratified five-MF release plan",
       "reviews": ["judge"],
-      "status": "pending"
+      "status": "done",
+      "verified_by_human": "skipped"
     },
     {
       "id": 5,

@@ -31,6 +31,17 @@ def load(rel):
         return None
 
 
+def has_unescaped_inner_double_quote(value):
+    if len(value) < 2 or value[0] != '"' or value[-1] != '"':
+        return False
+    escaped = False
+    for char in value[1:-1]:
+        if char == '"' and not escaped:
+            return True
+        escaped = not escaped if char == "\\" else False
+    return False
+
+
 versions = {}
 
 # --- Claude Code plugin manifests ---
@@ -74,6 +85,13 @@ def parse_frontmatter(path, rel, require=("description",), allow_requires_direct
         return
     fm_lines = lines[1:close]
     data = {}
+    for ln in fm_lines:
+        if ":" not in ln:
+            continue
+        key, value = (part.strip() for part in ln.split(":", 1))
+        if key == "description" and has_unescaped_inner_double_quote(value):
+            err(f"{rel}: description contains an unescaped inner double quote")
+            return
     try:
         import yaml  # real parser when available
         try:

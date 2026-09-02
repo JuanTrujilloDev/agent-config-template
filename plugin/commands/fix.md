@@ -21,6 +21,8 @@ use `/feature`.
 
 ## What it does
 
+Read `agent_style` from `.claude/answers.local.env` once before spawning (absent, empty, or unrecognized = `terse`). Add `agent_style: <terse|descriptive> — return per "Report format" in the principles skill` to every subagent prompt this command spawns. Persisted artifacts stay prose.
+
 1. **Reproduce red first.** Obtain a red-capable reproduction — a failing test or a command that fails for *this* bug and goes green only when fixed — before naming the cause.
 
    If you cannot get a reproduction in one step, stop and switch to `/feature`. Write 2–4 ranked falsifiable hypotheses only when the reproduction does not single out a cause, and test them one variable at a time.
