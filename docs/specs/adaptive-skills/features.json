@@ -1,4 +1,5 @@
 {
+  "schema_version": 2,
   "feature": "adaptive-skills",
   "version": "0.8.2",
   "rules": {
@@ -13,8 +14,20 @@
     {
       "id": 1,
       "name": "output-style",
-      "scenarios": ["@s1", "@s2", "@s3", "@s4", "@s5", "@s6", "@s7", "@s8", "@s9"],
-      "files": [
+      "scenarios": [
+        "@s1",
+        "@s2",
+        "@s3",
+        "@s4",
+        "@s5",
+        "@s6",
+        "@s7",
+        "@s8",
+        "@s9"
+      ],
+      "depends_on": [],
+      "parallel": false,
+      "files_hint": [
         "core/.claude/hooks/coding-reminder.sh",
         "core/.claude/rules/principles.md",
         "core/CLAUDE.md",
@@ -25,16 +38,34 @@
         "template.config.yaml",
         "scripts/smoke.sh"
       ],
-      "max_files": 12, "max_loc": 3000,
-      "reviews": ["judge", "security-reviewer"],
-      "status": "done"
+      "max_files": 12,
+      "max_loc": 3000,
+      "status": "done",
+      "verified_by_human": "skipped",
+      "reviews": [
+        "judge",
+        "security-reviewer"
+      ]
     },
     {
       "id": 8,
       "name": "agent-style",
-      "after": 1,
-      "scenarios": ["@s58", "@s59", "@s60", "@s61", "@s62", "@s63", "@s64", "@s65", "@s66"],
-      "files": [
+      "scenarios": [
+        "@s58",
+        "@s59",
+        "@s60",
+        "@s61",
+        "@s62",
+        "@s63",
+        "@s64",
+        "@s65",
+        "@s66"
+      ],
+      "depends_on": [
+        1
+      ],
+      "parallel": false,
+      "files_hint": [
         "core/.claude/rules/principles.md",
         "core/.claude/commands/feature.md",
         "core/.claude/agents/orchestrator.md",
@@ -45,16 +76,35 @@
         "plugin/commands/setup-template.md",
         "scripts/smoke.sh"
       ],
-      "max_files": 12, "max_loc": 3000,
-      "reviews": ["judge"],
-      "human_verified_scenarios": ["@s66"],
-      "status": "done"
+      "max_files": 12,
+      "max_loc": 3000,
+      "status": "done",
+      "verified_by_human": "skipped",
+      "reviews": [
+        "judge"
+      ],
+      "human_verified_scenarios": [
+        "@s66"
+      ]
     },
     {
       "id": 2,
       "name": "patterns-rule",
-      "scenarios": ["@s10", "@s11", "@s12", "@s13", "@s14", "@s15", "@s16", "@s17"],
-      "files": [
+      "scenarios": [
+        "@s10",
+        "@s11",
+        "@s12",
+        "@s13",
+        "@s14",
+        "@s15",
+        "@s16",
+        "@s17"
+      ],
+      "depends_on": [
+        8
+      ],
+      "parallel": false,
+      "files_hint": [
         "core/.claude/rules/patterns.md",
         "core/.claude/patterns/backend.md",
         "core/.claude/patterns/frontend.md",
@@ -69,16 +119,34 @@
         "README.md",
         "plugin/README.md"
       ],
-      "max_files": 13, "max_loc": 3000,
-      "reviews": ["judge"],
-      "human_verified_scenarios": ["@s17"],
-      "status": "done"
+      "max_files": 13,
+      "max_loc": 3000,
+      "status": "done",
+      "verified_by_human": "skipped",
+      "reviews": [
+        "judge"
+      ],
+      "human_verified_scenarios": [
+        "@s17"
+      ]
     },
     {
       "id": 3,
       "name": "pattern-ledger-integration",
-      "scenarios": ["@s18", "@s19", "@s20", "@s21", "@s22", "@s23", "@s24"],
-      "files": [
+      "scenarios": [
+        "@s18",
+        "@s19",
+        "@s20",
+        "@s21",
+        "@s22",
+        "@s23",
+        "@s24"
+      ],
+      "depends_on": [
+        2
+      ],
+      "parallel": false,
+      "files_hint": [
         "core/.claude/rules/principles.md",
         "core/.claude/agents/pmo.md",
         "core/.claude/agents/judge.md",
@@ -89,16 +157,36 @@
         "plugin/commands/verify.md",
         "scripts/smoke.sh"
       ],
-      "max_files": 12, "max_loc": 3000,
-      "reviews": ["judge"],
-      "human_verified_scenarios": ["@s23", "@s24"],
-      "status": "done"
+      "max_files": 12,
+      "max_loc": 3000,
+      "status": "done",
+      "verified_by_human": "skipped",
+      "reviews": [
+        "judge"
+      ],
+      "human_verified_scenarios": [
+        "@s23",
+        "@s24"
+      ]
     },
     {
       "id": 4,
       "name": "brand-system",
-      "scenarios": ["@s25", "@s26", "@s27", "@s28", "@s29", "@s30", "@s31", "@s32"],
-      "files": [
+      "scenarios": [
+        "@s25",
+        "@s26",
+        "@s27",
+        "@s28",
+        "@s29",
+        "@s30",
+        "@s31",
+        "@s32"
+      ],
+      "depends_on": [
+        3
+      ],
+      "parallel": false,
+      "files_hint": [
         "core/docs/design-system/MASTER.md",
         "core/.claude/agents/ui-designer.md",
         "core/.claude/agents/frontend-dev.md",
@@ -112,15 +200,31 @@
         "plugin/commands/design.md",
         "scripts/build.sh"
       ],
-      "max_files": 12, "max_loc": 3000,
-      "reviews": ["judge"],
-      "status": "done"
+      "max_files": 12,
+      "max_loc": 3000,
+      "status": "done",
+      "verified_by_human": "skipped",
+      "reviews": [
+        "judge"
+      ]
     },
     {
       "id": 5,
       "name": "workflow-vocabulary",
-      "scenarios": ["@s33", "@s34", "@s35", "@s36", "@s37", "@s38", "@s39"],
-      "files": [
+      "scenarios": [
+        "@s33",
+        "@s34",
+        "@s35",
+        "@s36",
+        "@s37",
+        "@s38",
+        "@s39"
+      ],
+      "depends_on": [
+        4
+      ],
+      "parallel": false,
+      "files_hint": [
         "core/.claude/agents/pmo.md",
         "core/.claude/commands/fix.md",
         "core/.claude/commands/spec.md",
@@ -134,16 +238,35 @@
         "plugin/skills/sdd-workflow/SKILL.md",
         "hosts/codex/skills/sdd-workflow/SKILL.md"
       ],
-      "max_files": 12, "max_loc": 3000,
-      "reviews": ["judge"],
-      "human_verified_scenarios": ["@s39"],
-      "status": "done"
+      "max_files": 12,
+      "max_loc": 3000,
+      "status": "done",
+      "verified_by_human": "skipped",
+      "reviews": [
+        "judge"
+      ],
+      "human_verified_scenarios": [
+        "@s39"
+      ]
     },
     {
       "id": 6,
       "name": "companions",
-      "scenarios": ["@s40", "@s41", "@s42", "@s43", "@s44", "@s45", "@s46", "@s47"],
-      "files": [
+      "scenarios": [
+        "@s40",
+        "@s41",
+        "@s42",
+        "@s43",
+        "@s44",
+        "@s45",
+        "@s46",
+        "@s47"
+      ],
+      "depends_on": [
+        5
+      ],
+      "parallel": false,
+      "files_hint": [
         "plugin/commands/setup-template.md",
         "plugin/commands/setup-companions.md",
         "hosts/codex/skills/setup-companions/SKILL.md",
@@ -153,15 +276,34 @@
         "plugin/README.md",
         "docs/upgrade-guide.md"
       ],
-      "max_files": 12, "max_loc": 3000,
-      "reviews": ["judge"],
-      "status": "done"
+      "max_files": 12,
+      "max_loc": 3000,
+      "status": "done",
+      "verified_by_human": "skipped",
+      "reviews": [
+        "judge"
+      ]
     },
     {
       "id": 7,
       "name": "merge-reporting-release",
-      "scenarios": ["@s48", "@s49", "@s50", "@s51", "@s52", "@s53", "@s54", "@s55", "@s56", "@s57"],
-      "files": [
+      "scenarios": [
+        "@s48",
+        "@s49",
+        "@s50",
+        "@s51",
+        "@s52",
+        "@s53",
+        "@s54",
+        "@s55",
+        "@s56",
+        "@s57"
+      ],
+      "depends_on": [
+        6
+      ],
+      "parallel": false,
+      "files_hint": [
         "setup.sh",
         "scripts/smoke.sh",
         ".github/workflows/ci.yml",
@@ -171,10 +313,15 @@
         "codex/.codex-plugin/plugin.json",
         "scripts/smoke/mf7-merge.sh"
       ],
-      "max_files": 8, "max_loc": 3000,
+      "max_files": 8,
+      "max_loc": 3000,
+      "status": "done",
+      "verified_by_human": "skipped",
       "budget_note": "max_files set to 8 per mf7 judge: the scripts/smoke/ split (a36e917) predates this budget, so the per-MF smoke file is a hand-authored file the plan did not count",
-      "reviews": ["judge", "security-reviewer"],
-      "status": "done"
+      "reviews": [
+        "judge",
+        "security-reviewer"
+      ]
     }
   ]
 }

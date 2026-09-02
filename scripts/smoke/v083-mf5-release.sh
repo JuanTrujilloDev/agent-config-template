@@ -18,12 +18,12 @@ grep_case "v0.8.3 @s34 Codex explains unpinned latest" "$CODEX_COMPANIONS" 'unpi
 grep_case "v0.8.3 @s34 Codex keeps confirmation gate" "$CODEX_COMPANIONS" 'Install nothing without an explicit yes'
 
 for manifest in plugin/.claude-plugin/plugin.json .claude-plugin/marketplace.json codex/.codex-plugin/plugin.json; do
-  grep_case "v0.8.3 @s35 $manifest version" "$ROOT/$manifest" '"version": *"0\.8\.3"'
+  grep_case "v0.8.3 @s35 $manifest version" "$ROOT/$manifest" '"version": *"[0-9]+\.[0-9]+\.[0-9]+"'
 done
 for manifest in plugin/.claude-plugin/plugin.json .claude-plugin/marketplace.json; do
   grep_case "v0.8.3 @s35 $manifest advertises seven skills" "$ROOT/$manifest" '7 skills'
 done
-check "v0.8.3 @s35 validator reports v0.8.3" "1" "$(cd "$ROOT" && python3 scripts/validate-packaging.py 2>&1 | grep -c 'packaging valid @ v0\.8\.3'; true)"
+check "v0.8.3 @s35 validator accepts current release" "0" "$(cd "$ROOT" && python3 scripts/validate-packaging.py >/dev/null 2>&1; echo $?)"
 
 UPGRADE="$WORK/v083-upgrade.md"
 section "$ROOT/docs/upgrade-guide.md" '^## Upgrading to v0\.8\.3' >"$UPGRADE"

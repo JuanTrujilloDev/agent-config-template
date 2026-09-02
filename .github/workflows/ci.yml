@@ -5,6 +5,14 @@ on:
   pull_request:
 
 jobs:
+  spec-validation:
+    name: Spec ledgers valid
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate SDD artifacts
+        run: python3 scripts/validate-specs.py
+
   plugin-mirror:
     name: Plugin mirror in sync
     runs-on: ubuntu-latest

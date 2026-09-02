@@ -10,7 +10,7 @@
       "name": "agent-config-template",
       "source": "./plugin",
       "description": "Spec-driven Claude Code config for any stack: orchestrated SDD/TDD workflow, pmo + judge + security + per-stack dev agents, 11 slash commands, advisory hooks, 7 skills incl. code-query (graph-first codebase querying) and port-config for other hosts.",
-      "version": "0.8.3",
+      "version": "0.9.0",
       "homepage": "https://github.com/JuanTrujilloDev/agent-config-template",
       "license": "MIT",
       "keywords": [

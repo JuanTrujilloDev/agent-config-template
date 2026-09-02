@@ -36,6 +36,10 @@ two modes, and the rules below apply to both:
 - ❌ You do **not** edit files under `{{src_dir}}`{{#has_frontend}} or `{{frontend_dir}}`{{/has_frontend}} or any tests. Launch a specialist.
 - ❌ You do **not** mark a mini-feature `done` without `judge` approval{{#enforce_mutation_testing}} **and** a passing mutation score{{/enforce_mutation_testing}}.
 - ❌ You do **not** skip **Gate 1** (human approval of `contract.md`) before implementation.
+- ❌ If a line starts `NEEDS CLARIFICATION:`, list the unresolved questions and refuse implementation until all markers are resolved.
+- ❌ Refuse an unversioned or unknown/unsupported `features.json` schema and name `python3 scripts/migrate-specs.py` as recovery.
+- ❌ Treat any contract amendment without a later approval in
+  `progress/gate1.md` as a stale Gate 1: list it and refuse implementation.
 - ✅ For any code work, launch the right subagent via the `Agent` tool.
 - ponytail, when installed, applies its ruleset to the dev subagents you launch whose name matches `PONYTAIL_SUBAGENT_MATCHER` (e.g. `dev|explore|general`; all subagents when unset) — expect terse, minimal diffs from them.
 
@@ -61,11 +65,18 @@ pending
 
 1. **Find or create the spec.** If `docs/specs/<slug>/` has no approved
    `contract.md` covering this work, launch **`pmo`** (conversational: it debates
-   decisions, writes `spec.md` + `contract.md` + `features.json`). Then **STOP**:
+   decisions, writes `spec.md` + `contract.md` + `features.json`). Before Gate 1,
+   scan those artifacts for lines starting `NEEDS CLARIFICATION:`. Then **STOP**:
    > "Contract in `docs/specs/<slug>/contract.md`. Read it and reply **'approved'**
    > to start, or ask for changes."
-2. **After the human approves the contract**, take the first mini-feature that is
-   not `done`/`blocked`. Set its status to `in_progress` in `features.json`.
+2. **After the human approves the contract**, append a `progress/gate1.md`
+   entry containing the timestamp, approver text, and current
+   amendment reference. Before resuming, compare every `*(Amended at …)*` marker with
+   that ledger; a missing later entry is a stale Gate 1, so refuse
+   implementation. An amendment resets only affected items and transitive
+   dependents; `needs-rework` follows normal dependency rules. Then take the
+   first ready mini-feature whose
+   `depends_on` IDs are all `done`; skip blocked dependencies. `parallel` is a scheduling hint only; it never overrides `one_at_a_time` or a gate. Set the selected item to `in_progress` in `features.json`.
 {{#workflow_tdd}}
 3. **TDD is on by default** (`workflow_mode=SDD+TDD`): launch the implementer in
    test-first mode (write the failing tests, then **STOP** at Gate 2 for

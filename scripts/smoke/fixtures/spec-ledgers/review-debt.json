@@ -1,0 +1,131 @@
+{
+  "feature": "review-debt",
+  "version": "0.8.3",
+  "rules": {
+    "one_at_a_time": true,
+    "require_approved_contract": true,
+    "workflow_mode": "SDD+TDD",
+    "autonomy_mode": "gated",
+    "generated_mirrors_excluded_from_budget": true,
+    "order": "array order; ids are stable"
+  },
+  "mini_features": [
+    {
+      "id": 1,
+      "name": "hook-and-setup-bugs",
+      "scenarios": ["@s1", "@s2", "@s3", "@s4", "@s5", "@s6", "@s7", "@s8", "@s9"],
+      "files": [
+        "core/.claude/hooks/coding-reminder.sh",
+        "plugin/hooks/coding-reminder.sh",
+        "core/.claude/hooks/agent-enforcement.sh",
+        "plugin/hooks/agent-enforcement.sh",
+        "setup.sh",
+        "scripts/smoke/mf1-output-style.sh",
+        "scripts/smoke/mf7-merge.sh",
+        "scripts/smoke/v083-mf1-bugs.sh",
+        "scripts/smoke.sh"
+      ],
+      "max_files": 12,
+      "max_loc": 3000,
+      "reviews": ["judge", "security-reviewer"],
+      "status": "done",
+      "verified_by_human": "skipped"
+    },
+    {
+      "id": 2,
+      "name": "docs-catch-up",
+      "scenarios": ["@s10", "@s11", "@s12", "@s13", "@s14"],
+      "files": [
+        "docs/what-each-file-does.md",
+        "README.md",
+        "docs/install/host-capability-matrix.md",
+        "docs/install/cursor.md",
+        "hosts/cursor/AGENTS.md",
+        "scripts/smoke/mf-docs.sh",
+        "scripts/smoke.sh"
+      ],
+      "max_files": 12,
+      "max_loc": 3000,
+      "reviews": ["judge"],
+      "status": "done",
+      "verified_by_human": "skipped"
+    },
+    {
+      "id": 3,
+      "name": "instruction-text-debt",
+      "scenarios": ["@s15", "@s16", "@s17", "@s18", "@s19", "@s20", "@s21", "@s22", "@s23"],
+      "files": [
+        "core/.claude/agents/pmo.md",
+        "plugin/agents/pmo.md",
+        "core/.claude/commands/fix.md",
+        "plugin/commands/fix.md",
+        "core/.claude/commands/feature.md",
+        "plugin/commands/feature.md",
+        "core/CLAUDE.md",
+        "core/.claude/rules/principles.md",
+        "plugin/skills/principles/SKILL.md",
+        "plugin/commands/setup-template.md",
+        "core/docs/design-system/MASTER.md",
+        "scripts/smoke/v083-mf3-instructions.sh",
+        "scripts/smoke.sh"
+      ],
+      "max_files": 13,
+      "max_loc": 3000,
+      "budget_note": "Gate 1 exception: the handoff keeps one instruction-text MF; direct plugin components are hand-authored, while generated mirrors remain excluded",
+      "reviews": ["judge"],
+      "status": "done",
+      "verified_by_human": "skipped"
+    },
+    {
+      "id": 4,
+      "name": "build-test-hygiene",
+      "scenarios": ["@s24", "@s25", "@s26", "@s27", "@s28", "@s29", "@s30", "@s31"],
+      "files": [
+        "scripts/build.sh",
+        "scripts/validate-packaging.py",
+        "scripts/smoke/lib.sh",
+        "scripts/smoke/mf7-merge.sh",
+        "docs/specs/adaptive-skills/features.json",
+        "core/.claude/commands/audit.md",
+        "core/.claude/commands/design.md",
+        "core/.claude/commands/fix.md",
+        "plugin/commands/audit.md",
+        "plugin/commands/design.md",
+        "plugin/commands/fix.md",
+        "scripts/smoke/fixtures/stale-render/.claude/agents/backend-dev.md",
+        "scripts/smoke/fixtures/stale-render/.claude/agents/frontend-dev.md",
+        "scripts/smoke/fixtures/stale-render/.claude/rules/principles.md",
+        "scripts/smoke/fixtures/stale-render/.claude/CLAUDE.md",
+        "scripts/smoke/v083-mf4-hygiene.sh",
+        "scripts/smoke.sh"
+      ],
+      "max_files": 17,
+      "max_loc": 3000,
+      "budget_note": "Gate 1 exception: the maintainer-defined MF includes six hand-authored command surfaces plus four fixture files; splitting would change the ratified five-MF release plan",
+      "reviews": ["judge"],
+      "status": "done",
+      "verified_by_human": "skipped"
+    },
+    {
+      "id": 5,
+      "name": "companion-pin-and-release",
+      "scenarios": ["@s32", "@s33", "@s34", "@s35", "@s36"],
+      "files": [
+        "plugin/commands/setup-companions.md",
+        "hosts/codex/skills/setup-companions/SKILL.md",
+        "plugin/.claude-plugin/plugin.json",
+        ".claude-plugin/marketplace.json",
+        "codex/.codex-plugin/plugin.json",
+        "docs/upgrade-guide.md",
+        "scripts/smoke/v083-mf5-release.sh",
+        "scripts/smoke/mf7-merge.sh",
+        "scripts/smoke.sh"
+      ],
+      "max_files": 12,
+      "max_loc": 3000,
+      "reviews": ["judge"],
+      "status": "done",
+      "verified_by_human": "skipped"
+    }
+  ]
+}

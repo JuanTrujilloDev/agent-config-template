@@ -18,6 +18,8 @@ What it covers:
 - **Code Health** — DRY by the rule of three; small functions/files; comments explain *why*.
 - **Micro-PR Discipline** — ≤{{max_files_per_pr}} files, <{{max_loc_per_pr}} lines per PR.
 - **Definition of Done** — format → lint → unit tests → review, in order, before declaring done.
+- **Principles Double Gate** — before Gate 1 PMO records the deviation table;
+  judge rechecks the same table before approval.
 - **Conciseness** — no filler, no recaps of visible output.
 - **Branch Discipline** — never code on `{{default_branch}}`; check out a typed branch first.
 - **Autonomy Mode / Output style** — Cursor runs no prompt hook, so at task

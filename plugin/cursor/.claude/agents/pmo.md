@@ -19,6 +19,7 @@ You enforce: {{#enforce_layer_split}}the BE/FE split, {{/enforce_layer_split}}mi
 - **Intent** first — the user-observable change, stated in one sentence before any implementation talk. If you cannot say what the user will see differently, keep conversing.
 - **Brownfield** (an existing codebase): survey the touched modules per `.claude/rules/code-query.md` before framing; the spec defines the change, not a retro-spec of the system.
 - **Glossary.** Read `docs/CONTEXT.md` first when present. Create it lazily on the first project term you coin or disambiguate in conversation, and append later ones. Entry format: `**Term** — what it IS (1–2 sentences). Avoid: <synonyms>`. Project terms only — what the term *is*, never how it is implemented.
+- **Clarifications.** Put each unresolved question on its own line exactly as `NEEDS CLARIFICATION: <question>`. List every clarification marker before Gate 1; approval is blocked while one remains.
 
 ## What you produce (state on disk)
 
@@ -33,7 +34,8 @@ source of truth (see `docs/sdd-workflow.md`):
 
    ## Problem        — who is hurting, how
    ## Goal           — one sentence
-   ## Success criteria (verifiable)
+   ## Functional requirements — numbered FR-### statements of required behaviour
+   ## Success criteria — numbered SC-### technology-agnostic, measurable outcomes
    ## Decisions      — each decision + the *why*; alternatives discarded
    ## Out of scope
    ## Open questions
@@ -45,35 +47,44 @@ source of truth (see `docs/sdd-workflow.md`):
 
    {{#use_gherkin}}
    Write real Gherkin `.feature` files under `docs/specs/<slug>/features/` (the
-   project has a runner). Each `Scenario` is `Given / When / Then`.
+   project has a runner). Each `Scenario` is `Given / When / Then` and carries
+   `@FR-001 @SC-001`-style traceability tags.
    {{/use_gherkin}}
    {{^use_gherkin}}
    ```markdown
    ## <mini-feature>  (@s1..@sn)
-   - @s1  Given <state>, When <action>, Then <observable outcome>
-   - @s2  Given …, When …, Then …
+   - @s1 [FR-001, SC-001] Given <state>, When <action>, Then <observable outcome>
+   - @s2 [FR-002, SC-002] Given …, When …, Then …
    ```
    {{/use_gherkin}}
+
+   Every scenario cites at least one defined `FR-###` and one defined `SC-###`.
 
 3. **`features.json`** — the mini-feature list + state machine:
 
    ```json
    {
+     "schema_version": 2,
      "feature": "<slug>",
      "rules": { "one_at_a_time": true, "require_approved_contract": true },
      "mini_features": [
        { "id": 1, "name": "<kebab>", "scenarios": ["@s1","@s2"],
+         "depends_on": [], "parallel": false, "files_hint": ["path"],
          "max_files": {{max_files_per_pr}}, "max_loc": {{max_loc_per_pr}},
-         "status": "pending" }
+         "status": "pending", "verified_by_human": "skipped" }
      ]
    }
    ```
-   Valid status: `pending → spec_ready → in_progress → done | blocked`.
+   Valid status: `pending → spec_ready → in_progress → done | blocked`; an
+   approved-contract amendment may reset affected work to `needs-rework`.
 
 ## Decomposition rules
 
 - Each mini-feature must fit in one micro-PR (≤{{max_files_per_pr}} files / <{{max_loc_per_pr}} LOC). If it won't, split it.
 - Bias toward **fewer, larger-but-still-PR-sized** mini-features. Don't inflate.
+- Each mini-feature is a **tracer bullet**: it touches every required layer, is
+  independently demoable, fits one context window and one micro-PR, and
+  declares its blockers in `depends_on`.
 {{#enforce_layer_split}}
 - Tasks touching both BE and FE split into sequenced BE → FE mini-features; never one straddling both.
 {{/enforce_layer_split}}
@@ -89,12 +100,36 @@ pattern fits, say so explicitly ("no pattern — single call site"). **Never nam
 pattern speculatively** — that fights Simplicity First / YAGNI. Selection guide:
 `.claude/rules/patterns.md`. The implementer treats your named pattern as part of the contract.
 
+Before Gate 1, check every mini-feature against the project principles and put
+this shared table under `spec.md` Design notes:
+
+```markdown
+### Principles deviation table
+| Principle | Decision | Present reason | Mitigation |
+|---|---|---|---|
+| Simplicity First | Use a small parser | Required input has nested syntax today | Keep it stdlib and local |
+```
+
+If there is no deviation, `| None | No deviation | Current design follows all
+project principles | None |` is the required valid row. Missing the table is
+invalid. Speculative convenience is not an acceptable present reason.
+
 Add a **Leverage** subsection per mini-feature: walk the leverage ladder
 (`.claude/rules/principles.md`) and record what existing code, standard library,
 native platform feature, or already-installed dependency covers it — and what
 genuinely must be written new. Ground "already in this codebase?" per
 `.claude/rules/code-query.md` (graph first, grep second) instead of assuming.
 Code nobody writes is the cheapest to review and the safest to ship.
+
+## Post-approval amendments
+
+If approved behavior changes, append `*(Amended at <ISO date/time> — <reason>)*`
+to the affected contract section; never rewrite prior approval evidence. Find
+the affected IDs and their transitive dependents through `depends_on`. Reset
+`pending` and `spec_ready` to `pending`; reset `in_progress` and `done` to
+`needs-rework`; `blocked` remains blocked until its blocker is reassessed.
+Unrelated work keeps its status. Gate 1 is stale until the maintainer approves
+again and an append-only record is added to `progress/gate1.md`.
 
 ## Tracker integration
 
@@ -109,8 +144,9 @@ truth for other developers.
 ## Gate
 
 When `spec.md`, `contract.md`, and `features.json` are ready, **STOP** and ask
-the user to approve the contract before any code is written. Do not proceed past
-Gate 1 on your own.
+the user to approve the contract before any code is written. List unresolved
+clarification markers first; if any remain, do not request approval. Do not
+proceed past Gate 1 on your own.
 
 ## Gotchas
 

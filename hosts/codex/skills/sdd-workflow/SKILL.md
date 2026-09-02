@@ -65,6 +65,52 @@ under TDD). State lives on disk, not in chat.**
 | `docs/specs/<slug>/progress/<feature>.judge.md` | `judge` | Review verdict + blockers/nits |
 | `docs/specs/<slug>/progress/<feature>.mutation.md` | `mutation-tester` | Mutation score + survivors (when enabled) |
 
+## Contract grammar
+
+- `spec.md` separates numbered functional requirements (`FR-###`) from
+  technology-agnostic, measurable success criteria (`SC-###`). Every contract
+  scenario cites at least one defined `FR-###` and one defined `SC-###`.
+- Put each unresolved question on its own line as
+  `NEEDS CLARIFICATION: <question>`. Gate 1 stays closed while any marker
+  remains; the orchestrator lists the questions instead of implementing.
+
+## Mini-feature grammar
+
+`features.json` schema v2 requires each mini-feature to declare `id`, `name`,
+`scenarios`, `depends_on`, `parallel`, `files_hint`, `max_files`, `max_loc`,
+`status`, and `verified_by_human`. A mini-feature is a tracer bullet: it touches
+every required layer, is independently demoable, fits one context window and
+one micro-PR, and declares blockers. The orchestrator starts it only when every
+`depends_on` item is `done`; `parallel` is a hint, never a gate override.
+
+The current ledger version is `schema_version: 2`. Upgrade older ledgers once
+with `python3 scripts/migrate-specs.py`; `/feature` refuses unversioned or
+unknown/unsupported versions and prints that recovery command.
+
+## Contract amendments
+
+After Gate 1, append `*(Amended at <ISO date/time> — <reason>)*` to each changed
+contract section; do not rewrite old approval evidence. Reset the affected item
+and its transitive dependents: `pending`/`spec_ready` → `pending`,
+`in_progress`/`done` → `needs-rework`, while `blocked` stays blocked for
+reassessment. Unrelated statuses stay unchanged. The amendment makes Gate 1
+stale until `progress/gate1.md` appends a later timestamp, approver text, and
+current amendment reference. Only then may work resume at the first ready item.
+
+## Principles double gate
+
+Before Gate 1 PMO records the result; judge rechecks the same table before
+approving the implementation:
+
+### Principles deviation table
+
+| Principle | Decision | Present reason | Mitigation |
+|---|---|---|---|
+| None | No deviation | Current design follows all principles | None |
+
+The explicit `None` row is valid. A real deviation must name a present reason
+and mitigation; missing, speculative, unrecorded, or unused rows block approval.
+
 ## The gates
 
 - **Gate 1 — the contract.** The cheapest place to fix ambiguity is before code

@@ -19,6 +19,7 @@ You enforce: micro-PR discipline (≤12 files / <3000 lines per mini-feature), a
 - **Intent** first — the user-observable change, stated in one sentence before any implementation talk. If you cannot say what the user will see differently, keep conversing.
 - **Brownfield** (an existing codebase): survey the touched modules per the `code-query` skill before framing; the spec defines the change, not a retro-spec of the system.
 - **Glossary.** Read `docs/CONTEXT.md` first when present. Create it lazily on the first project term you coin or disambiguate in conversation, and append later ones. Entry format: `**Term** — what it IS (1–2 sentences). Avoid: <synonyms>`. Project terms only — what the term *is*, never how it is implemented.
+- **Clarifications.** Put each unresolved question on its own line exactly as `NEEDS CLARIFICATION: <question>`. List every clarification marker before Gate 1; approval is blocked while one remains.
 
 ## What you produce (state on disk)
 
@@ -33,7 +34,8 @@ source of truth (see `the `sdd-workflow` skill`):
 
    ## Problem        — who is hurting, how
    ## Goal           — one sentence
-   ## Success criteria (verifiable)
+   ## Functional requirements — numbered FR-### statements of required behaviour
+   ## Success criteria — numbered SC-### technology-agnostic, measurable outcomes
    ## Decisions      — each decision + the *why*; alternatives discarded
    ## Out of scope
    ## Open questions
@@ -43,31 +45,39 @@ source of truth (see `the `sdd-workflow` skill`):
 2. **`contract.md`** — the executable contract the user signs. One block per
    mini-feature, each behaviour a verifiable scenario, tagged `@s1`, `@s2`, …:
 
-         ```markdown
+   ```markdown
    ## <mini-feature>  (@s1..@sn)
-   - @s1  Given <state>, When <action>, Then <observable outcome>
-   - @s2  Given …, When …, Then …
+   - @s1 [FR-001, SC-001] Given <state>, When <action>, Then <observable outcome>
+   - @s2 [FR-002, SC-002] Given …, When …, Then …
    ```
+
+   Every scenario cites at least one defined `FR-###` and one defined `SC-###`.
    
 3. **`features.json`** — the mini-feature list + state machine:
 
    ```json
    {
+     "schema_version": 2,
      "feature": "<slug>",
      "rules": { "one_at_a_time": true, "require_approved_contract": true },
      "mini_features": [
        { "id": 1, "name": "<kebab>", "scenarios": ["@s1","@s2"],
+         "depends_on": [], "parallel": false, "files_hint": ["path"],
          "max_files": 12, "max_loc": 3000,
-         "status": "pending" }
+         "status": "pending", "verified_by_human": "skipped" }
      ]
    }
    ```
-   Valid status: `pending → spec_ready → in_progress → done | blocked`.
+   Valid status: `pending → spec_ready → in_progress → done | blocked`; an
+   approved-contract amendment may reset affected work to `needs-rework`.
 
 ## Decomposition rules
 
 - Each mini-feature must fit in one micro-PR (≤12 files / <3000 LOC). If it won't, split it.
 - Bias toward **fewer, larger-but-still-PR-sized** mini-features. Don't inflate.
+- Each mini-feature is a **tracer bullet**: it touches every required layer, is
+  independently demoable, fits one context window and one micro-PR, and
+  declares its blockers in `depends_on`.
 
 ## Design notes (required for technical mini-features)
 
@@ -80,12 +90,36 @@ pattern fits, say so explicitly ("no pattern — single call site"). **Never nam
 pattern speculatively** — that fights Simplicity First / YAGNI. Selection guide:
 the `patterns` skill. The implementer treats your named pattern as part of the contract.
 
+Before Gate 1, check every mini-feature against the project principles and put
+this shared table under `spec.md` Design notes:
+
+```markdown
+### Principles deviation table
+| Principle | Decision | Present reason | Mitigation |
+|---|---|---|---|
+| Simplicity First | Use a small parser | Required input has nested syntax today | Keep it stdlib and local |
+```
+
+If there is no deviation, `| None | No deviation | Current design follows all
+project principles | None |` is the required valid row. Missing the table is
+invalid. Speculative convenience is not an acceptable present reason.
+
 Add a **Leverage** subsection per mini-feature: walk the leverage ladder (`principles`
 skill) and record what existing code, standard library, native platform feature,
 or already-installed dependency covers it — and what genuinely must be written
 new. Ground "already in this codebase?" with the `code-query` skill (graph
 first, grep second) instead of assuming. Code nobody writes is the cheapest to
 review and the safest to ship.
+
+## Post-approval amendments
+
+If approved behavior changes, append `*(Amended at <ISO date/time> — <reason>)*`
+to the affected contract section; never rewrite prior approval evidence. Find
+the affected IDs and their transitive dependents through `depends_on`. Reset
+`pending` and `spec_ready` to `pending`; reset `in_progress` and `done` to
+`needs-rework`; `blocked` remains blocked until its blocker is reassessed.
+Unrelated work keeps its status. Gate 1 is stale until the maintainer approves
+again and an append-only record is added to `progress/gate1.md`.
 
 ## Tracker integration
 
@@ -100,8 +134,9 @@ truth for other developers.
 ## Gate
 
 When `spec.md`, `contract.md`, and `features.json` are ready, **STOP** and ask
-the user to approve the contract before any code is written. Do not proceed past
-Gate 1 on your own.
+the user to approve the contract before any code is written. List unresolved
+clarification markers first; if any remain, do not request approval. Do not
+proceed past Gate 1 on your own.
 
 ## Gotchas
 

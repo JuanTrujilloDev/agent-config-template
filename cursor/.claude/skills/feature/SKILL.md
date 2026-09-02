@@ -27,6 +27,16 @@ then run the pipeline from this conversation, chaining one subagent at a time:
 ### 1. Spec + contract
 If there's no approved contract for this work, spawn `pmo`
 (or run `/spec` first). Output: `docs/specs/<slug>/{spec.md, contract.md, features.json}`.
+Before Gate 1, scan those artifacts for lines starting `NEEDS CLARIFICATION:`;
+if any remain, list the unresolved questions and refuse implementation.
+If `features.json` is unversioned or has an unknown/unsupported schema version,
+refuse to continue and tell the user to run `python3 scripts/migrate-specs.py`.
+If the contract contains `*(Amended at …)*`, require a later append-only entry
+in `progress/gate1.md` with the timestamp, approver text, and current
+amendment reference. Otherwise report a stale Gate 1, list the amendment, and refuse
+implementation. Reset only affected items and transitive dependents;
+`needs-rework` obeys dependency rules. After reapproval, resume at the first
+ready item.
 **Gate 1 — you approve `contract.md` before any code is written.**
 
 ### 2. Per mini-feature (one at a time)
