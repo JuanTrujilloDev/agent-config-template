@@ -1,0 +1,161 @@
+{
+  "schema_version": 2,
+  "feature": "sdd-grammar",
+  "version": "0.9.0",
+  "rules": {
+    "one_at_a_time": true,
+    "require_approved_contract": true,
+    "workflow_mode": "SDD+TDD",
+    "autonomy_mode": "gated",
+    "generated_mirrors_excluded_from_budget": true
+  },
+  "mini_features": [
+    {
+      "id": 1,
+      "name": "contract-grammar",
+      "scenarios": ["@s1", "@s2", "@s3", "@s4", "@s5", "@s6"],
+      "depends_on": [],
+      "parallel": false,
+      "files_hint": [
+        "core/.claude/agents/pmo.md",
+        "plugin/agents/pmo.md",
+        "core/.claude/agents/orchestrator.md",
+        "plugin/agents/orchestrator.md",
+        "core/.claude/commands/feature.md",
+        "plugin/commands/feature.md",
+        "core/.claude/HELP.md",
+        "docs/sdd-workflow.md",
+        "plugin/skills/sdd-workflow/SKILL.md",
+        "hosts/codex/skills/sdd-workflow/SKILL.md",
+        "scripts/smoke/v090-mf1-contract-grammar.sh",
+        "scripts/smoke.sh"
+      ],
+      "max_files": 12,
+      "max_loc": 3000,
+      "status": "in_progress",
+      "verified_by_human": "skipped"
+    },
+    {
+      "id": 2,
+      "name": "mini-feature-grammar",
+      "scenarios": ["@s7", "@s8", "@s9", "@s10", "@s11", "@s12", "@s13"],
+      "depends_on": [1],
+      "parallel": false,
+      "files_hint": [
+        "core/.claude/agents/pmo.md",
+        "plugin/agents/pmo.md",
+        "core/.claude/agents/orchestrator.md",
+        "plugin/agents/orchestrator.md",
+        "docs/sdd-workflow.md",
+        "plugin/skills/sdd-workflow/SKILL.md",
+        "hosts/codex/skills/sdd-workflow/SKILL.md",
+        "scripts/validate-specs.py",
+        "scripts/smoke/v090-mf2-mini-feature-grammar.sh",
+        "scripts/smoke.sh",
+        ".github/workflows/ci.yml"
+      ],
+      "max_files": 12,
+      "max_loc": 3000,
+      "status": "pending",
+      "verified_by_human": "skipped"
+    },
+    {
+      "id": 3,
+      "name": "schema-version-and-migration",
+      "scenarios": ["@s14", "@s15", "@s16", "@s17", "@s18", "@s19", "@s20"],
+      "depends_on": [2],
+      "parallel": false,
+      "files_hint": [
+        "scripts/migrate-specs.py",
+        "scripts/validate-specs.py",
+        "core/.claude/commands/feature.md",
+        "plugin/commands/feature.md",
+        "core/.claude/agents/orchestrator.md",
+        "plugin/agents/orchestrator.md",
+        "docs/sdd-workflow.md",
+        "plugin/skills/sdd-workflow/SKILL.md",
+        "hosts/codex/skills/sdd-workflow/SKILL.md",
+        "docs/specs/*/features.json",
+        "scripts/smoke/fixtures/spec-ledgers/*.json",
+        "scripts/smoke/v090-mf3-schema-migration.sh",
+        "scripts/smoke.sh"
+      ],
+      "max_files": 20,
+      "max_loc": 3000,
+      "budget_note": "Gate 1 exception: one atomic migration touches every historical ledger plus mechanical fixture copies; splitting would leave mixed live schema versions",
+      "status": "pending",
+      "verified_by_human": "skipped"
+    },
+    {
+      "id": 4,
+      "name": "contract-amendments",
+      "scenarios": ["@s21", "@s22", "@s23", "@s24", "@s25", "@s26", "@s27"],
+      "depends_on": [3],
+      "parallel": false,
+      "files_hint": [
+        "core/.claude/agents/pmo.md",
+        "plugin/agents/pmo.md",
+        "core/.claude/agents/orchestrator.md",
+        "plugin/agents/orchestrator.md",
+        "core/.claude/commands/feature.md",
+        "plugin/commands/feature.md",
+        "docs/sdd-workflow.md",
+        "plugin/skills/sdd-workflow/SKILL.md",
+        "hosts/codex/skills/sdd-workflow/SKILL.md",
+        "scripts/validate-specs.py",
+        "scripts/smoke/v090-mf4-contract-amendments.sh",
+        "scripts/smoke.sh"
+      ],
+      "max_files": 12,
+      "max_loc": 3000,
+      "status": "pending",
+      "verified_by_human": "skipped"
+    },
+    {
+      "id": 5,
+      "name": "principles-double-gate",
+      "scenarios": ["@s28", "@s29", "@s30", "@s31", "@s32", "@s33"],
+      "depends_on": [4],
+      "parallel": false,
+      "files_hint": [
+        "core/.claude/agents/pmo.md",
+        "plugin/agents/pmo.md",
+        "core/.claude/agents/judge.md",
+        "plugin/agents/judge.md",
+        "core/.claude/rules/principles.md",
+        "plugin/skills/principles/SKILL.md",
+        "hosts/cursor/principles.mdc",
+        "docs/sdd-workflow.md",
+        "plugin/skills/sdd-workflow/SKILL.md",
+        "hosts/codex/skills/sdd-workflow/SKILL.md",
+        "scripts/smoke/v090-mf5-principles-gates.sh",
+        "scripts/smoke.sh"
+      ],
+      "max_files": 12,
+      "max_loc": 3000,
+      "status": "pending",
+      "verified_by_human": "skipped"
+    },
+    {
+      "id": 6,
+      "name": "brownfield-readme-release",
+      "scenarios": ["@s34", "@s35", "@s36", "@s37", "@s38", "@s39", "@s40", "@s41"],
+      "depends_on": [5],
+      "parallel": false,
+      "files_hint": [
+        "docs/guides/existing-projects.md",
+        "README.md",
+        "docs/upgrade-guide.md",
+        "plugin/.claude-plugin/plugin.json",
+        ".claude-plugin/marketplace.json",
+        "codex/.codex-plugin/plugin.json",
+        "scripts/smoke/v090-mf6-release.sh",
+        "scripts/smoke.sh"
+      ],
+      "max_files": 12,
+      "max_loc": 3000,
+      "status": "pending",
+      "verified_by_human": "skipped"
+    }
+  ]
+}
