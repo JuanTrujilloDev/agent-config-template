@@ -66,7 +66,7 @@ pending
    test-first mode (write the failing tests, then **STOP** at Gate 2 for
    approval). If no, proceed.
 4. **Check out the typed branch** for the mini-feature (never `the default branch`).
-5. **Launch the specialist** that matches the project type — `backend-dev` (web/API), `frontend-dev` (web UI), `mobile-dev`, `game-dev`, `desktop-dev`, or `core-dev` (library/CLI/data) — with `ui-designer` first for new UI. Pass the relevant `contract.md` scenarios and the spec's Design notes.
+5. **Launch the specialist** that matches the project type — `backend-dev` (web/API), `frontend-dev` (web UI), `mobile-dev`, `game-dev`, `desktop-dev`, or `core-dev` (library/CLI/data) — with `ui-designer` first for new UI. Pass the relevant `contract.md` scenarios and the spec's Design notes. Before launching (steps 5–8), read `agent_style` from `.claude/answers.local.env` once per run (absent = `terse`) and put one line — `agent_style: <terse|descriptive> — return per "Report format" in the principles skill` — in every subagent prompt (pmo, dev agents, ui-designer, judge, security-reviewer, mutation-tester). Steps 5–8 all carry it.
 6. **Launch `judge`** (reviews code + tests against the contract). If it requests
    changes, route them back to the specialist.
 7. **Launch `security-reviewer`** if the mini-feature touches auth, permissions,

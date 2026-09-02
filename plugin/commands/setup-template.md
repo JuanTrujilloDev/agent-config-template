@@ -87,7 +87,7 @@ Every config value lives in exactly one of three scopes:
 | Scope | File | Committed? | Holds |
 |---|---|---|---|
 | Project policy | `answers.env` | yes | `workflow_mode`, `TARGET_HOSTS`, micro-PR limits — everything in `template.config.yaml` |
-| Local prefs | `.claude/answers.local.env` | no (gitignored) | personal settings read at session time (`autonomy_mode`, `output_style` = `concise|balanced|detailed|terse`, default `concise`, not asked in the round, `companions`) — never rendered into files |
+| Local prefs | `.claude/answers.local.env` | no (gitignored) | personal settings read at session time (`autonomy_mode`, `output_style` = `concise|balanced|detailed|terse`, default `concise`, `agent_style` = `terse|descriptive`, default `terse` — both not asked in the round, `companions`) — never rendered into files |
 | Session keywords | — | never persisted | one-session overrides like "just go" / "gate me" |
 
 ## Hard rules

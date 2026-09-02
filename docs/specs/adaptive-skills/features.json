@@ -47,7 +47,7 @@
       "max_files": 12, "max_loc": 3000,
       "reviews": ["judge"],
       "human_verified_scenarios": ["@s66"],
-      "status": "in_progress"
+      "status": "done"
     },
     {
       "id": 2,
@@ -69,7 +69,7 @@
       "max_files": 12, "max_loc": 3000,
       "reviews": ["judge"],
       "human_verified_scenarios": ["@s17"],
-      "status": "pending"
+      "status": "in_progress"
     },
     {
       "id": 3,

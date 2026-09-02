@@ -30,6 +30,7 @@ If there's no approved contract for this work, spawn `pmo`
 
 ### 2. Per mini-feature (one at a time)
 - Set `in_progress`; check out the typed branch (never `{{default_branch}}`).
+- Read `agent_style` from `.claude/answers.local.env` once per run (absent = `terse`) and put one line — `agent_style: <terse|descriptive> — return per "Report format" in .claude/rules/principles.md` — in every subagent prompt (pmo, dev agents, ui-designer, judge, security-reviewer, mutation-tester).
 {{#workflow_tdd}}
 - **TDD is on by default** (project policy: `workflow_mode=SDD+TDD`): the implementer writes the failing tests first → **Gate 2: you approve the tests** before production code — applied per mini-feature, skippable per mini-feature on request ("skip TDD").
 {{/workflow_tdd}}

@@ -196,6 +196,7 @@ Absent or empty = `concise`; an unrecognized value is ignored (mode-only banner,
   - No preamble, filler, recap of visible output, or closing phrase.
   - Errors stated plainly, with the recovery action.
 - **balanced** / **detailed** — relax *length only*; every other rule above holds.
+- **terse** (opt-in) — telegraphic prose: drop articles and filler; keep negations and every technical token (paths, commands, identifiers, versions, numbers) verbatim; never invent abbreviations; no arrow chains; the revert-to-prose list below applies unchanged. Caveat: on already-short output `terse` is often net-negative versus `concise` — `concise` remains the default.
 - **Prose is mandatory regardless of style** (including `terse`) for: security
   warnings; irreversible confirmations (push, merge, publish, destructive ops,
   secrets, data loss); an explicit "explain" request; real ambiguity (present
@@ -204,6 +205,20 @@ Absent or empty = `concise`; an unrecognized value is ignored (mode-only banner,
 - **Session overrides** — "explain more" / "detailed for this session" widen,
   "be brief" tightens, for this session only. Apply immediately and **never
   write them to any file** — same rule as "just go".
+
+### Report format
+
+A second **personal** preference, `agent_style=terse|descriptive`, read from the same gitignored `.claude/answers.local.env`. Absent, empty, or unrecognized = `terse`. It governs only the return message a subagent hands back to the orchestrator — never human-facing output, never what the agent writes to disk. The orchestrator passes the value as one prompt line; a prompt with no line means `terse`.
+
+- **terse** — a fixed field schema, exactly these fields in this order, no prose, ≤ ~25 lines, paths and commands verbatim:
+  - `RESULT:` — one of `pass|fail|approved|changes-requested|blocked`
+  - `FILES:` — `path:+n/-m`, one per file touched
+  - `CHECKS:` — `name=pass|fail`, one per check run
+  - `FINDINGS:` — severity + one line each (never drop a finding to fit the budget)
+  - `DECISIONS:` — one line each
+  - `NEXT:` — one line
+- **descriptive** — the prose report; the choice for debugging the workflow or onboarding a human to it.
+- **Boundary rule** — verdict and findings files under `docs/specs/*/progress/`, `spec.md`/`contract.md`, commit messages, PR bodies, and docs are always normal prose regardless of `agent_style` or `output_style`. Human-facing output follows `output_style`, never `agent_style`. The revert-to-prose list above applies to both channels.
 
 ## Branch Discipline
 

@@ -29,6 +29,7 @@ If there's no approved contract for this work, spawn `pmo`
 
 ### 2. Per mini-feature (one at a time)
 - Set `in_progress`; check out the typed branch (never `the default branch`).
+- Read `agent_style` from `.claude/answers.local.env` once per run (absent = `terse`) and put one line — `agent_style: <terse|descriptive> — return per "Report format" in the principles skill` — in every subagent prompt (pmo, dev agents, ui-designer, judge, security-reviewer, mutation-tester).
 - **Apply TDD?** If yes, the implementer writes the failing tests first → **Gate 2: you approve the tests** before production code.
 - Spawn the dev specialist that matches the project type (`backend-dev` web/API · `frontend-dev` web UI · `mobile-dev` · `game-dev` · `desktop-dev` · `core-dev` library/CLI/data), with `ui-designer` first for new UI; implement to green, honoring the Design-notes pattern and its **Leverage** subsection (reuse before writing — leverage ladder in the `principles` skill). For impact analysis before an edit, the `code-query` skill finds dependents cheaply.
 - Spawn `judge` — reviews code **and** tests against the contract scenarios.
