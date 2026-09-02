@@ -63,8 +63,8 @@ pending
    scan those artifacts for lines starting `NEEDS CLARIFICATION:`. Then **STOP**:
    > "Contract in `docs/specs/<slug>/contract.md`. Read it and reply **'approved'**
    > to start, or ask for changes."
-2. **After the human approves the contract**, take the first mini-feature that is
-   not `done`/`blocked`. Set its status to `in_progress` in `features.json`.
+2. **After the human approves the contract**, take the first mini-feature whose
+   `depends_on` IDs are all `done`; skip blocked dependencies. `parallel` is a scheduling hint only; it never overrides `one_at_a_time` or a gate. Set the selected item to `in_progress` in `features.json`.
 3. **Ask: apply TDD to this mini-feature?** If yes, launch the implementer in
    test-first mode (write the failing tests, then **STOP** at Gate 2 for
    approval). If no, proceed.

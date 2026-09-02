@@ -57,12 +57,14 @@ source of truth (see `the `sdd-workflow` skill`):
 
    ```json
    {
+     "schema_version": 2,
      "feature": "<slug>",
      "rules": { "one_at_a_time": true, "require_approved_contract": true },
      "mini_features": [
        { "id": 1, "name": "<kebab>", "scenarios": ["@s1","@s2"],
+         "depends_on": [], "parallel": false, "files_hint": ["path"],
          "max_files": 12, "max_loc": 3000,
-         "status": "pending" }
+         "status": "pending", "verified_by_human": "skipped" }
      ]
    }
    ```
@@ -72,6 +74,9 @@ source of truth (see `the `sdd-workflow` skill`):
 
 - Each mini-feature must fit in one micro-PR (≤12 files / <3000 LOC). If it won't, split it.
 - Bias toward **fewer, larger-but-still-PR-sized** mini-features. Don't inflate.
+- Each mini-feature is a **tracer bullet**: it touches every required layer, is
+  independently demoable, fits one context window and one micro-PR, and
+  declares its blockers in `depends_on`.
 
 ## Design notes (required for technical mini-features)
 

@@ -64,12 +64,14 @@ source of truth (see `docs/sdd-workflow.md`):
 
    ```json
    {
+     "schema_version": 2,
      "feature": "<slug>",
      "rules": { "one_at_a_time": true, "require_approved_contract": true },
      "mini_features": [
        { "id": 1, "name": "<kebab>", "scenarios": ["@s1","@s2"],
+         "depends_on": [], "parallel": false, "files_hint": ["path"],
          "max_files": {{max_files_per_pr}}, "max_loc": {{max_loc_per_pr}},
-         "status": "pending" }
+         "status": "pending", "verified_by_human": "skipped" }
      ]
    }
    ```
@@ -79,6 +81,9 @@ source of truth (see `docs/sdd-workflow.md`):
 
 - Each mini-feature must fit in one micro-PR (≤{{max_files_per_pr}} files / <{{max_loc_per_pr}} LOC). If it won't, split it.
 - Bias toward **fewer, larger-but-still-PR-sized** mini-features. Don't inflate.
+- Each mini-feature is a **tracer bullet**: it touches every required layer, is
+  independently demoable, fits one context window and one micro-PR, and
+  declares its blockers in `depends_on`.
 {{#enforce_layer_split}}
 - Tasks touching both BE and FE split into sequenced BE → FE mini-features; never one straddling both.
 {{/enforce_layer_split}}

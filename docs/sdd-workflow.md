@@ -69,6 +69,15 @@ under TDD). State lives on disk, not in chat.**
   `NEEDS CLARIFICATION: <question>`. Gate 1 stays closed while any marker
   remains; the orchestrator lists the questions instead of implementing.
 
+## Mini-feature grammar
+
+`features.json` schema v2 requires each mini-feature to declare `id`, `name`,
+`scenarios`, `depends_on`, `parallel`, `files_hint`, `max_files`, `max_loc`,
+`status`, and `verified_by_human`. A mini-feature is a tracer bullet: it touches
+every required layer, is independently demoable, fits one context window and
+one micro-PR, and declares blockers. The orchestrator starts it only when every
+`depends_on` item is `done`; `parallel` is a hint, never a gate override.
+
 ## The gates
 
 - **Gate 1 — the contract.** The cheapest place to fix ambiguity is before code
