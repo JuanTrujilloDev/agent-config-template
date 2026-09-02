@@ -40,7 +40,7 @@ CODEX_NOTE="hosts/codex/note-role-adaptation.md"
 CODEX_NOTE_COMMANDS=" spec feature fix audit design "
 
 build_codex_skills() {
-  out="$1"
+  local out="$1" name desc
   rm -rf "$out"
   mkdir -p "$out"
   for d in plugin/skills/*/; do
@@ -113,7 +113,7 @@ mdc_rule() { # src.md dst.mdc description globs
 }
 
 build_cursor_tree() {
-  out="$1"
+  local out="$1" name desc
   rm -rf "$out"
   mkdir -p "$out/.cursor/rules" "$out/.claude"
   cp hosts/cursor/AGENTS.md "$out/AGENTS.md"

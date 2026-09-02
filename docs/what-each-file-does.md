@@ -20,6 +20,12 @@ Project-level Claude Code settings. Three things:
 
 `.claude/settings.local.json` is per-user / per-machine overrides. **Gitignore it.**
 
+## `.claude/answers.local.env`
+
+Gitignored personal preferences read at session time: `autonomy_mode`,
+`output_style`, `agent_style`, and companion choices. It is never a renderer
+input; shared project policy stays in committed `answers.env`.
+
 ## `.claude/mcp.json.example`
 
 Template for MCP server config. Copy to `.claude/mcp.json` and fill in real values. **Gitignore `mcp.json`** if it contains secrets — use environment variables for API keys (`${PLANE_API_KEY}` etc.).
@@ -46,6 +52,12 @@ Auto-loaded for files matching the backend glob (configured by Claude Code based
 ## `.claude/rules/frontend-style.md` *(optional)*
 
 Skipped for API-only projects. Same shape as backend-style but for components, state management, accessibility, event handling.
+
+## `.claude/rules/patterns.md` + `.claude/patterns/*.md`
+
+The compact rule requires a present force before choosing a design pattern and
+points to six on-demand domain references. It works with `code-query.md`: inspect
+the project first, then use the simplest existing shape.
 
 ## `.claude/agents/*.md`
 
@@ -75,12 +87,24 @@ Slash command definitions. Each file becomes `/<filename>` in Claude Code.
 | `/feature` | Full spec-driven flow via `orchestrator`: contract → optional TDD → implement → `judge` → micro-commit |
 | `/fix` | Small, scoped change: skips brief/plan + formal Design First, keeps the full Definition of Done |
 | `/verify` | Implementer's skeptical self-review of its own diff before judge/commit (run it, don't just claim it) |
+| `/integrate <tool>` | Research and connect an official MCP/tool after an explicit confirmation |
 | `/audit` | Code + security review via `judge` + `security-reviewer` |
 | `/commit` | Conventional commit, with confirmation gate |
 | `/pr` | Push + open PR, with confirmation gate |
 | `/design` | Wireframe + spec via `ui-designer` (folds into `/feature` for UI work) |
 
 Commands pause at approval gates. Never silently proceed past a brief, plan, or PR creation.
+
+## `docs/design-system/MASTER.md` *(UI projects)*
+
+The project brand contract: color tokens, typography, spacing, components,
+responsive behavior, accessibility, and anti-patterns. Page-specific exceptions
+live under `docs/design-system/pages/` only when needed.
+
+## `docs/CONTEXT.md` *(created lazily)*
+
+The pmo-created glossary for project-specific terms. It is not rendered by
+setup and appears only after the workflow coins or disambiguates a term.
 
 ## `.claude/hooks/*.sh`
 
@@ -119,6 +143,16 @@ The trigger regex is conservative — it errs toward injecting (better to remind
 
 ---
 
+## Generated host and test surfaces
+
+- `hosts/` contains hand-authored host adapters and overrides used as build inputs.
+- `cursor/` and `codex/` are generated packaging trees; never edit them directly.
+- `scripts/smoke/` contains the shared harness plus one focused file per mini-feature.
+- `setup.sh --merge --overwrite-files a,b` replaces only the named managed files;
+  the plan prints the safe candidate list first.
+
+---
+
 ## Plugin variant — what's different
 
 The repo ships *two* distributable artifacts: the **template** (`template/` + `setup.sh`, parameterized) and the **plugin** (`plugin/` + `.claude-plugin/marketplace.json`, static-but-installable). Same DNA, different distribution.
@@ -141,7 +175,7 @@ The principles, style guides, and the `sdd-workflow` overview shipped as skills 
 
 ### `plugin/hooks/hooks.json` + `plugin/hooks/*.sh`
 
-The same three hooks (agent-enforcement, auto-format, coding-reminder) but wired through `hooks.json` (the plugin format) instead of the project's `settings.json`. The `agent-enforcement.sh` script reads env vars (`CLAUDE_CONFIG_SRC_DIR`, `CLAUDE_CONFIG_FRONTEND_DIR`, `CLAUDE_CONFIG_PROTECTED_BRANCHES`) with sensible defaults — users override per-project via direnv or shell rc.
+The same three hooks (agent-enforcement, auto-format, coding-reminder) but wired through `hooks.json` (the plugin format) instead of the project's `settings.json`. The `agent-enforcement.sh` script reads env vars (`CLAUDE_CONFIG_SRC_DIR`, `CLAUDE_CONFIG_FRONTEND_DIR`, `AGENT_CONFIG_PROTECTED_BRANCHES`, with legacy `CLAUDE_CONFIG_PROTECTED_BRANCHES` fallback) with sensible defaults — users override per-project via direnv or shell rc.
 
 ### `.claude-plugin/marketplace.json`
 

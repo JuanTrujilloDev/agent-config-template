@@ -181,12 +181,17 @@ HOSTS="${HOSTS# }"
 # (repo root: cursor/, codex/skills/; plugin bundle: same relative paths).
 CURSOR_DIR="$SCRIPT_DIR/cursor"
 CODEX_SKILLS_DIR="$SCRIPT_DIR/codex/skills"
+if [ -f "$SCRIPT_DIR/scripts/build.sh" ]; then
+  SOURCE_TREE_HINT="run scripts/build.sh first"
+else
+  SOURCE_TREE_HINT="reinstall/update the plugin"
+fi
 if [ -n "$WANT_CURSOR$WANT_GROK$WANT_CODEX" ] && [ ! -f "$CURSOR_DIR/AGENTS.md" ]; then
-  echo "Error: cursor source tree not found at $CURSOR_DIR (run scripts/build.sh first)." >&2
+  echo "Error: cursor source tree not found at $CURSOR_DIR ($SOURCE_TREE_HINT)." >&2
   exit 1
 fi
 if [ -n "$WANT_CODEX" ] && [ ! -d "$CODEX_SKILLS_DIR" ]; then
-  echo "Error: codex skills tree not found at $CODEX_SKILLS_DIR (run scripts/build.sh first)." >&2
+  echo "Error: codex skills tree not found at $CODEX_SKILLS_DIR ($SOURCE_TREE_HINT)." >&2
   exit 1
 fi
 
@@ -306,14 +311,13 @@ def render(text):
 #    byte-identical — a differing collision aborts (D4 invariant).
 STAGING = tempfile.mkdtemp(prefix="cct-render-")
 try:
-    skipped = 0
+    skipped = set()
 
     def collide(rel):
         print(f"Error: host collision on {rel} — the selected hosts render different content for the same path.", file=sys.stderr)
         sys.exit(1)
 
     def stage_file(src, rel):
-        global skipped
         dst = os.path.join(STAGING, rel)
         d = os.path.dirname(dst)
         if d:
@@ -326,7 +330,7 @@ try:
                 first_line = content[:first_nl]
                 req_match = re.match(r"\s*<!--\s*requires:\s*(\w+)\s*-->\s*$", first_line)
                 if req_match and not truthy(ANS.get(req_match.group(1))):
-                    skipped += 1
+                    skipped.add(rel)
                     return
                 if req_match:
                     content = content[first_nl + 1:]
@@ -549,6 +553,8 @@ try:
         if stale:
             print("  Regenerate the STALE-MANAGED files (delete any you want to keep):")
             print(f"  {shlex.quote(os.environ['SCRIPT'])} --target {shlex.quote(TARGET)} --answers {shlex.quote(os.environ['ANSWERS_FILE'])} --merge --overwrite-files {','.join(stale)}")
+            if os.environ["ANSWERS_FILE"] == "-":
+                print("  Note: pipe the same answers to stdin when running this command.")
 
     # 8. Apply according to MODE.
     to_write = [r for r in staged if os.path.basename(r) != LOCAL_SETTINGS]
@@ -558,7 +564,7 @@ try:
         for rel in to_write:
             write_file(rel)
         relink_claude_md()
-        print(f"✓ Template rendered to {TARGET}" + (f" (skipped {skipped} files)" if skipped else ""))
+        print(f"✓ Template rendered to {TARGET}" + (f" (skipped {len(skipped)} files)" if skipped else ""))
     else:
         warn_dual_claude_md()
         if MODE in ("", "abort"):

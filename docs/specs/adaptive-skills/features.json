@@ -42,7 +42,8 @@
         "plugin/commands/feature.md",
         "plugin/agents/orchestrator.md",
         "template.config.yaml",
-        "plugin/commands/setup-template.md"
+        "plugin/commands/setup-template.md",
+        "scripts/smoke.sh"
       ],
       "max_files": 12, "max_loc": 3000,
       "reviews": ["judge"],

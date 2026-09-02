@@ -68,7 +68,7 @@ parity() {
 # h2_list FILE — H2 headings joined by "|", order-preserving, for exact comparison against SECTIONS.
 h2_list() { grep '^## ' "$1" 2>/dev/null | sed 's/^## //' | paste -sd'|' -; }
 # first_line FILE RE — 1-based line of the first match (0 = none).
-first_line() { grep -nE -- "$2" "$1" 2>/dev/null | head -1 | cut -d: -f1 | sed 's/^$/0/'; }
+first_line() { grep -nE -- "$2" "$1" 2>/dev/null | head -1 | cut -d: -f1; }
 # before NAME FILE RE_A RE_B — asserts RE_A first matches on an earlier line than RE_B (both present).
 before() {
   a=$(first_line "$2" "$3"); b=$(first_line "$2" "$4")

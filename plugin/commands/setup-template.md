@@ -38,7 +38,7 @@ The interview is **infer → show → ask once → record → render**. Facts ar
    2. Target hosts — multi-select `claude`, `cursor`, `codex` (`grok` = claude tree + AGENTS.md). Recommended: the inferred set from step 1; the user may add or drop any.
    3. `autonomy_mode` — `gated` or `autonomous`. Recommended: `gated` (today's behavior: pause before each micro-commit; `autonomous` skips that pause — push/merge/publish/destructive confirms ALWAYS apply regardless of mode).
    4. Companions — three groups, one answer. **Core quality:** graphify (knowledge graph behind `code-query`) + ponytail (runtime minimal-code enforcement). **Output:** the native `concise` output style is already on by default — nothing to install. **UI:** ui-ux-pro-max (design-system skill) — listed only when `has_ui` is truthy; omit the whole UI group when `has_ui` is falsy. Answer `[Yes / Not now / Never / <comma list>]`. Recommended: `Not now`. When every tool recommended for this project is already installed (`command -v graphify`; `claude plugin list` contains `ponytail@ponytail`; `.claude/skills/ui-ux-pro-max/` exists, when `has_ui`), skip this question **and step 8**, and leave any existing `companions` key untouched.
-   5. … every LOW placeholder (recommended = the best guess, alternative named), every UNKNOWN (no recommendation — say which signal is missing), and any `default`-tagged item that changes what renders (`has_frontend`, `ticket_tracker`, `has_background_jobs`, `use_gherkin`, `enforce_mutation_testing`).
+   5. Remaining uncertain configuration — every LOW placeholder (recommended = the best guess, alternative named), every UNKNOWN (no recommendation — say which signal is missing), and any `default`-tagged item that changes what renders (`has_frontend`, `ticket_tracker`, `has_background_jobs`, `use_gherkin`, `enforce_mutation_testing`).
 
    End with: *"Reply `all defaults` (or `go`) to accept every recommendation and render, or answer by number — `1: SDD+TDD, 4: Never`. Unanswered numbers take the recommendation."* That reply is the approval gate: it resolves the whole round and authorizes the render — **do not run `setup.sh` before it arrives.**
 
@@ -98,7 +98,7 @@ Every config value lives in exactly one of three scopes:
 - **Wait for explicit approval** before invoking `setup.sh`. The reply that resolves the frontier round is that approval; without it, nothing renders.
 - **Personal prefs stay personal.** `autonomy_mode` and `companions` go only to `.claude/answers.local.env` — never into `answers.env`, never into rendered files.
 - **Don't modify anything outside `answers.env`, `.claude/`, `CLAUDE.md`, and `.gitignore`.**
-- **Never overwrite an existing config silently.** The renderer now enforces this — against an existing `.claude/` tree (or root `CLAUDE.md`) it writes nothing without an explicit `--merge`/`--overwrite`. Run it once with no mode to show the user the per-file plan, then let them choose. `.claude/settings.local.json` is never touched. If both root `CLAUDE.md` and `.claude/CLAUDE.md` exist with different content, the renderer warns — surface that to the user and ask which is canonical.
+- **Never overwrite an existing config silently.** The renderer now enforces this — against an existing `.claude/` tree (or root `CLAUDE.md`) it writes nothing without an explicit `--merge`/`--overwrite`. Run it once with no mode to show the user the per-file plan, then let them choose. Explicit setup just-go may print the plan and apply `--merge` in the same run; automatic `--overwrite` is never allowed, including in just-go mode. `.claude/settings.local.json` is never touched. If both root `CLAUDE.md` and `.claude/CLAUDE.md` exist with different content, the renderer warns — surface that to the user and ask which is canonical.
 
 ## Honor conditional questions (`when:` clauses)
 
@@ -114,7 +114,7 @@ The general rule: **if a `when:` clause isn't satisfied, the variable doesn't ex
 
 ## Variant: just-go mode
 
-If the user prefixes the command with explicit phrasing like *"setup, just go"* or passes `--auto`, skip the frontier round: every recommendation is accepted as if the user had replied `all defaults`, UNKNOWN values stay blank with their `# TODO` line (reported after the render), and the render runs immediately. Against an existing config the plan is still printed and applied with `--merge`; `--overwrite` is never automatic. Useful for throwaway projects, dangerous on real ones — the user is taking responsibility for any wrong inferences.
+If the user prefixes the command with explicit phrasing like *"setup, just go"* or passes `--auto` to this command, skip the frontier round: every recommendation is accepted as if the user had replied `all defaults`, UNKNOWN values stay blank with their `# TODO` line (reported after the render), and the render runs immediately. Against an existing config the plan is still printed and applied with `--merge`; `--overwrite` is never automatic. Useful for throwaway projects, dangerous on real ones — the user is taking responsibility for any wrong inferences.
 
 ## What gets rendered
 

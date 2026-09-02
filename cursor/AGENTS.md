@@ -92,6 +92,7 @@ Prefer the appropriate agent role for non-trivial work (>50 lines changed or mor
 
 ## Detail
 
+- Project skills: `.claude/skills/` — Cursor reads these rendered, stack-dependent skills natively
 - Style rules: `.claude/rules/backend-style.md`{{#has_frontend}}, `.claude/rules/frontend-style.md`{{/has_frontend}} (auto-attached via `.cursor/rules/*.mdc`)
 - Structural code questions (what depends on what): `.claude/rules/code-query.md` — graph first, grep second
 - Full principles: `.claude/rules/principles.md`

@@ -30,7 +30,7 @@ has a UI. With a comma list: exactly those tools, nothing else.
 2. **Show the plan and STOP for confirmation.** List exactly what will be
    installed with the exact install command per tool, from where (PyPI package
    `graphifyy` — double-y, the single-y packages are unaffiliated; GitHub
-   marketplace `DietrichGebert/ponytail`; npm `ui-ux-pro-max-cli` from
+   marketplace `DietrichGebert/ponytail`; npm `ui-ux-pro-max-cli@2.15.0` from
    github.com/nextlevelbuilder/ui-ux-pro-max-skill, MIT), and what each writes
    to the machine. Install nothing without an explicit yes.
 3. **Install graphify** (first available installer wins):
@@ -46,9 +46,10 @@ has a UI. With a comma list: exactly those tools, nothing else.
    ```
 5. **Install ui-ux-pro-max** (only when requested or `has_ui`; project-local):
    ```bash
-   npm install -g ui-ux-pro-max-cli   # pin a version (e.g. @2.15.0) if you want reproducible installs
+   npm install -g ui-ux-pro-max-cli@2.15.0
    uipro init --ai codex               # writes .agents/skills/ui-ux-pro-max/
    ```
+   To deliberately use the unpinned latest release instead, run `npm install -g ui-ux-pro-max-cli`; this is never the default.
 6. **Verify and report**: `graphify --version`, `codex plugin list`, `ls .agents/skills/ui-ux-pro-max`. Remind
    the user to restart Codex so the new plugin and skill load, and that
    `/graphify .` builds the graph for the current project.

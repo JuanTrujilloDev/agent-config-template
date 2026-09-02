@@ -135,6 +135,7 @@ key = `gated`. It is never rendered into committed files.
   autonomous; "gate me" or "stop before commit" switches it to gated. These are
   session-scoped overrides of the stored mode: apply them immediately and
   **never write them to any file**.
+- **“Just go” is scoped.** In Read Before You Write it skips only narration; here it switches session autonomy; in setup it skips the frontier round. A recorded `autonomy_mode=autonomous` does not activate setup just-go.
 - **Action-level confirms ALWAYS apply regardless of mode**: push, merge,
   publish, and destructive operations require explicit user confirmation even
   in autonomous mode.

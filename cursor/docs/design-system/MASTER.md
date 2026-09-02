@@ -137,6 +137,8 @@ Layout:
 - Touch targets ≥ 44×44px on every pointer-coarse viewport.
 - No horizontal scroll at any breakpoint; wide content (tables, code) scrolls inside its own container.
 - Test at 320px, 768px, 1024px, and 1440px before handoff.
+- Mobile apps — TODO: define device classes, orientation behavior, and safe-area rules for the target platforms.
+- Game UI — TODO: define the Unity Canvas Scaler mode, reference resolution, and match behavior.
 
 ## Accessibility & contrast
 

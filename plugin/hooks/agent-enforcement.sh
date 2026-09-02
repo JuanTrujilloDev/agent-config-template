@@ -3,8 +3,8 @@
 #
 # Two checks, deliberately with different teeth:
 #  - Branch discipline (HARD BLOCK): never edit code under $CLAUDE_CONFIG_SRC_DIR
-#    while on a protected branch. Protected = $CLAUDE_CONFIG_PROTECTED_BRANCHES,
-#    default "main,master".
+#    while on a protected branch. Protected = $AGENT_CONFIG_PROTECTED_BRANCHES
+#    (or legacy $CLAUDE_CONFIG_PROTECTED_BRANCHES), default "main,master".
 #  - Agent guidance (ADVISORY): non-trivial edits print a reminder to prefer the
 #    right agent, but do NOT block. Discipline is on you, not the hook.
 #
@@ -12,7 +12,7 @@
 # or your shell rc):
 #   export CLAUDE_CONFIG_SRC_DIR=apps                  # default: src
 #   export CLAUDE_CONFIG_FRONTEND_DIR=apps/frontend    # default: (none)
-#   export CLAUDE_CONFIG_PROTECTED_BRANCHES="main,qa,prod"  # default: main,master
+#   export AGENT_CONFIG_PROTECTED_BRANCHES="main,qa,prod"   # default: main,master
 #
 # Trivial edits (≤50 lines AND ≤1 new def/class) pass silently.
 
@@ -56,7 +56,7 @@ if [ -z "$FILE_PATH" ]; then exit 0; fi
 # Defaults; override via environment variables.
 SRC_DIR="${CLAUDE_CONFIG_SRC_DIR:-src}"
 FRONTEND_DIR="${CLAUDE_CONFIG_FRONTEND_DIR:-}"
-PROTECTED="${CLAUDE_CONFIG_PROTECTED_BRANCHES:-main,master}"
+PROTECTED="${AGENT_CONFIG_PROTECTED_BRANCHES:-${CLAUDE_CONFIG_PROTECTED_BRANCHES:-main,master}}"
 
 # Membership test for a comma/space-separated list (bash 3.2 safe).
 branch_in_list() {
@@ -90,7 +90,7 @@ Check out a typed branch first:
   git checkout -b hotfix/<slug>
   git checkout -b refactor/<slug>
   git checkout -b chore/<slug>
-Protected branches: $PROTECTED  (override with CLAUDE_CONFIG_PROTECTED_BRANCHES)
+Protected branches: $PROTECTED  (override with AGENT_CONFIG_PROTECTED_BRANCHES; legacy: CLAUDE_CONFIG_PROTECTED_BRANCHES)
 MSG
             exit 2
         fi

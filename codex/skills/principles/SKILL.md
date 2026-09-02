@@ -92,6 +92,7 @@ cheaply — graph first, grep second; then read what it surfaces.
 - **Bypass:** the human can say "just go" / "skip the walkthrough" for changes
   they consider low-risk, and trivial edits (≤50 lines, no new def/class) don't
   need the narration. The *reading* is never skipped — only the reporting.
+- **“Just go” is scoped.** In Read Before You Write it skips only narration; it can also switch session autonomy; in setup it skips the frontier round. A recorded `autonomy_mode=autonomous` does not activate setup just-go.
 
 ## Code Health
 

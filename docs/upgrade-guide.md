@@ -56,6 +56,38 @@ diff -r .claude "$TMP/.claude"
 
 ---
 
+## Upgrading to v0.8.3 (review-debt patch)
+
+v0.8.3 fixes setup and hook edge cases without changing the workflow:
+
+- Preference hooks now normalize CRLF and surrounding spaces before applying
+  the fixed-value whitelist.
+- Stdin merge plans keep `--answers -` and explain that the same answers must be
+  piped again; multi-host summaries count each unique skipped path once.
+- An installed bundle with a missing generated tree now says to reinstall the
+  plugin instead of suggesting the repository-only build script.
+- Branch guards prefer `AGENT_CONFIG_PROTECTED_BRANCHES`, with
+  `CLAUDE_CONFIG_PROTECTED_BRANCHES` retained as the legacy fallback.
+- Optional UI companion installs now default to the reproducible
+  `ui-ux-pro-max-cli@2.15.0` pin. The unpinned latest release remains an explicit
+  opt-in.
+
+Update an installed Claude Code plugin, then restart or reload plugins:
+
+```bash
+claude plugin marketplace update juantrujillodev
+claude plugin update agent-config-template@juantrujillodev
+```
+
+Preview and apply generated project updates separately:
+
+```bash
+./setup.sh --target . --answers ./answers.env
+./setup.sh --target . --answers ./answers.env --merge
+```
+
+---
+
 ## Upgrading to v0.8.2 (adaptive skills + merge reporting)
 
 v0.8.2 adds per-project answer styles, the companions list grammar, and a
