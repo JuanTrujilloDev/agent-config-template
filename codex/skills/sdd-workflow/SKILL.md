@@ -87,6 +87,16 @@ The current ledger version is `schema_version: 2`. Upgrade older ledgers once
 with `python3 scripts/migrate-specs.py`; `/feature` refuses unversioned or
 unknown/unsupported versions and prints that recovery command.
 
+## Contract amendments
+
+After Gate 1, append `*(Amended at <ISO date/time> — <reason>)*` to each changed
+contract section; do not rewrite old approval evidence. Reset the affected item
+and its transitive dependents: `pending`/`spec_ready` → `pending`,
+`in_progress`/`done` → `needs-rework`, while `blocked` stays blocked for
+reassessment. Unrelated statuses stay unchanged. The amendment makes Gate 1
+stale until `progress/gate1.md` appends a later timestamp, approver text, and
+current amendment reference. Only then may work resume at the first ready item.
+
 ## The gates
 
 - **Gate 1 — the contract.** The cheapest place to fix ambiguity is before code

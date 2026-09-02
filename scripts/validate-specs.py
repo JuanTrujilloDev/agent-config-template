@@ -10,7 +10,7 @@ from pathlib import Path
 REPO = Path(__file__).resolve().parents[1]
 SCENARIO = re.compile(r"@s[1-9][0-9]*")
 NAME = re.compile(r"[a-z0-9]+(?:-[a-z0-9]+)*$")
-STATUSES = {"pending", "spec_ready", "in_progress", "done", "blocked"}
+STATUSES = {"pending", "spec_ready", "in_progress", "done", "blocked", "needs-rework"}
 VERIFICATIONS = {"yes", "no", "skipped"}
 V2_FIELDS = {
     "id",

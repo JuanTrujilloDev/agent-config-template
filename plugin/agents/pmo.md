@@ -68,7 +68,8 @@ source of truth (see `the `sdd-workflow` skill`):
      ]
    }
    ```
-   Valid status: `pending → spec_ready → in_progress → done | blocked`.
+   Valid status: `pending → spec_ready → in_progress → done | blocked`; an
+   approved-contract amendment may reset affected work to `needs-rework`.
 
 ## Decomposition rules
 
@@ -95,6 +96,16 @@ or already-installed dependency covers it — and what genuinely must be written
 new. Ground "already in this codebase?" with the `code-query` skill (graph
 first, grep second) instead of assuming. Code nobody writes is the cheapest to
 review and the safest to ship.
+
+## Post-approval amendments
+
+If approved behavior changes, append `*(Amended at <ISO date/time> — <reason>)*`
+to the affected contract section; never rewrite prior approval evidence. Find
+the affected IDs and their transitive dependents through `depends_on`. Reset
+`pending` and `spec_ready` to `pending`; reset `in_progress` and `done` to
+`needs-rework`; `blocked` remains blocked until its blocker is reassessed.
+Unrelated work keeps its status. Gate 1 is stale until the maintainer approves
+again and an append-only record is added to `progress/gate1.md`.
 
 ## Tracker integration
 
