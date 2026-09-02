@@ -64,12 +64,15 @@ source of truth (see `the `sdd-workflow` skill`):
        { "id": 1, "name": "<kebab>", "scenarios": ["@s1","@s2"],
          "depends_on": [], "parallel": false, "files_hint": ["path"],
          "max_files": 12, "max_loc": 3000,
-         "status": "pending", "verified_by_human": "skipped" }
+         "status": "pending", "verified_by_human": "skipped",
+         "review_cycles": 0 }
      ]
    }
    ```
    Valid status: `pending → spec_ready → in_progress → done | blocked`; an
    approved-contract amendment may reset affected work to `needs-rework`.
+   New mini-features set `review_cycles` to 0. In an existing schema v2 ledger,
+   absent `review_cycles` is backward-compatible and means 0.
 
 ## Decomposition rules
 

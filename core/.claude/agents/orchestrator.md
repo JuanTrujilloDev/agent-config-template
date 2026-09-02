@@ -88,9 +88,10 @@ pending
    failing tests, then **STOP** at Gate 2 for approval). If no, proceed.
 {{/workflow_tdd}}
 4. **Check out the typed branch** for the mini-feature (never `{{default_branch}}`).
-5. **Launch the specialist** — `{{primary_dev_agent}}`{{#has_frontend}} or `frontend-dev`{{/has_frontend}}{{#has_ui}} (with `ui-designer` first for new UI){{/has_ui}} — passing the relevant `contract.md` scenarios and the spec's Design notes. Before launching (steps 5–8), read `agent_style` from `.claude/answers.local.env` once per run (absent = `terse`) and put one line — `agent_style: <terse|descriptive> — return per "Report format" in .claude/rules/principles.md` — in every subagent prompt (pmo, dev agents, ui-designer, judge, security-reviewer, mutation-tester). Steps 5–8 all carry it.
-6. **Launch `judge`** (reviews code + tests against the contract). If it requests
-   changes, route them back to the specialist.
+5. **Launch the specialist** — `{{primary_dev_agent}}`{{#has_frontend}} or `frontend-dev`{{/has_frontend}}{{#has_ui}} (with `ui-designer` first for new UI){{/has_ui}} — passing the relevant `contract.md` scenarios and the spec's Design notes. Before launching (steps 5–8), read `agent_style` from `.claude/answers.local.env` once per run (absent = `terse`) and put one line — `agent_style: <terse|descriptive> — return per "Report format" in .claude/rules/principles.md` — in every subagent prompt (pmo, dev agents, ui-designer, judge, security-reviewer, mutation-tester). Steps 5–8 all carry it. Every implementer prompt also carries the `TDD quality guardrails` from `docs/sdd-workflow.md`; do not copy the full policy into each stack agent.
+6. **Launch `judge`** (reviews code + tests against the contract), then run the
+   bounded review-convergence loop in `docs/sdd-workflow.md`; never repeat an
+   unbounded ad-hoc fix/re-review loop.
 7. **Launch `security-reviewer`** if the mini-feature touches auth, permissions,
    data exposure, or external input.{{#enforce_mutation_testing}}
 8. **Launch `mutation-tester`**; only a passing score closes the mini-feature.{{/enforce_mutation_testing}}

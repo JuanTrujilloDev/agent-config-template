@@ -57,7 +57,7 @@ under TDD). State lives on disk, not in chat.**
 | `docs/CONTEXT.md` | `pmo` | Project glossary, created lazily on the first coined project term: `**Term** — what it IS (1–2 sentences). Avoid: <synonyms>` |
 | `docs/specs/<slug>/features.json` | `orchestrator` / `pmo` | Mini-feature list + state machine: `pending → spec_ready → in_progress → done / blocked` |
 | `docs/specs/<slug>/progress/<feature>.tdd.md` | implementer | Red→Green→Refactor log + `scenario → test` map (TDD on) |
-| `docs/specs/<slug>/progress/<feature>.judge.md` | `judge` | Review verdict + blockers/nits |
+| `docs/specs/<slug>/progress/<feature>.judge.md` | `judge` | Two review axes, classified findings, and exact verdict |
 | `docs/specs/<slug>/progress/<feature>.mutation.md` | `mutation-tester` | Mutation score + survivors (when enabled) |
 
 ## Contract grammar
@@ -106,6 +106,30 @@ approving the implementation:
 The explicit `None` row is valid. A real deviation must name a present reason
 and mitigation; missing, speculative, unrecorded, or unused rows block approval.
 
+## Review verdict contract
+
+Judge keeps **Spec fidelity** and **Standards & health** as separate axes with a
+`pass|fail|not-applicable` result. Classes: `hard-violation` or `judgment-call`.
+Each finding stays on its originating axis and the axes are never merged
+or cross-ranked. A judgment call alone cannot block. Judge and security reviewer
+end with exactly one verdict: `APPROVED`, unless at least one hard violation
+requires `CHANGES REQUESTED`. Security severity remains a separate label.
+
+## Bounded review convergence
+
+- The initial review is cycle 0. `review_cycles` counts completed fix/re-review
+  loops; when absent from an existing schema v2 ledger, read it as 0.
+- Advance only when every required reviewer returns exact `APPROVED`.
+- On `CHANGES REQUESTED` while the value is below 2, send the finding to the
+  implementer and increment `review_cycles` immediately before re-review.
+- Allow a maximum of 2 fix/re-review cycles. Never start a third cycle.
+- If a required reviewer still requests changes after cycle 2, mark the mini-feature `blocked`
+  and write `progress/<mf>.review-escalation.md` with the
+  unresolved finding, reviewer position, implementer position/evidence, and
+  minimal human choices. Ask the human; do not silently choose a side.
+- Reset `review_cycles` to 0 for a new mini-feature and a reapproved contract amendment
+  affecting that mini-feature.
+
 ## The gates
 
 - **Gate 1 — the contract.** The cheapest place to fix ambiguity is before code
@@ -120,6 +144,13 @@ Whether TDD is the default comes from `workflow_mode` in the committed
 mini-feature (still skippable per feature); `SDD` — or the key absent, the
 back-compat default — leaves TDD opt-in per mini-feature ("with TDD"). The
 flow itself is identical either way; only the default flips.
+
+## TDD quality guardrails
+
+1. **Public seams first.** Name the public behavior seams before any test. Gate 2 approves the public seams and first failing test with its observed failure.
+2. **Independent expectations.** Do not bind a test to an unconfirmed seam. Derive each expected value from the contract, a literal, a worked example, or an independent oracle. Never reproduce the same algorithm as production.
+3. **Real internals.** Mock only external boundaries; project-owned implementation modules stay real.
+4. **Vertical slices.** Complete one test → failing evidence → minimal green → next test. Do not batch all tests before all code.
 
 ## The anti-telephone rule
 

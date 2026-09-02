@@ -31,7 +31,7 @@ git add answers.env   # the source of truth — re-renders the same config later
 
 ```bash
 # 1. Pull the latest template (or check out a tag for stability)
-cd ~/code/agent-config-template && git pull origin main   # or: git checkout v0.9.0
+cd ~/code/agent-config-template && git pull origin main   # or: git checkout v0.9.1
 
 # 2. Preview what would change in your project
 cd ~/code/my-project
@@ -41,7 +41,7 @@ cd ~/code/my-project
 ~/code/agent-config-template/setup.sh --target . --answers ./answers.env --merge
 
 # 4. Commit
-git add .claude/ CLAUDE.md docs/ && git commit -m "chore: upgrade agent-config-template to v0.9.0"
+git add .claude/ CLAUDE.md docs/ && git commit -m "chore: upgrade agent-config-template to v0.9.1"
 ```
 
 A template upgrade (`setup.sh --merge`) is its own `chore:` commit — never mixed into a feature PR.
@@ -52,6 +52,36 @@ For fine-grained control, render into a temp dir and cherry-pick:
 TMP=$(mktemp -d)
 ~/code/agent-config-template/setup.sh --target "$TMP" --answers ./answers.env --overwrite
 diff -r .claude "$TMP/.claude"
+```
+
+---
+
+## Upgrading to v0.9.1 (review convergence)
+
+v0.9.1 makes review and TDD decisions reproducible without changing schema v2
+or adding dependencies:
+
+- `/verify` uses a pinned review scope, includes untracked paths, rejects empty
+  work, and locates the originating spec in a fixed order.
+- Judge reports separate `Spec fidelity` and `Standards & health` axes. Only a
+  `hard-violation` blocks; a `judgment-call` stays advisory.
+- A mini-feature gets at most two review cycles. Continued disagreement records
+  both positions and waits for a human instead of looping.
+- Gate 2 names public behavior seams and the first failing test. Expected values
+  come from an independent source, mocks stop at external boundaries, and work
+  advances one vertical test/implementation slice at a time.
+- Existing schema v2 ledgers remain valid. New ledgers initialize
+  `review_cycles: 0`; the field is optional for old ledgers and limited to 0–2.
+
+A focused check proved every current dispatch command passes `agent_style`
+through the central handoff. No per-agent pointers were added.
+
+Pull or update the plugin, restart the host, preview project changes, then merge
+only the managed files you want to refresh:
+
+```bash
+./setup.sh --target . --answers ./answers.env --host cursor
+./setup.sh --target . --answers ./answers.env --host cursor --merge
 ```
 
 ---

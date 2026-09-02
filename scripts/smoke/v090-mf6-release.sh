@@ -37,8 +37,10 @@ grep_case "v0.9.0 @s39 README says MIT inspiration" "$V090_MF6_README" 'MIT-lice
 grep_case "v0.9.0 @s39 README denies copied artifacts" "$V090_MF6_README" '[Nn]o artifacts.*copied'
 grep_case "v0.9.0 @s39 README denies affiliation" "$V090_MF6_README" '[Nn]ot affiliated'
 
+V090_MF6_VERSION="$(python3 -c 'import json,sys; d=json.load(open(sys.argv[1])); print((d.get("plugins") or [d])[0]["version"])' "$ROOT/plugin/.claude-plugin/plugin.json")"
+check "v0.9.0 @s40 release version is not older" "0" "$(python3 -c 'import sys; print(0 if tuple(map(int, sys.argv[1].split("."))) >= (0, 9, 0) else 1)' "$V090_MF6_VERSION")"
 for f in "$ROOT/plugin/.claude-plugin/plugin.json" "$ROOT/.claude-plugin/marketplace.json" "$ROOT/.cursor-plugin/plugin.json" "$ROOT/codex/.codex-plugin/plugin.json"; do
-  check "v0.9.0 @s40 $(basename "$f") version" "0.9.0" "$(python3 -c 'import json,sys; d=json.load(open(sys.argv[1])); print((d.get("plugins") or [d])[0]["version"])' "$f")"
+  check "v0.9.0 @s40 $(basename "$f") version" "$V090_MF6_VERSION" "$(python3 -c 'import json,sys; d=json.load(open(sys.argv[1])); print((d.get("plugins") or [d])[0]["version"])' "$f")"
 done
 grep_case "v0.9.0 @s40 upgrade section" "$ROOT/docs/upgrade-guide.md" '^## Upgrading to v0\.9\.0'
 for term in 'FR/SC' 'schema v2' 'amend' 'principles'; do
@@ -46,7 +48,7 @@ for term in 'FR/SC' 'schema v2' 'amend' 'principles'; do
 done
 python3 "$ROOT/scripts/validate-packaging.py" >"$WORK/v090-mf6-packaging.out" 2>&1
 check "v0.9.0 @s40 packaging valid" "0" "$?"
-grep_case "v0.9.0 @s40 packaging reports version" "$WORK/v090-mf6-packaging.out" 'packaging valid @ v0\.9\.0'
+check "v0.9.0 @s40 packaging reports version" "0" "$(grep -Fq "packaging valid @ v$V090_MF6_VERSION" "$WORK/v090-mf6-packaging.out"; echo $?)"
 
 CURSOR_PLUGIN="$ROOT/.cursor-plugin/plugin.json"
 check "v0.9.0 Cursor plugin JSON" "0" "$(python3 -m json.tool "$CURSOR_PLUGIN" >/dev/null 2>&1; echo $?)"
