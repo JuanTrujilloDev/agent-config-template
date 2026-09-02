@@ -17,6 +17,13 @@ hook_case "@s2 gated+terse" "$CODING" \
 hook_case "@s2 autonomous+terse" "$CODING" \
   'mode: autonomous | output: terse — say "gate me" or "be brief" to override this session' \
   "$(printf 'autonomy_mode=autonomous\noutput_style=terse')"
+# v0.8.3 @s1 — common editor/Windows whitespace is normalized before whitelisting.
+hook_case "v0.8.3 @s1 CRLF prefs" "$CODING" \
+  'mode: autonomous | output: detailed — say "gate me" or "be brief" to override this session' \
+  "$(printf 'autonomy_mode=autonomous\r\noutput_style=detailed\r')"
+hook_case "v0.8.3 @s1 padded prefs" "$CODING" \
+  'mode: autonomous | output: balanced — say "gate me" or "be brief" to override this session' \
+  "$(printf 'autonomy_mode=  autonomous  \noutput_style= balanced ')"
 # @s3 — unrecognized value → v0.8.1 banner, value never echoed
 hook_case "@s3 unrecognized" "$CODING" "$V081_GATED" "output_style=verbose"
 check "@s3 value not leaked" "0" "$(printf '%s%s' "$CORE_OUT" "$OUT" | grep -c verbose)"

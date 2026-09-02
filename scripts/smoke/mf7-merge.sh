@@ -44,6 +44,12 @@ check "@s49 exactly one --overwrite-files line" "1" "$(printf '%s\n' "$OUT" | gr
 grep_case "@s49 line is copy-pasteable (setup.sh --target … --answers … --merge --overwrite-files …)" <(printf '%s\n' "$LINE") "setup\.sh --target .* --answers .* --merge --overwrite-files [^ ]+$"
 LIST=$(printf '%s\n' "$LINE" | sed -E 's/.*--overwrite-files ([^ ]+).*/\1/' | tr ',' '\n' | sort | paste -sd, -)
 check "@s49 list = exactly the STALE-MANAGED files, no CUSTOMIZED path (MASTER.md absent)" "$BD,$BS" "$LIST"
+# v0.8.3 @s3 — stdin plans keep `-` but explain that replay needs the same pipe.
+fresh_fix
+OUT=$(bash "$SETUP" --target "$F" --answers - <"$DJ" 2>&1); RC=$?
+check "v0.8.3 @s3 stdin plan exits 1" "1" "$RC"
+grep_case "v0.8.3 @s3 stdin plan keeps --answers -" <(printf '%s\n' "$OUT") '--answers - --merge --overwrite-files'
+grep_case "v0.8.3 @s3 stdin plan explains replay" <(printf '%s\n' "$OUT") '[Pp]ipe.*same answers|same answers.*[Pp]ipe'
 # @s50 — --merge alone keeps every differing file
 fresh_fix; run_setup --merge
 check "@s50 --merge alone exits 0" "0" "$RC"

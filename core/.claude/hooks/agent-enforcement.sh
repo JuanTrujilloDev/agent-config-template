@@ -3,13 +3,13 @@
 #
 # Two checks, deliberately with different teeth:
 #  - Branch discipline (HARD BLOCK): never edit code under {{src_dir}} while on a
-#    protected branch. Protected = $CLAUDE_CONFIG_PROTECTED_BRANCHES, default
-#    "{{default_branch}},master".
+#    protected branch. Protected = $AGENT_CONFIG_PROTECTED_BRANCHES (or legacy
+#    $CLAUDE_CONFIG_PROTECTED_BRANCHES), default "{{default_branch}},master".
 #  - Agent guidance (ADVISORY): non-trivial edits to {{src_dir}} print a reminder
 #    to prefer the right agent, but do NOT block. Discipline is on you, not the hook.
 #
 # Override the protected-branch list per-project (e.g. to guard env branches):
-#   export CLAUDE_CONFIG_PROTECTED_BRANCHES="{{default_branch}},qa,prod"
+#   export AGENT_CONFIG_PROTECTED_BRANCHES="{{default_branch}},qa,prod"
 #
 # Trivial edits (≤50 lines AND ≤1 new def/class) pass silently.
 
@@ -64,7 +64,7 @@ branch_in_list() {
 }
 
 # --- Branch Discipline (HARD BLOCK) ---
-PROTECTED="${CLAUDE_CONFIG_PROTECTED_BRANCHES:-{{default_branch}},master}"
+PROTECTED="${AGENT_CONFIG_PROTECTED_BRANCHES:-${CLAUDE_CONFIG_PROTECTED_BRANCHES:-{{default_branch}},master}}"
 PROJECT_DIR="${CLAUDE_PROJECT_DIR:-}"
 if [ -n "$PROJECT_DIR" ] && { [ -d "$PROJECT_DIR/.git" ] || [ -f "$PROJECT_DIR/.git" ]; }; then
     CURRENT_BRANCH=$(git -C "$PROJECT_DIR" rev-parse --abbrev-ref HEAD 2>/dev/null || echo "")
@@ -79,7 +79,7 @@ Check out a typed branch first:
   git checkout -b hotfix/<slug>
   git checkout -b refactor/<slug>
   git checkout -b chore/<slug>
-Protected branches: $PROTECTED  (override with CLAUDE_CONFIG_PROTECTED_BRANCHES)
+Protected branches: $PROTECTED  (override with AGENT_CONFIG_PROTECTED_BRANCHES; legacy: CLAUDE_CONFIG_PROTECTED_BRANCHES)
 See .claude/HELP.md for the branch cheat sheet.
 MSG
                 exit 2

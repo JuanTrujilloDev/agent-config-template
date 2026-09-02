@@ -34,8 +34,8 @@ fi
 # banner; unrecognized autonomy_mode = no banner. Only whitelisted fixed strings
 # are echoed — file content never reaches the output; never blocks the prompt.
 PREFS="${CLAUDE_PROJECT_DIR:-.}/.claude/answers.local.env"
-AUTONOMY=$(sed -n 's/^autonomy_mode=//p' "$PREFS" 2>/dev/null | head -1)
-STYLE=$(sed -n 's/^output_style=//p' "$PREFS" 2>/dev/null | head -1)
+AUTONOMY=$(sed -n 's/^autonomy_mode=//p' "$PREFS" 2>/dev/null | head -1 | tr -d '\r' | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')
+STYLE=$(sed -n 's/^output_style=//p' "$PREFS" 2>/dev/null | head -1 | tr -d '\r' | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')
 case "$STYLE" in
     "")                              STYLE=concise ;;
     concise|balanced|detailed|terse) ;;
