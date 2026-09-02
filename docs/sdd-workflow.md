@@ -78,6 +78,10 @@ every required layer, is independently demoable, fits one context window and
 one micro-PR, and declares blockers. The orchestrator starts it only when every
 `depends_on` item is `done`; `parallel` is a hint, never a gate override.
 
+The current ledger version is `schema_version: 2`. Upgrade older ledgers once
+with `python3 scripts/migrate-specs.py`; `/feature` refuses unversioned or
+unknown/unsupported versions and prints that recovery command.
+
 ## The gates
 
 - **Gate 1 — the contract.** The cheapest place to fix ambiguity is before code

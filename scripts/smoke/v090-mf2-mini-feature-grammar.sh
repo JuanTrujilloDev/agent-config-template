@@ -36,7 +36,12 @@ EOF
 python3 "$V090_MF2_VALIDATOR" "$V090_MF2_DIR/valid/features.json" >"$V090_MF2_DIR/valid.out" 2>&1
 check "v0.9.0 @s7 strict valid ledger" "0" "$?"
 python3 "$V090_MF2_VALIDATOR" "$V090_MF2_DIR/legacy/features.json" >"$V090_MF2_DIR/legacy.out" 2>&1
-check "v0.9.0 @s12 legacy ledger accepted" "0" "$?"
+legacy_rc=$?
+if grep -q '^ALLOW_LEGACY = True' "$V090_MF2_VALIDATOR"; then
+  check "v0.9.0 @s12 legacy ledger accepted during MF2" "0" "$legacy_rc"
+else
+  check "v0.9.0 @s12 legacy window closed after migration" "1" "$legacy_rc"
+fi
 python3 "$V090_MF2_VALIDATOR" "$V090_MF2_DIR/invalid/features.json" >"$V090_MF2_DIR/invalid.out" 2>&1
 check "v0.9.0 @s8 invalid ledger rejected" "1" "$?"
 for token in parallel bad_name @s99 self-dependency 'unknown dependency' cycle 'duplicate name' 'duplicate scenario' '.id: expected positive integer' files_hint max_files max_loc status verified_by_human; do

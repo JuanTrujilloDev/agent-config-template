@@ -1,5 +1,4 @@
 {
-  "schema_version": 2,
   "feature": "setup-evolution",
   "rules": {
     "one_at_a_time": true,
@@ -18,8 +17,6 @@
         "@s5",
         "@s6"
       ],
-      "depends_on": [],
-      "parallel": false,
       "files_hint": [
         "template.config.yaml",
         "setup.sh",
@@ -30,8 +27,7 @@
       ],
       "max_files": 8,
       "max_loc": 400,
-      "status": "done",
-      "verified_by_human": "skipped"
+      "status": "done"
     },
     {
       "id": 2,
@@ -44,10 +40,6 @@
         "@s11",
         "@s12"
       ],
-      "depends_on": [
-        1
-      ],
-      "parallel": false,
       "files_hint": [
         "core/.claude/hooks/coding-reminder.sh",
         "core/.claude/rules/principles.md",
@@ -58,8 +50,7 @@
       ],
       "max_files": 8,
       "max_loc": 350,
-      "status": "done",
-      "verified_by_human": "skipped"
+      "status": "done"
     },
     {
       "id": 3,
@@ -72,17 +63,12 @@
         "@s17",
         "@s18"
       ],
-      "depends_on": [
-        2
-      ],
-      "parallel": false,
       "files_hint": [
         "plugin/commands/setup-template.md"
       ],
       "max_files": 4,
       "max_loc": 500,
-      "status": "done",
-      "verified_by_human": "skipped"
+      "status": "done"
     },
     {
       "id": 4,
@@ -94,10 +80,6 @@
         "@s22",
         "@s23"
       ],
-      "depends_on": [
-        3
-      ],
-      "parallel": false,
       "files_hint": [
         "core/.claude/commands/integrate.md",
         "core/CLAUDE.md",
@@ -106,8 +88,7 @@
       ],
       "max_files": 6,
       "max_loc": 500,
-      "status": "done",
-      "verified_by_human": "skipped"
+      "status": "done"
     },
     {
       "id": 5,
@@ -117,10 +98,6 @@
         "@s25",
         "@s26"
       ],
-      "depends_on": [
-        4
-      ],
-      "parallel": false,
       "files_hint": [
         "core/.claude/commands/feature.md",
         "core/.claude/commands/fix.md",
@@ -139,10 +116,6 @@
         "@s28",
         "@s29"
       ],
-      "depends_on": [
-        5
-      ],
-      "parallel": false,
       "files_hint": [
         "plugin/.claude-plugin/plugin.json",
         ".claude-plugin/marketplace.json",

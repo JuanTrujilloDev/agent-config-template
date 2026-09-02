@@ -25,7 +25,8 @@ V2_FIELDS = {
     "verified_by_human",
 }
 LEGACY_FIELDS = {"id", "name", "scenarios", "max_files", "max_loc", "status"}
-ALLOW_LEGACY = True
+ALLOW_LEGACY = False
+MIGRATION_COMMAND = "python3 scripts/migrate-specs.py"
 
 
 def label(path):
@@ -155,9 +156,9 @@ def validate(path):
     strict = "schema_version" in data
     schema_version = data.get("schema_version")
     if strict and schema_version != 2:
-        errors.append(f"schema_version: unsupported version {schema_version!r}")
+        errors.append(f"schema_version: unsupported version {schema_version!r}; run {MIGRATION_COMMAND}")
     if not strict and not ALLOW_LEGACY:
-        errors.append("schema_version: missing")
+        errors.append(f"schema_version: missing; run {MIGRATION_COMMAND}")
     if not isinstance(data.get("feature"), str) or not data.get("feature"):
         errors.append("feature: expected non-empty string")
     items = data.get("mini_features")

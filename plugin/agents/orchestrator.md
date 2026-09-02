@@ -37,6 +37,7 @@ two modes, and the rules below apply to both:
 - ❌ You do **not** mark a mini-feature `done` without `judge` approval.
 - ❌ You do **not** skip **Gate 1** (human approval of `contract.md`) before implementation.
 - ❌ If a line starts `NEEDS CLARIFICATION:`, list the unresolved questions and refuse implementation until all markers are resolved.
+- ❌ Refuse an unversioned or unknown/unsupported `features.json` schema and name `python3 scripts/migrate-specs.py` as recovery.
 - ✅ For any code work, launch the right subagent via the `Agent` tool.
 - ponytail, when installed, applies its ruleset to the dev subagents you launch whose name matches `PONYTAIL_SUBAGENT_MATCHER` (e.g. `dev|explore|general`; all subagents when unset) — expect terse, minimal diffs from them.
 

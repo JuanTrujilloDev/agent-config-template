@@ -29,6 +29,8 @@ If there's no approved contract for this work, spawn `pmo`
 (or run `/spec` first). Output: `docs/specs/<slug>/{spec.md, contract.md, features.json}`.
 Before Gate 1, scan those artifacts for lines starting `NEEDS CLARIFICATION:`;
 if any remain, list the unresolved questions and refuse implementation.
+If `features.json` is unversioned or has an unknown/unsupported schema version,
+refuse to continue and tell the user to run `python3 scripts/migrate-specs.py`.
 **Gate 1 — you approve `contract.md` before any code is written.**
 
 ### 2. Per mini-feature (one at a time)

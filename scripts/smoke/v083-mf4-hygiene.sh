@@ -58,7 +58,7 @@ check "v0.8.3 @s29 adaptive MF8 tracks scripts/smoke.sh" "1" "$(python3 - "$ROOT
 import json, sys
 data = json.load(open(sys.argv[1], encoding="utf-8"))
 mf = next(item for item in data["mini_features"] if item["id"] == 8)
-print(int("scripts/smoke.sh" in mf["files"]))
+print(int("scripts/smoke.sh" in mf.get("files_hint", mf.get("files", []))))
 PY
 )"
 

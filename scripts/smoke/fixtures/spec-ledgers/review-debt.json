@@ -1,5 +1,4 @@
 {
-  "schema_version": 2,
   "feature": "review-debt",
   "version": "0.8.3",
   "rules": {
@@ -14,20 +13,8 @@
     {
       "id": 1,
       "name": "hook-and-setup-bugs",
-      "scenarios": [
-        "@s1",
-        "@s2",
-        "@s3",
-        "@s4",
-        "@s5",
-        "@s6",
-        "@s7",
-        "@s8",
-        "@s9"
-      ],
-      "depends_on": [],
-      "parallel": false,
-      "files_hint": [
+      "scenarios": ["@s1", "@s2", "@s3", "@s4", "@s5", "@s6", "@s7", "@s8", "@s9"],
+      "files": [
         "core/.claude/hooks/coding-reminder.sh",
         "plugin/hooks/coding-reminder.sh",
         "core/.claude/hooks/agent-enforcement.sh",
@@ -40,28 +27,15 @@
       ],
       "max_files": 12,
       "max_loc": 3000,
+      "reviews": ["judge", "security-reviewer"],
       "status": "done",
-      "verified_by_human": "skipped",
-      "reviews": [
-        "judge",
-        "security-reviewer"
-      ]
+      "verified_by_human": "skipped"
     },
     {
       "id": 2,
       "name": "docs-catch-up",
-      "scenarios": [
-        "@s10",
-        "@s11",
-        "@s12",
-        "@s13",
-        "@s14"
-      ],
-      "depends_on": [
-        1
-      ],
-      "parallel": false,
-      "files_hint": [
+      "scenarios": ["@s10", "@s11", "@s12", "@s13", "@s14"],
+      "files": [
         "docs/what-each-file-does.md",
         "README.md",
         "docs/install/host-capability-matrix.md",
@@ -72,31 +46,15 @@
       ],
       "max_files": 12,
       "max_loc": 3000,
+      "reviews": ["judge"],
       "status": "done",
-      "verified_by_human": "skipped",
-      "reviews": [
-        "judge"
-      ]
+      "verified_by_human": "skipped"
     },
     {
       "id": 3,
       "name": "instruction-text-debt",
-      "scenarios": [
-        "@s15",
-        "@s16",
-        "@s17",
-        "@s18",
-        "@s19",
-        "@s20",
-        "@s21",
-        "@s22",
-        "@s23"
-      ],
-      "depends_on": [
-        2
-      ],
-      "parallel": false,
-      "files_hint": [
+      "scenarios": ["@s15", "@s16", "@s17", "@s18", "@s19", "@s20", "@s21", "@s22", "@s23"],
+      "files": [
         "core/.claude/agents/pmo.md",
         "plugin/agents/pmo.md",
         "core/.claude/commands/fix.md",
@@ -113,31 +71,16 @@
       ],
       "max_files": 13,
       "max_loc": 3000,
-      "status": "done",
-      "verified_by_human": "skipped",
       "budget_note": "Gate 1 exception: the handoff keeps one instruction-text MF; direct plugin components are hand-authored, while generated mirrors remain excluded",
-      "reviews": [
-        "judge"
-      ]
+      "reviews": ["judge"],
+      "status": "done",
+      "verified_by_human": "skipped"
     },
     {
       "id": 4,
       "name": "build-test-hygiene",
-      "scenarios": [
-        "@s24",
-        "@s25",
-        "@s26",
-        "@s27",
-        "@s28",
-        "@s29",
-        "@s30",
-        "@s31"
-      ],
-      "depends_on": [
-        3
-      ],
-      "parallel": false,
-      "files_hint": [
+      "scenarios": ["@s24", "@s25", "@s26", "@s27", "@s28", "@s29", "@s30", "@s31"],
+      "files": [
         "scripts/build.sh",
         "scripts/validate-packaging.py",
         "scripts/smoke/lib.sh",
@@ -158,28 +101,16 @@
       ],
       "max_files": 17,
       "max_loc": 3000,
-      "status": "done",
-      "verified_by_human": "skipped",
       "budget_note": "Gate 1 exception: the maintainer-defined MF includes six hand-authored command surfaces plus four fixture files; splitting would change the ratified five-MF release plan",
-      "reviews": [
-        "judge"
-      ]
+      "reviews": ["judge"],
+      "status": "done",
+      "verified_by_human": "skipped"
     },
     {
       "id": 5,
       "name": "companion-pin-and-release",
-      "scenarios": [
-        "@s32",
-        "@s33",
-        "@s34",
-        "@s35",
-        "@s36"
-      ],
-      "depends_on": [
-        4
-      ],
-      "parallel": false,
-      "files_hint": [
+      "scenarios": ["@s32", "@s33", "@s34", "@s35", "@s36"],
+      "files": [
         "plugin/commands/setup-companions.md",
         "hosts/codex/skills/setup-companions/SKILL.md",
         "plugin/.claude-plugin/plugin.json",
@@ -192,11 +123,9 @@
       ],
       "max_files": 12,
       "max_loc": 3000,
+      "reviews": ["judge"],
       "status": "done",
-      "verified_by_human": "skipped",
-      "reviews": [
-        "judge"
-      ]
+      "verified_by_human": "skipped"
     }
   ]
 }

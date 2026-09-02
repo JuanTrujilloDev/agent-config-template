@@ -1,5 +1,4 @@
 {
-  "schema_version": 2,
   "feature": "cursor-grok-portability",
   "version": "0.8.0",
   "rules": {
@@ -11,135 +10,64 @@
     {
       "id": 1,
       "name": "codex-drift-elimination",
-      "scenarios": [
-        "@s1",
-        "@s2",
-        "@s3",
-        "@s4"
-      ],
-      "depends_on": [],
-      "parallel": false,
-      "files_hint": [],
+      "scenarios": ["@s1", "@s2", "@s3", "@s4"],
       "max_files": 8,
       "max_loc": 600,
       "status": "done",
-      "verified_by_human": "skipped",
       "notes": "build.sh codex generation + hosts/codex/ overrides + SYNC_NOTE rewrite; CI covered by existing plugin-mirror job"
     },
     {
       "id": 2,
       "name": "model-agnostic-phrasing",
-      "scenarios": [
-        "@s5",
-        "@s6"
-      ],
-      "depends_on": [
-        1
-      ],
-      "parallel": false,
-      "files_hint": [],
+      "scenarios": ["@s5", "@s6"],
       "max_files": 12,
       "max_loc": 400,
       "status": "done",
-      "verified_by_human": "skipped",
       "notes": "surgical reword of Claude-as-actor idioms in core/ (grep found 14 candidate files; most mentions are host mechanics that stay). If >12 source files genuinely need edits, split rules+commands / agents"
     },
     {
       "id": 3,
       "name": "cursor-static-target",
-      "scenarios": [
-        "@s7",
-        "@s8",
-        "@s9",
-        "@s10"
-      ],
-      "depends_on": [
-        2
-      ],
-      "parallel": false,
-      "files_hint": [],
+      "scenarios": ["@s7", "@s8", "@s9", "@s10"],
       "max_files": 8,
       "max_loc": 800,
       "status": "done",
-      "verified_by_human": "skipped",
       "notes": "build.sh emits cursor/ (AGENTS.md, rules .mdc, mcp.json, agents+rules copies) from core/ + hosts/cursor/ sources; --check drift"
     },
     {
       "id": 4,
       "name": "cursor-hooks-and-skills",
-      "scenarios": [
-        "@s11",
-        "@s12",
-        "@s13",
-        "@s14"
-      ],
-      "depends_on": [
-        3
-      ],
-      "parallel": false,
-      "files_hint": [],
+      "scenarios": ["@s11", "@s12", "@s13", "@s14"],
       "max_files": 8,
       "max_loc": 800,
       "status": "done",
-      "verified_by_human": "skipped",
       "notes": "hooks.json (native events only) + 2 adapter scripts + commands-to-skills transform. setup.sh flag moved to mini-feature 5 (Gate-1 amendment)"
     },
     {
       "id": 5,
       "name": "host-aware-install",
-      "scenarios": [
-        "@s15",
-        "@s22",
-        "@s23",
-        "@s24"
-      ],
-      "depends_on": [
-        4
-      ],
-      "parallel": false,
-      "files_hint": [],
+      "scenarios": ["@s15", "@s22", "@s23", "@s24"],
       "max_files": 6,
       "max_loc": 500,
       "status": "done",
-      "verified_by_human": "skipped",
       "notes": "Gate-1 amendment (spec D4/D11): setup.sh --host <list> over {claude,cursor,codex}+grok alias, unsupported hosts -> port-config message, TARGET_HOSTS in template.config.yaml/answers.env, one multi-select host question in setup-template.md. Runs after 3 and 4 (needs cursor tree + codex generation)"
     },
     {
       "id": 6,
       "name": "portability-docs",
-      "scenarios": [
-        "@s16",
-        "@s17",
-        "@s18"
-      ],
-      "depends_on": [
-        5
-      ],
-      "parallel": false,
-      "files_hint": [],
+      "scenarios": ["@s16", "@s17", "@s18"],
       "max_files": 5,
       "max_loc": 900,
       "status": "done",
-      "verified_by_human": "skipped",
       "notes": "docs/install/cursor.md, docs/install/grok.md (incl. --host grok shortcut), docs/install/host-capability-matrix.md + README pointer"
     },
     {
       "id": 7,
       "name": "packaging-validation-ci",
-      "scenarios": [
-        "@s19",
-        "@s20",
-        "@s21"
-      ],
-      "depends_on": [
-        6
-      ],
-      "parallel": false,
-      "files_hint": [],
+      "scenarios": ["@s19", "@s20", "@s21"],
       "max_files": 6,
       "max_loc": 400,
       "status": "done",
-      "verified_by_human": "skipped",
       "budget_note": "max_files corrected 4->6 at close per mf7 judge ruling: the three contract-mandated manifest version bumps made 4 unattainable at planning time",
       "notes": "validate-packaging.py cursor/codex checks, ci.yml render-smoke cursor iteration, version bump to 0.8.0 (Q2)"
     }

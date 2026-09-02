@@ -80,10 +80,10 @@
         "scripts/smoke/v090-mf3-schema-migration.sh",
         "scripts/smoke.sh"
       ],
-      "max_files": 20,
+      "max_files": 22,
       "max_loc": 3000,
-      "budget_note": "Gate 1 exception: one atomic migration touches every historical ledger plus mechanical fixture copies; splitting would leave mixed live schema versions",
-      "status": "pending",
+      "budget_note": "Gate 1 exception: one atomic migration touches every historical ledger plus exact fixture copies and two compatibility smoke updates; splitting would leave mixed live schema versions",
+      "status": "done",
       "verified_by_human": "skipped"
     },
     {
