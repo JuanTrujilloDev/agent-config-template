@@ -167,11 +167,13 @@
         "docs/upgrade-guide.md",
         "plugin/.claude-plugin/plugin.json",
         ".claude-plugin/marketplace.json",
-        "codex/.codex-plugin/plugin.json"
+        "codex/.codex-plugin/plugin.json",
+        "scripts/smoke/mf7-merge.sh"
       ],
-      "max_files": 12, "max_loc": 3000,
+      "max_files": 8, "max_loc": 3000,
+      "budget_note": "max_files set to 8 per mf7 judge: the scripts/smoke/ split (a36e917) predates this budget, so the per-MF smoke file is a hand-authored file the plan did not count",
       "reviews": ["judge", "security-reviewer"],
-      "status": "in_progress"
+      "status": "done"
     }
   ]
 }

@@ -46,14 +46,18 @@ jobs:
             # hooks must be valid bash
             for h in "$d"/.claude/hooks/*.sh; do bash -n "$h" || { echo "::error::hook syntax in $ex"; fail=1; }; done
           done
-          # cursor target: render one example, apply the same checks
-          d=$(mktemp -d)
-          bash setup.sh --target "$d" --answers examples/node-nextjs/answers.env --host cursor
-          if grep -rEl '[{][{][#/^]?[a-zA-Z_][a-zA-Z0-9_]*[}][}]|<!--[[:space:]]*requires' "$d"; then
-            echo "::error::leftover placeholders in cursor render"; fail=1
-          fi
+          # non-claude hosts: render one example per host, zero leftover placeholders
+          PH='[{][{][#/^]?[a-zA-Z_][a-zA-Z0-9_]*[}][}]|<!--[[:space:]]*requires'
+          d=$(mktemp -d); bash setup.sh --target "$d" --answers examples/node-nextjs/answers.env --host cursor
+          grep -rEl "$PH" "$d" && { echo "::error::leftover placeholders in cursor render"; fail=1; }
           for h in "$d"/.cursor/hooks/*.sh; do bash -n "$h" || { echo "::error::cursor hook syntax"; fail=1; }; done
           # rendered cursor JSON must parse (mcp.json is a template pre-render; the render must be valid)
           python3 -c "import json; json.load(open('$d/.cursor/mcp.json')); json.load(open('$d/.cursor/hooks.json'))" \
             || { echo "::error::invalid rendered cursor JSON"; fail=1; }
+          d=$(mktemp -d); bash setup.sh --target "$d" --answers examples/node-nextjs/answers.env --host grok
+          grep -rEl "$PH" "$d" && { echo "::error::leftover placeholders in grok render"; fail=1; }
+          d=$(mktemp -d); bash setup.sh --target "$d" --answers examples/node-nextjs/answers.env --host codex
+          grep -rEl "$PH" "$d" && { echo "::error::leftover placeholders in codex render"; fail=1; }
+          # contract smoke scenarios (scripts/smoke/mf*.sh)
+          bash scripts/smoke.sh || fail=1
           exit $fail

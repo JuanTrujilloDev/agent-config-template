@@ -13,13 +13,23 @@
 #   --merge       Add files that don't exist; deep-merge .claude/settings.json
 #                 (union of permissions.allow/deny/ask + additive hooks); keep
 #                 every other existing file as-is. Never touches
-#                 .claude/settings.local.json.
+#                 .claude/settings.local.json. Add --overwrite-files a,b
+#                 (comma list of target-relative paths) to take the template
+#                 version of just those files; listing .claude/CLAUDE.md
+#                 replaces a regular file there with the ../CLAUDE.md symlink.
 #   --overwrite   Replace template-managed files. Still never touches
 #                 .claude/settings.local.json, and never deletes files the
 #                 template doesn't manage.
 #   --abort       Do nothing (this is the default if no mode is given).
 #
-# Run with no mode against an existing config to see a per-file change plan.
+# Run with no mode against an existing config to see a per-file change plan:
+#   STALE-MANAGED     template-managed file differs (usually an old render)
+#   CUSTOMIZED        user-filled file differs (root CLAUDE.md, docs/CONTEXT.md,
+#                     docs/design-system/) — yours, kept on --merge, never in the line
+#   SYMLINK-CONFLICT  .claude/CLAUDE.md is a regular file where a symlink to
+#                     ../CLAUDE.md is expected
+# The plan ends with one copy-pasteable `--merge --overwrite-files ...` line
+# listing every STALE-MANAGED path; delete entries you want to keep.
 #
 # This is NOT an interactive setup. The expected workflow is:
 #
@@ -34,7 +44,7 @@
 #   ./setup.sh --target /path/to/project --answers ./answers.env --merge    # existing
 #
 # Usage:
-#   setup.sh --target <dir> --answers <file> [--merge|--overwrite|--abort]
+#   setup.sh --target <dir> --answers <file> [--merge [--overwrite-files a,b]|--overwrite|--abort]
 #   setup.sh --target <dir> --answers -        # read answers from stdin
 #   setup.sh --host <list> ...                  # comma-separated target hosts
 #
@@ -66,6 +76,7 @@ TARGET=""
 ANSWERS_FILE=""
 MODE=""
 HOST_ARG=""
+OVERWRITE_FILES=""
 
 while [ $# -gt 0 ]; do
   case "$1" in
@@ -76,6 +87,7 @@ while [ $# -gt 0 ]; do
     --overwrite) MODE="overwrite"; shift ;;
     --abort) MODE="abort"; shift ;;
     --mode) MODE="$2"; shift 2 ;;
+    --overwrite-files) OVERWRITE_FILES="$2"; shift 2 ;;
     -h|--help)
       grep '^#' "$0" | sed 's/^# \?//'
       exit 0
@@ -86,7 +98,7 @@ done
 
 if [ -z "$TARGET" ]; then
   echo "Error: --target is required." >&2
-  echo "Usage: setup.sh --target <dir> --answers <file> [--merge|--overwrite|--abort]" >&2
+  echo "Usage: setup.sh --target <dir> --answers <file> [--merge [--overwrite-files a,b]|--overwrite|--abort]" >&2
   exit 1
 fi
 
@@ -108,6 +120,10 @@ case "$MODE" in
   ""|merge|overwrite|abort) ;;
   *) echo "Error: --mode must be one of: merge, overwrite, abort" >&2; exit 1 ;;
 esac
+if [ -n "$OVERWRITE_FILES" ] && [ "$MODE" != "merge" ]; then
+  echo "Error: --overwrite-files is only valid together with --merge." >&2
+  exit 1
+fi
 
 if [ ! -d "$TEMPLATE_DIR" ]; then
   echo "Error: template/ not found at $TEMPLATE_DIR" >&2
@@ -182,16 +198,20 @@ ANSWERS_INPUT="$ANSWERS_INPUT" \
   TEMPLATE_DIR="$TEMPLATE_DIR" \
   TARGET="$TARGET" \
   MODE="$MODE" \
+  OVERWRITE_FILES="$OVERWRITE_FILES" \
+  ANSWERS_FILE="$ANSWERS_FILE" \
+  SCRIPT="$0" \
   HOSTS="$HOSTS" \
   CURSOR_DIR="$CURSOR_DIR" \
   CODEX_SKILLS_DIR="$CODEX_SKILLS_DIR" \
   python3 - <<'PYEOF' || PY_RC=$?
-import os, re, sys, shutil, stat, json, tempfile
+import os, re, sys, shutil, stat, json, tempfile, shlex
 
 TEMPLATE_DIR = os.environ["TEMPLATE_DIR"]
 TARGET = os.environ["TARGET"]
 ANSWERS_INPUT = os.environ["ANSWERS_INPUT"]
 MODE = os.environ.get("MODE", "")
+OVERWRITE_FILES = [p for p in os.environ.get("OVERWRITE_FILES", "").split(",") if p]
 HOSTS = (os.environ.get("HOSTS") or "claude").split()
 CURSOR_DIR = os.environ.get("CURSOR_DIR", "")
 CODEX_SKILLS_DIR = os.environ.get("CODEX_SKILLS_DIR", "")
@@ -358,9 +378,24 @@ try:
 
     SETTINGS_REL = os.path.join(".claude", "settings.json")
     LOCAL_SETTINGS = "settings.local.json"
+    DOT_CLAUDE_MD = os.path.join(".claude", "CLAUDE.md")  # never staged: the template's version is the ../CLAUDE.md symlink
+    # D13: user-filled files are yours — never labelled stale, never in --overwrite-files.
+    NON_MANAGED = {"CLAUDE.md", os.path.join("docs", "CONTEXT.md")}
+    NON_MANAGED_DIRS = (os.path.join("docs", "design-system") + os.sep,)
+    REAL_TARGET = os.path.realpath(TARGET) + os.sep
+
+    def non_managed(rel):
+        return rel in NON_MANAGED or rel.startswith(NON_MANAGED_DIRS)
 
     def tpath(rel):
         return os.path.join(TARGET, rel)
+
+    def check_inside(rels):
+        # Refuse before any write: a symlinked file or intermediate dir must not lead outside TARGET.
+        outside = [r for r in rels if not os.path.realpath(tpath(r)).startswith(REAL_TARGET)]
+        if outside:
+            print(f"Error: path(s) resolve outside {TARGET} via symlink; refusing to write: {','.join(outside)}", file=sys.stderr)
+            sys.exit(1)
 
     def classify(rel):
         t = tpath(rel)
@@ -371,6 +406,24 @@ try:
                 return "SAME" if a.read() == b.read() else "DIFFERS"
         except OSError:
             return "DIFFERS"
+
+    def symlink_conflict():
+        t = tpath(DOT_CLAUDE_MD)
+        return DOT_CLAUDE_MD not in staged and os.path.isfile(t) and not os.path.islink(t)
+
+    # 6a. --overwrite-files must name template-managed paths (or .claude/CLAUDE.md); fail before writing anything.
+    overwritable = {r for r in staged if not non_managed(r) and os.path.basename(r) != LOCAL_SETTINGS} | {DOT_CLAUDE_MD}
+    unknown = [p for p in OVERWRITE_FILES if p not in overwritable]
+    if unknown:
+        print(f"Error: --overwrite-files names path(s) the template does not manage: {','.join(unknown)}", file=sys.stderr)
+        sys.exit(1)
+    if SETTINGS_REL in OVERWRITE_FILES:
+        print(f"Error: {SETTINGS_REL} is merge-managed (deep-merged on --merge); remove it from --overwrite-files.", file=sys.stderr)
+        sys.exit(1)
+    if DOT_CLAUDE_MD in OVERWRITE_FILES and not (os.path.isfile(tpath("CLAUDE.md")) and not os.path.islink(tpath("CLAUDE.md"))):
+        print(f"Error: --overwrite-files {DOT_CLAUDE_MD} needs a regular root CLAUDE.md to link to; move {DOT_CLAUDE_MD} to CLAUDE.md first.", file=sys.stderr)
+        sys.exit(1)
+    check_inside(OVERWRITE_FILES)
 
     # 7. Detect existing Claude config in the target.
     markers = [
@@ -389,6 +442,7 @@ try:
     present = [m for m in markers if os.path.exists(tpath(m))]
 
     def write_file(rel):
+        check_inside([rel])
         src = os.path.join(STAGING, rel); dst = tpath(rel)
         d = os.path.dirname(dst)
         if d:
@@ -396,6 +450,7 @@ try:
         shutil.copy2(src, dst)
 
     def merge_settings(rel):
+        check_inside([rel])  # never union-merge through a symlink that escapes TARGET
         src = os.path.join(STAGING, rel); dst = tpath(rel)
         try:
             s = json.load(open(src, encoding="utf-8"))
@@ -468,29 +523,39 @@ try:
         print("")
         print("Planned changes (nothing written yet):")
         adds = diffs = sames = 0
+        stale = []
         for rel in staged:
             if os.path.basename(rel) == LOCAL_SETTINGS:
                 continue
             st = classify(rel)
             if st == "ADD":
-                adds += 1; print(f"  ADD      {rel}")
+                adds += 1; print(f"  ADD               {rel}")
             elif st == "DIFFERS":
                 diffs += 1
-                extra = "  (mergeable)" if rel == SETTINGS_REL else ""
-                print(f"  DIFFERS  {rel}{extra}")
+                if non_managed(rel):
+                    print(f"  CUSTOMIZED        {rel}  (yours — keep; --merge never touches it, reconcile by hand)")
+                elif rel == SETTINGS_REL:
+                    print(f"  STALE-MANAGED     {rel}  (mergeable)")
+                else:
+                    stale.append(rel); print(f"  STALE-MANAGED     {rel}")
             else:
                 sames += 1
+        if symlink_conflict():
+            diffs += 1; print(f"  SYMLINK-CONFLICT  {DOT_CLAUDE_MD}  (regular file; expected symlink to ../CLAUDE.md)")
         if sames:
-            print(f"  SAME     ({sames} file(s) already identical)")
+            print(f"  SAME              ({sames} file(s) already identical)")
         print("")
         print(f"  {adds} to add, {diffs} differ, {sames} identical.")
+        if stale:
+            print("  Regenerate the STALE-MANAGED files (delete any you want to keep):")
+            print(f"  {shlex.quote(os.environ['SCRIPT'])} --target {shlex.quote(TARGET)} --answers {shlex.quote(os.environ['ANSWERS_FILE'])} --merge --overwrite-files {','.join(stale)}")
 
     # 8. Apply according to MODE.
+    to_write = [r for r in staged if os.path.basename(r) != LOCAL_SETTINGS]
     if not present:
         # Fresh target: write everything.
-        for rel in staged:
-            if os.path.basename(rel) == LOCAL_SETTINGS:
-                continue
+        check_inside(to_write)
+        for rel in to_write:
             write_file(rel)
         relink_claude_md()
         print(f"✓ Template rendered to {TARGET}" + (f" (skipped {skipped} files)" if skipped else ""))
@@ -509,25 +574,27 @@ try:
                 print("Aborted — nothing was written.")
                 sys.exit(0)
         elif MODE == "overwrite":
-            for rel in staged:
-                if os.path.basename(rel) == LOCAL_SETTINGS:
-                    continue
+            check_inside(to_write)
+            for rel in to_write:
                 write_file(rel)
             relink_claude_md()
             print(f"✓ Overwrote template-managed files in {TARGET} (your settings.local.json untouched)")
         elif MODE == "merge":
-            added = merged = kept = 0
-            for rel in staged:
-                if os.path.basename(rel) == LOCAL_SETTINGS:
-                    continue
+            added = merged = kept = overwritten = 0
+            check_inside([r for r in to_write if not os.path.exists(tpath(r)) or r in OVERWRITE_FILES])
+            for rel in to_write:
                 if not os.path.exists(tpath(rel)):
                     write_file(rel); added += 1; print(f"  + {rel}")
+                elif rel in OVERWRITE_FILES:
+                    write_file(rel); overwritten += 1; print(f"  ~ {rel}")
                 elif rel == SETTINGS_REL:
                     merge_settings(rel); merged += 1
                 else:
                     kept += 1  # keep the user's existing file
+            if DOT_CLAUDE_MD in OVERWRITE_FILES and symlink_conflict():
+                os.remove(tpath(DOT_CLAUDE_MD)); overwritten += 1; print(f"  ~ {DOT_CLAUDE_MD}  (relinked to ../CLAUDE.md)")
             relink_claude_md()
-            print(f"✓ Merge complete: {added} added, {merged} settings merged, {kept} kept as-is.")
+            print(f"✓ Merge complete: {added} added, {merged} settings merged, {overwritten} overwritten, {kept} kept as-is.")
 
     print("")
     print("Next steps:")

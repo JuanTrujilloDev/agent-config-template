@@ -11,7 +11,7 @@ trap 'rm -rf "$WORK"' EXIT
 FAIL=0
 
 . "$ROOT/scripts/smoke/lib.sh"
-for mf in mf1-output-style mf8-agent-style mf2-patterns mf3-ledger mf4-brand mf5-vocabulary mf6-companions; do
+for mf in mf1-output-style mf8-agent-style mf2-patterns mf3-ledger mf4-brand mf5-vocabulary mf6-companions mf7-merge; do
   . "$ROOT/scripts/smoke/$mf.sh"
 done
 

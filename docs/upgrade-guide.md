@@ -56,6 +56,61 @@ diff -r .claude "$TMP/.claude"
 
 ---
 
+## Upgrading to v0.8.2 (adaptive skills + merge reporting)
+
+v0.8.2 adds per-project answer styles, the companions list grammar, and a
+`--merge` plan that says *why* a file differs instead of a bare `DIFFERS`.
+
+1. New personal keys in the gitignored `.claude/answers.local.env` (both
+   optional; absent = today's behaviour; never committed):
+
+   ```dotenv
+   output_style=concise      # what Claude says to you
+   agent_style=terse         # what subagents return to the orchestrator
+   ```
+
+   `output_style` accepts `output_style=concise|balanced|detailed|terse` (default `concise`).
+   Caveat: `terse` is lossy and not for beginners — ask before enabling it on a shared project.
+   `agent_style` accepts `agent_style=terse|descriptive` (default `terse`).
+   Boundary rule: `agent_style` shapes only the return message a subagent hands
+   back to the orchestrator, never the user-facing `output_style`. `companions=yes|not_now|never|<comma list>` (for example
+   `companions=graphify,ponytail`) is unchanged from v0.8.1.
+2. Run the plan and read the three labels:
+
+   ```bash
+   ./setup.sh --target . --answers ./answers.env
+   ```
+
+   - `STALE-MANAGED` — a template-managed file (agents, commands, rules, hooks,
+     skills, patterns, `.claude/HELP.md`, `mcp.json.example`, `AGENTS.md`,
+     `.cursor/`, `.agents/skills/`) differs; usually an old render, sometimes a
+     hand edit. Content cannot tell the two apart, so nothing is overwritten
+     automatically. `.claude/settings.json` is deep-merged instead and cannot be listed.
+   - `CUSTOMIZED` — a user-filled file differs: root `CLAUDE.md`, `docs/CONTEXT.md`,
+     `docs/design-system/`. Keep it; `--merge` never touches it and never lists it.
+   - `SYMLINK-CONFLICT` — `.claude/CLAUDE.md` is a regular file where the
+     template expects a symlink to `../CLAUDE.md`. Never auto-listed.
+
+   The plan ends with one copy-pasteable line:
+   `--merge --overwrite-files <every STALE-MANAGED path>`. Delete the entries
+   you edited on purpose, then run it. `--overwrite-files` is only valid with
+   `--merge`; unknown paths, `.claude/settings.json`, a path that resolves outside
+   the target through a symlink, or `.claude/CLAUDE.md` without a regular root
+   `CLAUDE.md` exit non-zero before anything is written; `settings.local.json`
+   is never touched.
+
+### Portfolio-style resolution (many old renders, one team `CLAUDE.md`)
+
+1. Keep root `CLAUDE.md` — your team conventions live there; the template adds
+   nothing to it on merge.
+2. Run the plan (no mode) and read the labels file by file.
+3. Regenerate the STALE-MANAGED agents/rules with the printed `--merge --overwrite-files` line.
+4. Diff `.claude/CLAUDE.md` against root `CLAUDE.md`, fold anything worth keeping into root, then add `.claude/CLAUDE.md` to the list to replace the regular file with the symlink.
+
+Land the tooling upgrade as its own `chore:` commit, separate from feature work.
+
+---
+
 ## Upgrading to v0.8.x (setup evolution)
 
 v0.8.1 separates shared project policy from personal agent preferences, batches
