@@ -31,7 +31,7 @@ git add answers.env   # the source of truth — re-renders the same config later
 
 ```bash
 # 1. Pull the latest template (or check out a tag for stability)
-cd ~/code/agent-config-template && git pull origin main   # or: git checkout v0.4.0
+cd ~/code/agent-config-template && git pull origin main   # or: git checkout v0.9.0
 
 # 2. Preview what would change in your project
 cd ~/code/my-project
@@ -41,7 +41,7 @@ cd ~/code/my-project
 ~/code/agent-config-template/setup.sh --target . --answers ./answers.env --merge
 
 # 4. Commit
-git add .claude/ CLAUDE.md docs/ && git commit -m "chore: upgrade agent-config-template to v0.4.0"
+git add .claude/ CLAUDE.md docs/ && git commit -m "chore: upgrade agent-config-template to v0.9.0"
 ```
 
 A template upgrade (`setup.sh --merge`) is its own `chore:` commit — never mixed into a feature PR.
@@ -53,6 +53,37 @@ TMP=$(mktemp -d)
 ~/code/agent-config-template/setup.sh --target "$TMP" --answers ./answers.env --overwrite
 diff -r .claude "$TMP/.claude"
 ```
+
+---
+
+## Upgrading to v0.9.0 (explicit SDD grammar)
+
+v0.9.0 makes the on-disk workflow more deterministic across Claude, Cursor,
+Grok, and Codex:
+
+- Specs separate numbered FR/SC statements and trace every contract scenario
+  to both; unresolved `NEEDS CLARIFICATION:` markers block Gate 1.
+- `features.json` now requires schema v2, explicit dependencies, budgets,
+  status, and human-verification state. Migrate old ledgers once with
+  `python3 scripts/migrate-specs.py`.
+- Post-approval amendments reset only affected work and transitive dependents,
+  then require a newer approval in `progress/gate1.md`.
+- PMO and judge use one principles-deviation table as a planning and review
+  gate.
+- README is shorter, and `docs/guides/existing-projects.md` adds the safe
+  brownfield survey → preview → merge → verify path.
+
+Pull or install v0.9.0, preview the generated diff, then merge it as a separate
+tooling commit:
+
+```bash
+./setup.sh --target . --answers ./answers.env --host cursor
+./setup.sh --target . --answers ./answers.env --host cursor --merge
+```
+
+Do not overwrite customized root instructions. Review `STALE-MANAGED` files and
+use the printed `--overwrite-files` list only for upstream files you intend to
+refresh.
 
 ---
 
