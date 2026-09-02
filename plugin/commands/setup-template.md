@@ -30,14 +30,14 @@ The interview is **infer → show → ask once → record → render**. Facts ar
    | `line_length` | 100 | default | template default |
    | `branch_prefix` | — | UNKNOWN | no ticket ids in `git branch -a` |
 
-   Personal prefs already present in `.claude/answers.local.env` appear tagged `recorded` and are not re-asked (the user edits that file to change them); `companions=not_now` is the exception — it is asked again on every run. Likewise, policy decisions already present in `answers.env` (`workflow_mode`, `TARGET_HOSTS`) appear tagged `recorded` (source `answers.env`) and are not re-asked — round items 1–2 are listed only when their value is absent.
+   Personal prefs already present in `.claude/answers.local.env` appear tagged `recorded` and are not re-asked (the user edits that file to change them); `companions=not_now` is the exception — it is asked again on every run. A recorded comma list (e.g. `companions=graphify,ponytail`) is tagged `recorded` and not re-asked; tools omitted from that list were skipped by omission and are not re-recommended. Likewise, policy decisions already present in `answers.env` (`workflow_mode`, `TARGET_HOSTS`) appear tagged `recorded` (source `answers.env`) and are not re-asked — round items 1–2 are listed only when their value is absent.
 
 3. **ASK one frontier round.** Below the table, list **all** currently-answerable decision questions, numbered, each with a recommended answer. Facts (stack, dirs, commands, versions) are never in the round. The round contains:
 
    1. `workflow_mode` — `SDD` or `SDD+TDD`. Recommended: `SDD` (`SDD+TDD` when the project already has a substantial test suite and CI running it).
    2. Target hosts — multi-select `claude`, `cursor`, `codex` (`grok` = claude tree + AGENTS.md). Recommended: the inferred set from step 1; the user may add or drop any.
    3. `autonomy_mode` — `gated` or `autonomous`. Recommended: `gated` (today's behavior: pause before each micro-commit; `autonomous` skips that pause — push/merge/publish/destructive confirms ALWAYS apply regardless of mode).
-   4. Recommend graphify + ponytail? `[Yes / Not now / Never]`. Recommended: `Not now`. When both are already installed (`command -v graphify`; `claude plugin list` contains `ponytail@ponytail`), skip this question **and step 8**, and leave any existing `companions` key untouched.
+   4. Companions — three groups, one answer. **Core quality:** graphify (knowledge graph behind `code-query`) + ponytail (runtime minimal-code enforcement). **Output:** the native `concise` output style is already on by default — nothing to install. **UI:** ui-ux-pro-max (design-system skill) — listed only when `has_ui` is truthy; omit the whole UI group when `has_ui` is falsy. Answer `[Yes / Not now / Never / <comma list>]`. Recommended: `Not now`. When every tool recommended for this project is already installed (`command -v graphify`; `claude plugin list` contains `ponytail@ponytail`; `.claude/skills/ui-ux-pro-max/` exists, when `has_ui`), skip this question **and step 8**, and leave any existing `companions` key untouched.
    5. … every LOW placeholder (recommended = the best guess, alternative named), every UNKNOWN (no recommendation — say which signal is missing), and any `default`-tagged item that changes what renders (`has_frontend`, `ticket_tracker`, `has_background_jobs`, `use_gherkin`, `enforce_mutation_testing`).
 
    End with: *"Reply `all defaults` (or `go`) to accept every recommendation and render, or answer by number — `1: SDD+TDD, 4: Never`. Unanswered numbers take the recommendation."* That reply is the approval gate: it resolves the whole round and authorizes the render — **do not run `setup.sh` before it arrives.**
@@ -46,7 +46,7 @@ The interview is **infer → show → ask once → record → render**. Facts ar
 
 4. **RECORD** the resolved answers in their scopes (table below):
    - **`answers.env`** at the project root — one `KEY=VALUE` per applicable placeholder, including `workflow_mode=…` and `TARGET_HOSTS=<comma-separated list>` (the renderer defaults to `claude` when the line is absent; `setup.sh --host` overrides it). Project policy, committed.
-   - **`.claude/answers.local.env`** (`mkdir -p .claude`; create or update, preserving other keys) — `autonomy_mode=gated|autonomous` and `companions=yes|not_now|never`. Personal, gitignored, read at session time by hooks and command instructions. **Never write these two keys to `answers.env`, and never pass this file to the renderer** — it is not a placeholder source.
+   - **`.claude/answers.local.env`** (`mkdir -p .claude`; create or update, preserving other keys) — `autonomy_mode=gated|autonomous` and `companions=yes|not_now|never|<comma list>` — `yes` = all recommended for this project; a comma list (e.g. `graphify,ponytail`) installs only those and the rest are skipped by omission and not re-recommended; `not_now` = asked again next run; `never` = suppress every mention. Personal, gitignored, read at session time by hooks and command instructions. **Never write these two keys to `answers.env`, and never pass this file to the renderer** — it is not a placeholder source.
 
 5. **RENDER.** The renderer is **non-destructive**: against a project that already has a Claude config it writes nothing and prints a per-file change plan until you pass an explicit mode.
    ```bash
@@ -77,7 +77,8 @@ The interview is **infer → show → ask once → record → render**. Facts ar
 
 8. **Companions**, per the `companions` value recorded **this run** (a value recorded on an earlier run does not re-trigger this step):
    - `yes` — run the `/setup-companions` flow now. It detects what is already installed and has its own confirmation gate; that gate is kept even in just-go mode — nothing installs without it.
-   - `not_now` — mention once (don't push): `/setup-companions` installs the optional companion tools — graphify (knowledge graph behind the `code-query` skill) and ponytail (runtime minimal-code enforcement).
+   - `<comma list>` (e.g. `graphify,ponytail`) — run `/setup-companions <list>` now; it installs exactly those and keeps its own confirmation gate.
+   - `not_now` — mention once (don't push): `/setup-companions` installs the optional companion tools — graphify (knowledge graph behind the `code-query` skill), ponytail (runtime minimal-code enforcement) and, when `has_ui`, ui-ux-pro-max (design-system skill).
    - `never` — say nothing about companions, this run and every future run (the recorded value also skips question 4).
 
 ## Config scopes
@@ -139,7 +140,7 @@ After `/setup-template`, both layers are active:
 
 The project-root versions take precedence when names collide. This is intentional — the project versions have the calibrated test commands, branch prefixes, and toggles baked in.
 
-Companion tools (graphify, ponytail) follow step 8 above — routed by the recorded `companions` value, never pushed.
+Companion tools (graphify, ponytail, ui-ux-pro-max when `has_ui`) follow step 8 above — routed by the recorded `companions` value, never pushed.
 
 ## Pre-filled examples
 

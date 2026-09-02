@@ -81,6 +81,10 @@ setup decisions, and adds safe task-time MCP integration.
 
    `autonomy_mode` accepts `gated` or `autonomous`; session phrases such as
    “just go” and “gate me” override it without changing the file.
+   `companions` accepts `companions=yes|not_now|never|<comma list>`; the
+   companions are graphify, ponytail and ui-ux-pro-max (only when `has_ui` is
+   truthy), so `companions=graphify,ponytail` installs those two and never
+   re-recommends the rest.
 4. Preview, then merge the new files:
 
    ```bash

@@ -149,7 +149,7 @@ Every agent ships with a **Gotchas** section listing its role-specific failure m
 | `/commit`, `/pr` | Conventional commit / open PR, with confirmation gates |
 | `/design` | Wireframe + spec via `ui-designer` (folds into `/feature` for UI work) |
 | `/setup-template` | Render a calibrated `.claude/` tree into the current project (non-destructive) |
-| `/setup-companions` | Optionally install graphify + ponytail with a confirmation gate |
+| `/setup-companions [list]` | Optionally install the companions — graphify + ponytail, plus ui-ux-pro-max when `has_ui` is set — with a confirmation gate. `/setup-template` records the answer as `companions=yes`, `not_now`, `never` or a comma list such as `companions=graphify,ponytail` (unlisted tools are not re-recommended) |
 
 
 ---
