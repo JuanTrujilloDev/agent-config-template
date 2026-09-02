@@ -52,7 +52,7 @@ Tests: `{{tests_glob}}`
 - **Formatter:** {{formatter}} — run `{{format_cmd}}`
 - **Linter:** {{linter}} — run `{{lint_cmd}}`
 
-Detailed patterns: `.claude/rules/backend-style.md`{{#has_frontend}}, `.claude/rules/frontend-style.md`{{/has_frontend}}. Structural code questions (what depends on what): `.claude/rules/code-query.md` — graph first, grep second.
+Detailed patterns: `.claude/rules/backend-style.md`{{#has_frontend}}, `.claude/rules/frontend-style.md`{{/has_frontend}}. Structural code questions (what depends on what): `.claude/rules/code-query.md` — graph first, grep second. Before adding any abstraction: `.claude/rules/patterns.md` — name the force or refuse.
 
 ## Git Workflow
 

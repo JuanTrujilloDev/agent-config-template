@@ -55,21 +55,23 @@
       "scenarios": ["@s10", "@s11", "@s12", "@s13", "@s14", "@s15", "@s16", "@s17"],
       "files": [
         "core/.claude/rules/patterns.md",
-        "core/.claude/patterns/backend-api-persistence.md",
-        "core/.claude/patterns/frontend-ui-state.md",
+        "core/.claude/patterns/backend.md",
+        "core/.claude/patterns/frontend.md",
         "core/.claude/patterns/mobile.md",
-        "core/.claude/patterns/game-unity.md",
+        "core/.claude/patterns/game.md",
         "core/.claude/patterns/desktop.md",
-        "core/.claude/patterns/concurrency-distributed.md",
+        "core/.claude/patterns/concurrency.md",
         "plugin/skills/patterns/SKILL.md",
         "scripts/build.sh",
+        "scripts/smoke.sh",
+        "core/CLAUDE.md",
         "README.md",
         "plugin/README.md"
       ],
-      "max_files": 12, "max_loc": 3000,
+      "max_files": 13, "max_loc": 3000,
       "reviews": ["judge"],
       "human_verified_scenarios": ["@s17"],
-      "status": "in_progress"
+      "status": "done"
     },
     {
       "id": 3,
@@ -88,7 +90,7 @@
       "max_files": 12, "max_loc": 3000,
       "reviews": ["judge"],
       "human_verified_scenarios": ["@s23", "@s24"],
-      "status": "pending"
+      "status": "in_progress"
     },
     {
       "id": 4,

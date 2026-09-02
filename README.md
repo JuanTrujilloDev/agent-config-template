@@ -229,7 +229,7 @@ The spec-driven, test-first spine (conversation, then an executable contract, th
 
 Several patterns (embedded "Gotchas" in agents, tighter permission wildcards, dynamic context injection) were adapted from [shanraisshan/claude-code-best-practice](https://github.com/shanraisshan/claude-code-best-practice).
 
-The **leverage ladder** in the principles (does it need to exist → reuse → stdlib → native platform → installed dep → minimum solution, without ever trimming security/validation/error handling/a11y) is adapted from [dietrichgebert/ponytail](https://github.com/dietrichgebert/ponytail). The graph-first `code-query` skill is designed around [Graphify-Labs/graphify](https://github.com/Graphify-Labs/graphify), a local-first codebase knowledge graph.
+The **leverage ladder** in the principles (does it need to exist → reuse → stdlib → native platform → installed dep → minimum solution, without ever trimming security/validation/error handling/a11y) is adapted from [dietrichgebert/ponytail](https://github.com/dietrichgebert/ponytail). The graph-first `code-query` skill is designed around [Graphify-Labs/graphify](https://github.com/Graphify-Labs/graphify), a local-first codebase knowledge graph. The `patterns` rule/skill (name the force, simplest default first, `pattern / force / rejected alternative` ledger, six domain references) is inspired by [00suryavanshi00/code-design-patterns](https://github.com/00suryavanshi00/code-design-patterns) (MIT) — restated in our own wording.
 
 ---
 
