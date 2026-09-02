@@ -25,6 +25,7 @@ Write the minimum code that solves the stated problem. **Nothing speculative.**
 - No abstractions for hypothetical second use cases.
 - Three similar lines beats a premature abstraction.
 - Trust internal code and framework guarantees — only validate at system boundaries.
+- **The senior-engineer test:** before shipping, ask whether a senior engineer would call this overcomplicated for the stated problem — if yes, simplify before moving on.
 
 **The leverage ladder.** Before writing any new code, walk down — stop at the
 first rung that solves it:
@@ -56,7 +57,7 @@ Define success criteria. Loop until verified.
 
 For each task:
 1. Write 2–4 verifiable checks (e.g., *"endpoint X returns 201 with the new record"*, *"`your project's test command` is green"*).
-2. Implement.
+2. Work in the shape `[step] → verify: [check]` — every step names the check that proves it landed (e.g., *"add the redirect → verify: the auth test passes"*).
 3. Run the criteria.
 4. Fix gaps.
 5. Repeat until all criteria pass — *then* declare done.
@@ -140,6 +141,31 @@ Be brief. Default to short answers and summaries. No filler ("Great question!", 
 - Code blocks only for code or terminal output.
 - For multi-step work: progress note → result. Not progress note → recap → next-steps → meta-commentary.
 - After a tool call, summarize only what's NOT already visible in the tool output.
+
+### Output style
+
+A **personal** preference, read at session time from the gitignored
+`.claude/answers.local.env` (`output_style=concise|balanced|detailed|terse`).
+Absent or empty = `concise`; an unrecognized value is ignored (mode-only banner, as the hook does). Never rendered into committed files.
+
+- **concise** (default):
+  - Answer or action first.
+  - Code or diff before explanation.
+  - Normal grammar — readable sentences, not fragments.
+  - Number only real multi-step actions.
+  - ≤5 bullets unless detail is requested.
+  - End with one concrete next action.
+  - No preamble, filler, recap of visible output, or closing phrase.
+  - Errors stated plainly, with the recovery action.
+- **balanced** / **detailed** — relax *length only*; every other rule above holds.
+- **Prose is mandatory regardless of style** (including `terse`) for: security
+  warnings; irreversible confirmations (push, merge, publish, destructive ops,
+  secrets, data loss); an explicit "explain" request; real ambiguity (present
+  2–4 ranked options); and any debugging loop past three turns (state what
+  is known).
+- **Session overrides** — "explain more" / "detailed for this session" widen,
+  "be brief" tightens, for this session only. Apply immediately and **never
+  write them to any file** — same rule as "just go".
 
 ## Branch Discipline
 

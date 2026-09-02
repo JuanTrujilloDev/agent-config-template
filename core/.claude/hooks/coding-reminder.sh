@@ -34,13 +34,24 @@ if ! printf '%s' "$LOWER" | grep -qE '(implement|fix|refactor|add|create|update|
     exit 0
 fi
 
-# Autonomy banner — personal pref from the gitignored local prefs file (see
-# .claude/rules/principles.md, "Autonomy Mode"). Defensive: absent file/key =
-# gated; unrecognized value = no banner; never blocks the prompt.
-AUTONOMY=$(sed -n 's/^autonomy_mode=//p' "${CLAUDE_PROJECT_DIR:-.}/.claude/answers.local.env" 2>/dev/null | head -1)
-case "$AUTONOMY" in
-    autonomous) echo "mode: autonomous — say 'gate me' to switch" ;;
-    gated|"")   echo "mode: gated — say 'just go' for autonomous" ;;
+# Mode + output-style banner — personal prefs from the gitignored local prefs
+# file (see .claude/rules/principles.md, "Autonomy Mode" / "Output style"). Defensive:
+# absent file/key = gated + concise; unrecognized output_style = the mode-only
+# banner; unrecognized autonomy_mode = no banner. Only whitelisted fixed strings
+# are echoed — file content never reaches the output; never blocks the prompt.
+PREFS="${CLAUDE_PROJECT_DIR:-.}/.claude/answers.local.env"
+AUTONOMY=$(sed -n 's/^autonomy_mode=//p' "$PREFS" 2>/dev/null | head -1)
+STYLE=$(sed -n 's/^output_style=//p' "$PREFS" 2>/dev/null | head -1)
+case "$STYLE" in
+    "")                              STYLE=concise ;;
+    concise|balanced|detailed|terse) ;;
+    *)                               STYLE="" ;;
+esac
+case "$AUTONOMY:$STYLE" in
+    autonomous:)  echo "mode: autonomous — say 'gate me' to switch" ;;
+    autonomous:*) echo "mode: autonomous | output: $STYLE — say \"gate me\" or \"be brief\" to override this session" ;;
+    gated:|:)     echo "mode: gated — say 'just go' for autonomous" ;;
+    gated:*|:*)   echo "mode: gated | output: $STYLE — say \"just go\" or \"explain more\" to override this session" ;;
 esac
 
 cat <<'HEREDOC'

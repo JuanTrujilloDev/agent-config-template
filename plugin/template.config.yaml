@@ -20,7 +20,8 @@
 #      TARGET_HOSTS, micro-PR limits, and every placeholder in this file.
 #   2. Local prefs — `.claude/answers.local.env`, GITIGNORED. Personal
 #      settings read at session/task time, never rendered into files:
-#      autonomy_mode, verbosity, companions.
+#      autonomy_mode, output_style (concise|balanced|detailed|terse;
+#      default concise — not asked by setup), companions.
 #   3. Session keywords — "just go", "gate me", "stop before commit".
 #      One-session overrides; never persisted to any file.
 
