@@ -15,6 +15,8 @@ what is a gap — documented, not faked.
 | MCP | native | native (Codex's own config) | generated (`.cursor/mcp.json`) | native | gap |
 | Skills discovery | native | generated⁵ | native (incl. `.claude/skills/`) | native | gap |
 | Commands / skills invocation | native (slash commands) | generated (skills by name) | generated⁶ | native | gap |
+| Autonomy / output banner | native (prompt hook) | generated (instruction fallback) | generated (always-on rule) | native (prompt hook) | gap |
+| Brand MASTER.md | generated | generated (lazy via `/design`) | generated | generated | gap |
 
 1. Codex plays every role itself in sequence; subagent-spawning workflow skills carry a role-adaptation note explaining the hat switches.
 2. Cursor reads `.claude/agents/` natively but ignores the `tools:` frontmatter — treat `judge`, `security-reviewer`, and `ui-designer` as `readonly: true` ([details](cursor.md)).

@@ -47,7 +47,8 @@
       "max_files": 12,
       "max_loc": 3000,
       "reviews": ["judge"],
-      "status": "pending"
+      "status": "done",
+      "verified_by_human": "skipped"
     },
     {
       "id": 3,

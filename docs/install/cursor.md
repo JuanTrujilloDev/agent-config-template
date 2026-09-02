@@ -28,7 +28,10 @@ so re-renders stay consistent. `--host` on the CLI overrides it.
 - **`.cursor/mcp.json`** — derived from the Claude MCP example config.
 - **`.cursor/hooks.json`** + two hook adapters (below).
 - **`.claude/agents/`** — the full agent library, read natively by Cursor.
-- **`.claude/skills/`** — every slash command (`spec`, `feature`, `fix`, `integrate`, `verify`, `audit`, `commit`, `pr`, `design`) as a skill with `disable-model-invocation: true`: invoke them by name, they never auto-trigger.
+- **`.claude/skills/`** — the stack-dependent command set as skills with
+  `disable-model-invocation: true`; file-level `requires:` directives omit items
+  that do not apply to the rendered project. Invoke the installed skills by
+  name; they never auto-trigger.
 - **No Claude hooks surface.** The cursor render ships no `.claude/settings.json` hooks block, so a dual-host render (`--host claude,cursor`) never double-fires an event.
 
 ## Agents: `tools:` is ignored
@@ -53,11 +56,8 @@ over-blocks (`git log --grep commit` on a protected branch is denied too), and a
 determined bypass can defeat it. Treat it as a guardrail for a cooperating
 agent, not a security boundary.
 
-Protected branches come from `AGENT_CONFIG_PROTECTED_BRANCHES` (the legacy
-`CLAUDE_CONFIG_PROTECTED_BRANCHES` is honored as a fallback). On a dual
-Claude+Cursor render, the Claude hook reads only the `CLAUDE_CONFIG_*` name —
-set `CLAUDE_CONFIG_PROTECTED_BRANCHES` as the cross-host override until core
-learns the new one.
+Protected branches come from `AGENT_CONFIG_PROTECTED_BRANCHES`; both Cursor and
+Claude guards honor `CLAUDE_CONFIG_PROTECTED_BRANCHES` as a legacy fallback.
 
 The second adapter, `afterFileEdit`, runs the same targeted autofix as the
 Claude format hook (e.g. `ruff check --fix` on Python) and never blocks.

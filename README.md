@@ -64,7 +64,7 @@ Full guide (including updating): [`docs/install/claude.md`](docs/install/claude.
 /agent-config-template:setup-template
 ```
 
-Reads your project, shows an inferred profile with sources, and asks only decisions in one numbered frontier round (a second only when an answer unlocks gated choices), then waits for approval and renders a calibrated `.claude/` tree + `CLAUDE.md`. Shared policy goes in committed `answers.env`; personal preferences go in gitignored `.claude/answers.local.env`. **Non-destructive**: existing configs get a per-file plan and require `--merge` or `--overwrite`. Old-school clone path: `setup.sh --target . --answers ./answers.env [--merge]`.
+Reads your project, shows an inferred profile with sources, and asks only decisions in one numbered frontier round (a second only when an answer unlocks gated choices), then waits for approval and renders a calibrated `.claude/` tree + `CLAUDE.md`. Shared policy goes in committed `answers.env`; personal `output_style` and subagent `agent_style` preferences go in gitignored `.claude/answers.local.env`. **Non-destructive**: existing configs get a per-file plan and require `--merge` or `--overwrite`; use the printed `--overwrite-files` list to replace selected stale managed files only. Old-school clone path: `setup.sh --target . --answers ./answers.env [--merge]`.
 
 Need a tracker or another MCP tool later? Run `/integrate <tool>`; it researches the official server and stops for confirmation before installing or writing anything.
 
@@ -119,6 +119,8 @@ One mini-feature at a time. One mandatory gate (the contract), one optional gate
     └── coding-reminder.sh    # Injects principles on coding prompts
 CLAUDE.md                     # Principles, branch rules, agent map, dynamic context
 docs/sdd-workflow.md          # The spec-driven flow end-to-end
+docs/design-system/MASTER.md  # UI brand tokens and conventions (UI projects)
+docs/CONTEXT.md               # Project glossary, created lazily by pmo
 tools/mutate.py               # No-dep mutation tester (only when mutation testing is on)
 ```
 
