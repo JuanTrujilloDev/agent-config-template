@@ -26,6 +26,7 @@
 set -euo pipefail
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$ROOT"
+python3 scripts/check-override-headings.py
 
 # Codex derivation (rules from the former hand-sync note, now code):
 # - plugin/skills/<s>/SKILL.md      -> codex skill, adding `name:` frontmatter.
