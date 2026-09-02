@@ -4,8 +4,7 @@
 
 # agent-config-template
 
-**A concise, spec-driven coding-agent workflow for Claude Code, Cursor, Grok,
-and Codex—adapted to your stack instead of copied by hand.**
+**A concise, spec-driven coding-agent workflow for Claude Code, Cursor, Grok, and Codex—adapted to your stack instead of copied by hand.**
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](#license)
 [![GitHub Sponsors](https://img.shields.io/badge/Sponsor-GitHub-EA4AAA)](https://github.com/sponsors/JuanTrujilloDev)
@@ -31,23 +30,21 @@ desktop, CLI, and data projects.
 
 ### Cursor
 
-```bash
-git clone https://github.com/JuanTrujilloDev/agent-config-template.git
-cp agent-config-template/examples/python-fastapi/answers.env ./answers.env # edit
-./agent-config-template/setup.sh --target . --answers ./answers.env --host cursor
+```text
+Cursor → Customize → Plugins → search "Agent Config Template" → Install
+/setup-template
 ```
 
 [Cursor install details](docs/install/cursor.md)
 
-### Grok
+### Grok in Cursor
 
-```bash
-git clone https://github.com/JuanTrujilloDev/agent-config-template.git
-cp agent-config-template/examples/python-fastapi/answers.env ./answers.env # edit
-./agent-config-template/setup.sh --target . --answers ./answers.env --host grok
+```text
+Install the same Cursor plugin, select a Grok model, then run:
+/setup-template
 ```
 
-[Grok install details](docs/install/grok.md)
+[Standalone Grok Build details](docs/install/grok.md)
 
 ### Codex
 
@@ -129,8 +126,11 @@ See [what each file does](docs/what-each-file-does.md).
 
 ## Adapt it to a project
 
-Claude users run `/agent-config-template:setup-template`. For the repository
-path, create or copy `answers.env`, then preview before applying:
+Run `/setup-template` from Cursor, or `/agent-config-template:setup-template`
+in Claude Code. It infers the project,
+asks one decision round, previews conflicts, and renders the selected hosts.
+
+For CI or offline rendering, use the repository CLI with `answers.env`:
 
 ```bash
 ./setup.sh --target . --answers ./answers.env --host cursor

@@ -1,4 +1,5 @@
 ---
+name: setup-companions
 description: "Install the optional companion tools — graphify (codebase knowledge graph, powers code-query), ponytail (runtime minimal-code enforcement) and, for UI projects, ui-ux-pro-max (design-system skill) — with a confirmation gate. Accepts an optional comma list. Idempotent: skips anything already installed."
 ---
 
@@ -22,10 +23,11 @@ has a UI. With a comma list: exactly those tools, nothing else.
 
 ## What it does
 
-1. **Detect what's already there** (never reinstall):
-   - graphify: `command -v graphify`, and the registered skill at `~/.claude/skills/graphify/`
-   - ponytail: `claude plugin list` contains `ponytail@ponytail`
-   - ui-ux-pro-max: `.claude/skills/ui-ux-pro-max/` exists in the project, or `claude plugin list` contains `ui-ux-pro-max@ui-ux-pro-max-skill`
+1. **Detect the active host and what's already there** (never reinstall):
+   - Cursor when `CURSOR_PLUGIN_ROOT` is set; Claude when `CLAUDE_PLUGIN_ROOT` is set.
+   - graphify: `command -v graphify`, plus `.cursor/rules/graphify.mdc` on Cursor or the registered Claude skill.
+   - ponytail: `.cursor/rules/ponytail.mdc` on Cursor; `claude plugin list` contains `ponytail@ponytail` on Claude.
+   - ui-ux-pro-max: `.cursor/skills/ui-ux-pro-max/` on Cursor or `.claude/skills/ui-ux-pro-max/` on Claude.
 2. **Show the plan and STOP for confirmation.** List exactly what will be
    installed with the exact install command per tool, from where (PyPI package
    `graphifyy` — double-y, the single-y packages are unaffiliated; GitHub
@@ -35,22 +37,30 @@ has a UI. With a comma list: exactly those tools, nothing else.
 3. **Install graphify** (first available installer wins):
    ```bash
    uv tool install graphifyy || pipx install graphifyy || pip install --user graphifyy
-   graphify install          # registers the /graphify skill user-level
+   graphify cursor install   # Cursor
+   graphify install          # Claude
    ```
 4. **Install ponytail**:
    ```bash
    claude plugin marketplace add DietrichGebert/ponytail
    claude plugin install ponytail@ponytail
    ```
+   Cursor's upstream integration is currently an always-on rule, not a native
+   plugin. With confirmation, download its official `ponytail.mdc` directly to
+   `.cursor/rules/`; do not clone the repository.
+   ```bash
+   mkdir -p .cursor/rules
+   curl -fsSL https://raw.githubusercontent.com/DietrichGebert/ponytail/main/.cursor/rules/ponytail.mdc -o .cursor/rules/ponytail.mdc
+   ```
 5. **Install ui-ux-pro-max** (only when requested or `has_ui`; project-local):
    ```bash
    npm install -g ui-ux-pro-max-cli@2.15.0
-   uipro init --ai claude              # writes .claude/skills/ui-ux-pro-max/
+   uipro init --ai cursor              # Cursor: .cursor/skills/ui-ux-pro-max/
+   uipro init --ai claude              # Claude: .claude/skills/ui-ux-pro-max/
    ```
    To deliberately use the unpinned latest release instead, run `npm install -g ui-ux-pro-max-cli`; this is never the default.
-6. **Verify and report**: `graphify --version`, `claude plugin list`, `ls .claude/skills/ui-ux-pro-max`. Remind
-   the user to restart Claude Code so the new plugin and skill load, and that
-   `/graphify .` builds the graph for the current project.
+6. **Verify and report** using the active host's rule/skill paths. Reload Cursor
+   or restart Claude Code, then use `/graphify .` in the current project.
 
 ## Options to mention after install (don't set them unprompted)
 

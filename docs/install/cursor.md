@@ -1,25 +1,23 @@
 # Install on Cursor
 
-**Skills and agents: zero porting. Rules, hooks, commands: generated.**
+No clone is required. The native Cursor plugin packages the rules, skills,
+agents, commands, and hooks.
 
-Cursor reads `.claude/agents/` and `.claude/skills/` natively, so those ship
-as-is. Rules (`.cursor/rules/*.mdc`), hooks (`.cursor/hooks.json`), MCP config
-(`.cursor/mcp.json`), and the slash commands are generated from the same
-`core/` source by `scripts/build.sh` — never hand-edited, drift-checked in CI.
+## Install
 
-## Render
+1. Open **Customize → Plugins** in Cursor.
+2. Search for **Agent Config Template** and select **Install**.
+3. Choose project or user scope.
+4. Run `/setup-template` in the project.
 
-From a clone:
+Cursor installs the plugin from its marketplace and exposes the bundle through
+`CURSOR_PLUGIN_ROOT`. `/setup-template` uses the bundled renderer, asks one
+decision round, writes `answers.env`, previews existing-file conflicts, and
+applies only after approval. It selects the Cursor host automatically.
 
-```bash
-cp examples/<stack>/answers.env ./answers.env   # edit to your project
-./setup.sh --host cursor --target /path/to/project --answers ./answers.env
-```
-
-Or via the Claude Code plugin: `/setup-template` batches target hosts with the
-other setup decisions — keep `cursor` selected (recommended when `.cursor/`
-exists). The choice is recorded as `TARGET_HOSTS` in committed `answers.env`,
-so re-renders stay consistent. `--host` on the CLI overrides it.
+The plugin repository must first pass Cursor's marketplace review. Maintainers
+submit it at [cursor.com/marketplace/publish](https://cursor.com/marketplace/publish).
+Normal users install from Cursor; they do not clone this repository.
 
 ## What you get
 
@@ -33,6 +31,16 @@ so re-renders stay consistent. `--host` on the CLI overrides it.
   that do not apply to the rendered project. Invoke the installed skills by
   name; they never auto-trigger.
 - **No Claude hooks surface.** The cursor render ships no `.claude/settings.json` hooks block, so a dual-host render (`--host claude,cursor`) never double-fires an event.
+
+The installed plugin works immediately with generic defaults. The rendered
+project files take precedence after `/setup-template` because they contain the
+project's actual stack, commands, paths, and branch policy.
+
+## Update
+
+Open **Customize → Plugins → Yours**, select **Agent Config Template**, and
+update it. Run `/setup-template` again to preview project-file changes; use the
+recommended merge path after reviewing the plan.
 
 ## Agents: `tools:` is ignored
 

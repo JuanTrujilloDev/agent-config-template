@@ -7,7 +7,8 @@
   and opt-in companions.
 - @s36–@s39 → README assertions cover the first-80 quick starts, line budget,
   one workflow diagram/table, grammar, retained paths, and Spec Kit credit.
-- @s40 → all three manifests and upgrade notes report v0.9.0 with no skew.
+- @s40 → all release manifests and upgrade notes report v0.9.0 with no skew;
+  Cursor's root manifest resolves every native component path.
 - @s41 → final repository, deterministic-build, and four-host checks are
   recorded after the focused release assertions pass.
 
@@ -19,8 +20,9 @@ grammar/credit markers, synchronized manifests, and release notes were absent.
 ### Green
 
 Focused and full smoke → exit 0. README is 223 lines; 31 local links resolve;
-all manifests report 0.9.0; 24 example/host renders have zero placeholders and
-valid shell/JSON; five generated trees are byte-stable across two builds.
+all manifests report 0.9.0; Cursor plugin JSON, component paths, command
+frontmatter, and hook behavior validate; 24 example/host renders have zero
+placeholders and valid shell/JSON; five generated trees are byte-stable.
 
 ### Refactor
 

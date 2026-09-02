@@ -20,8 +20,8 @@ for host in Claude Cursor Grok Codex; do
   grep_case "v0.9.0 @s36 first 80 names $host" "$V090_MF6_FIRST" "$host"
 done
 grep_case "v0.9.0 @s36 first 80 Claude install" "$V090_MF6_FIRST" 'plugin marketplace add'
-grep_case "v0.9.0 @s36 first 80 Cursor install" "$V090_MF6_FIRST" '--host cursor'
-grep_case "v0.9.0 @s36 first 80 Grok install" "$V090_MF6_FIRST" '--host grok'
+grep_case "v0.9.0 @s36 first 80 Cursor install" "$V090_MF6_FIRST" 'Customize.*Plugins'
+grep_case "v0.9.0 @s36 first 80 Grok install" "$V090_MF6_FIRST" 'Grok in Cursor'
 grep_case "v0.9.0 @s36 first 80 Codex install" "$V090_MF6_FIRST" 'codex plugin marketplace add'
 grep_case "v0.9.0 @s36 first 80 first command" "$V090_MF6_FIRST" '/(spec|feature)'
 check "v0.9.0 @s37 one workflow diagram" "1" "$(grep -c '<!-- workflow-diagram -->' "$V090_MF6_README" | tr -d ' ')"
@@ -37,7 +37,7 @@ grep_case "v0.9.0 @s39 README says MIT inspiration" "$V090_MF6_README" 'MIT-lice
 grep_case "v0.9.0 @s39 README denies copied artifacts" "$V090_MF6_README" '[Nn]o artifacts.*copied'
 grep_case "v0.9.0 @s39 README denies affiliation" "$V090_MF6_README" '[Nn]ot affiliated'
 
-for f in "$ROOT/plugin/.claude-plugin/plugin.json" "$ROOT/.claude-plugin/marketplace.json" "$ROOT/codex/.codex-plugin/plugin.json"; do
+for f in "$ROOT/plugin/.claude-plugin/plugin.json" "$ROOT/.claude-plugin/marketplace.json" "$ROOT/.cursor-plugin/plugin.json" "$ROOT/codex/.codex-plugin/plugin.json"; do
   check "v0.9.0 @s40 $(basename "$f") version" "0.9.0" "$(python3 -c 'import json,sys; d=json.load(open(sys.argv[1])); print((d.get("plugins") or [d])[0]["version"])' "$f")"
 done
 grep_case "v0.9.0 @s40 upgrade section" "$ROOT/docs/upgrade-guide.md" '^## Upgrading to v0\.9\.0'
@@ -47,3 +47,23 @@ done
 python3 "$ROOT/scripts/validate-packaging.py" >"$WORK/v090-mf6-packaging.out" 2>&1
 check "v0.9.0 @s40 packaging valid" "0" "$?"
 grep_case "v0.9.0 @s40 packaging reports version" "$WORK/v090-mf6-packaging.out" 'packaging valid @ v0\.9\.0'
+
+CURSOR_PLUGIN="$ROOT/.cursor-plugin/plugin.json"
+check "v0.9.0 Cursor plugin JSON" "0" "$(python3 -m json.tool "$CURSOR_PLUGIN" >/dev/null 2>&1; echo $?)"
+for field in rules agents skills commands hooks; do
+  check "v0.9.0 Cursor manifest $field exists" "0" "$(python3 -c 'import json,os,sys; v=json.load(open(sys.argv[1]))[sys.argv[2]]; ps=v if isinstance(v,list) else [v]; root=os.path.dirname(os.path.dirname(sys.argv[1])); raise SystemExit(0 if all(os.path.exists(os.path.join(root,p)) for p in ps) else 1)' "$CURSOR_PLUGIN" "$field"; echo $?)"
+done
+check "v0.9.0 Cursor docs reject clone install" "0" "$(grep -ci 'from a clone\|git clone' "$ROOT/docs/install/cursor.md"; true)"
+grep_case "v0.9.0 Cursor docs native install" "$ROOT/docs/install/cursor.md" 'Customize.*Plugins'
+grep_case "v0.9.0 Cursor setup uses plugin root" "$ROOT/plugin/commands/setup-template.md" 'CURSOR_PLUGIN_ROOT'
+for f in "$ROOT"/plugin/commands/setup-{template,companions}.md; do
+  grep_case "v0.9.0 Cursor command $(basename "$f") has name" "$f" '^name: [a-z0-9-]+$'
+done
+bash -n "$ROOT/plugin/.cursor-plugin/hooks/branch-guard.sh" "$ROOT/plugin/.cursor-plugin/hooks/format-on-edit.sh"
+check "v0.9.0 Cursor plugin hook shell syntax" "0" "$?"
+HOOK_REPO="$WORK/v090-cursor-hook"
+mkdir -p "$HOOK_REPO"
+git -C "$HOOK_REPO" init -q -b main
+git -C "$HOOK_REPO" -c user.name=test -c user.email=test@example.com commit --allow-empty -q -m init
+HOOK_OUT=$(cd "$HOOK_REPO" && printf '%s' '{"command":"git commit -m test"}' | bash "$ROOT/plugin/.cursor-plugin/hooks/branch-guard.sh")
+check "v0.9.0 Cursor plugin blocks protected commit" "deny" "$(printf '%s' "$HOOK_OUT" | python3 -c 'import json,sys; print(json.load(sys.stdin)["permission"])')"

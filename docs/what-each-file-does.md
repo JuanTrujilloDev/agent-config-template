@@ -155,7 +155,10 @@ The trigger regex is conservative — it errs toward injecting (better to remind
 
 ## Plugin variant — what's different
 
-The repo ships *two* distributable artifacts: the **template** (`template/` + `setup.sh`, parameterized) and the **plugin** (`plugin/` + `.claude-plugin/marketplace.json`, static-but-installable). Same DNA, different distribution.
+The repo ships a parameterized template plus native Claude, Cursor, and Codex
+plugin manifests. Cursor's root `.cursor-plugin/plugin.json` points at the
+shared `plugin/` bundle, so users install from Customize and run
+`/setup-template` without cloning the repository.
 
 ### `plugin/.claude-plugin/plugin.json`
 

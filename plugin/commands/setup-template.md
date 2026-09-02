@@ -1,24 +1,33 @@
 ---
-description: Render the full agent-config-template into the current project. Infers the whole placeholder profile from project files, asks one numbered round of decisions (with recommended defaults), then writes a calibrated `.claude/` tree + CLAUDE.md.
+name: setup-template
+description: Render agent-config-template into the current project. Infers the placeholder profile, asks one decision round, then writes the selected hosts' calibrated project files.
 ---
 
-# /agent-config-template:setup-template
+# /setup-template
 
-Render the full template into the current project — same flow as cloning the repo and running `setup.sh` manually, but driven by Claude inside the project. After running, the project has a fully-calibrated `.claude/` tree and `CLAUDE.md` tuned to its specific stack, test command, branch convention, and toggles.
+Render the bundled template into the current project. No repository clone is
+required. Cursor exposes the bundle through `CURSOR_PLUGIN_ROOT`; Claude Code
+uses `CLAUDE_PLUGIN_ROOT`. After running, the project has a calibrated agent
+configuration tuned to its stack, commands, branch convention, and toggles.
 
-This is the **opt-in calibration step** for users who installed the plugin and want more than the generic defaults. The agents, hooks, skills, and slash commands you got from `/plugin install` continue to work exactly the same — `/setup-template` just adds a project-root `.claude/` tree with project-specific configuration.
+This is the **opt-in calibration step** for users who want more than the
+generic plugin defaults. The plugin layer stays active; `/setup-template` adds
+project-specific Claude, Cursor, Grok, or Codex files for the selected hosts.
 
 ## What this command does
 
 The interview is **infer → show → ask once → record → render**. Facts are read from the project and never asked; only decisions reach the user, in one numbered round.
 
-1. **INFER.** Read `package.json`, `pyproject.toml`, `Cargo.toml`, `go.mod`, `Gemfile`, `requirements.txt`, `manage.py`, `setup.cfg`, top-level `README.md`, CI config, the source/test layout, `git branch -a`, and any existing `answers.env` (a prior render's values are HIGH, source `answers.env`). Draft a value for **every** placeholder in `${CLAUDE_PLUGIN_ROOT}/template.config.yaml` whose `when:` clause holds, tagged by confidence:
+1. **INFER.** Read `package.json`, `pyproject.toml`, `Cargo.toml`, `go.mod`, `Gemfile`, `requirements.txt`, `manage.py`, `setup.cfg`, top-level `README.md`, CI config, the source/test layout, `git branch -a`, and any existing `answers.env` (a prior render's values are HIGH, source `answers.env`). Draft a value for **every** placeholder in the active plugin root's `template.config.yaml` whose `when:` clause holds, tagged by confidence:
    - **HIGH** — derived directly from a file (cite it: `pyproject.toml [tool.ruff]`, `.github/workflows/ci.yml`, …). Never asked.
    - **LOW** — best guess with a named alternative. Goes to the round.
    - **UNKNOWN** — no signal. Goes to the round with no recommendation; if it stays unanswered it is written blank with a `# TODO: <what's missing>` line above.
    - **default** — no project signal, the `template.config.yaml` default is fine. Not asked unless it changes what renders (see the round).
 
-   Host signals: `claude` always; add `cursor` when a `.cursor/` directory exists; add `codex` when Codex project config exists (`.codex/` or `.agents/`). Tracker signals: `.github/` → GitHub; Jira/Linear/Plane keys in branch names or issue templates → that tracker.
+   Host signals: select `cursor` when `CURSOR_PLUGIN_ROOT` is set and `claude`
+   when `CLAUDE_PLUGIN_ROOT` is set; add `codex` when Codex project config exists
+   (`.codex/` or `.agents/`). Tracker signals: `.github/` → GitHub;
+   Jira/Linear/Plane keys in branch names or issue templates → that tracker.
 
 2. **SHOW the inferred profile** as one table — every applicable placeholder with its value, confidence tier, and cited source:
 
@@ -37,7 +46,7 @@ The interview is **infer → show → ask once → record → render**. Facts ar
    1. `workflow_mode` — `SDD` or `SDD+TDD`. Recommended: `SDD` (`SDD+TDD` when the project already has a substantial test suite and CI running it).
    2. Target hosts — multi-select `claude`, `cursor`, `codex` (`grok` = claude tree + AGENTS.md). Recommended: the inferred set from step 1; the user may add or drop any.
    3. `autonomy_mode` — `gated` or `autonomous`. Recommended: `gated` (today's behavior: pause before each micro-commit; `autonomous` skips that pause — push/merge/publish/destructive confirms ALWAYS apply regardless of mode).
-   4. Companions — three groups, one answer. **Core quality:** graphify (knowledge graph behind `code-query`) + ponytail (runtime minimal-code enforcement). **Output:** the native `concise` output style is already on by default — nothing to install. **UI:** ui-ux-pro-max (design-system skill) — listed only when `has_ui` is truthy; omit the whole UI group when `has_ui` is falsy. Answer `[Yes / Not now / Never / <comma list>]`. Recommended: `Not now`. When every tool recommended for this project is already installed (`command -v graphify`; `claude plugin list` contains `ponytail@ponytail`; `.claude/skills/ui-ux-pro-max/` exists, when `has_ui`), skip this question **and step 8**, and leave any existing `companions` key untouched.
+   4. Companions — three groups, one answer. **Core quality:** graphify (knowledge graph behind `code-query`) + ponytail (runtime minimal-code enforcement). **Output:** the native `concise` output style is already on by default — nothing to install. **UI:** ui-ux-pro-max (design-system skill) — listed only when `has_ui` is truthy; omit the whole UI group when `has_ui` is falsy. Answer `[Yes / Not now / Never / <comma list>]`. Recommended: `Not now`. Detect installations for the active host: Cursor uses `.cursor/rules/` and `.cursor/skills/`; Claude uses `claude plugin list` and `.claude/skills/`. When every recommended tool is installed, skip this question **and step 8**, and leave any existing `companions` key untouched.
    5. Remaining uncertain configuration — every LOW placeholder (recommended = the best guess, alternative named), every UNKNOWN (no recommendation — say which signal is missing), and any `default`-tagged item that changes what renders (`has_frontend`, `ticket_tracker`, `has_background_jobs`, `use_gherkin`, `enforce_mutation_testing`).
 
    End with: *"Reply `all defaults` (or `go`) to accept every recommendation and render, or answer by number — `1: SDD+TDD, 4: Never`. Unanswered numbers take the recommendation."* That reply is the approval gate: it resolves the whole round and authorizes the render — **do not run `setup.sh` before it arrives.**
@@ -51,14 +60,16 @@ The interview is **infer → show → ask once → record → render**. Facts ar
 5. **RENDER.** The renderer is **non-destructive**: against a project that already has a Claude config it writes nothing and prints a per-file change plan until you pass an explicit mode.
    ```bash
    # Fresh project (no existing .claude/ or root CLAUDE.md) — writes directly:
-   bash "${CLAUDE_PLUGIN_ROOT}/setup.sh" --target . --answers ./answers.env
+   PLUGIN_ROOT="${CURSOR_PLUGIN_ROOT:-${CLAUDE_PLUGIN_ROOT:-}}"
+   bash "$PLUGIN_ROOT/setup.sh" --target . --answers ./answers.env
 
    # Existing config — run with no mode first to show the user the change plan
    # (writes nothing, exits 1), then apply with one of:
    #   --merge      add missing files, deep-merge .claude/settings.json, keep your other files
    #   --overwrite  replace template-managed files (settings.local.json is never touched)
    #   --abort      do nothing (the default)
-   bash "${CLAUDE_PLUGIN_ROOT}/setup.sh" --target . --answers ./answers.env --merge
+   PLUGIN_ROOT="${CURSOR_PLUGIN_ROOT:-${CLAUDE_PLUGIN_ROOT:-}}"
+   bash "$PLUGIN_ROOT/setup.sh" --target . --answers ./answers.env --merge
    ```
    For a project that already has config, default to `--merge`. Only use `--overwrite` when the user explicitly wants the template versions to win, and only after they've seen the plan.
 
@@ -73,7 +84,8 @@ The interview is **infer → show → ask once → record → render**. Facts ar
    ./answers.env --merge`; see `docs/upgrade-guide.md`). Personal preferences go
    in the gitignored `.claude/answers.local.env` instead.
 
-7. **Reminds the user** that Claude Code needs to be restarted to pick up the new project-root hooks and slash commands. The plugin-level commands and agents remain available regardless.
+7. **Reminds the user** to reload the active host so new project-root hooks and
+   commands are picked up. Plugin-level components remain available regardless.
 
 8. **Companions**, per the `companions` value recorded **this run** (a value recorded on an earlier run does not re-trigger this step):
    - `yes` — run the `/setup-companions` flow now. It detects what is already installed and has its own confirmation gate; that gate is kept even in just-go mode — nothing installs without it.
@@ -97,7 +109,8 @@ Every config value lives in exactly one of three scopes:
 - **Ask decisions, never facts.** Anything a project file answers is inferred, cited, and shown — not asked.
 - **Wait for explicit approval** before invoking `setup.sh`. The reply that resolves the frontier round is that approval; without it, nothing renders.
 - **Personal prefs stay personal.** `autonomy_mode` and `companions` go only to `.claude/answers.local.env` — never into `answers.env`, never into rendered files.
-- **Don't modify anything outside `answers.env`, `.claude/`, `CLAUDE.md`, and `.gitignore`.**
+- **Don't modify anything outside `answers.env`, `.claude/`, `.cursor/`,
+  `.agents/`, `CLAUDE.md`, `AGENTS.md`, and `.gitignore`.**
 - **Never overwrite an existing config silently.** The renderer now enforces this — against an existing `.claude/` tree (or root `CLAUDE.md`) it writes nothing without an explicit `--merge`/`--overwrite`. Run it once with no mode to show the user the per-file plan, then let them choose. Explicit setup just-go may print the plan and apply `--merge` in the same run; automatic `--overwrite` is never allowed, including in just-go mode. `.claude/settings.local.json` is never touched. If both root `CLAUDE.md` and `.claude/CLAUDE.md` exist with different content, the renderer warns — surface that to the user and ask which is canonical.
 
 ## Honor conditional questions (`when:` clauses)
@@ -118,7 +131,9 @@ If the user prefixes the command with explicit phrasing like *"setup, just go"* 
 
 ## What gets rendered
 
-A full `.claude/` tree calibrated to the project:
+A calibrated host tree. Cursor adds `AGENTS.md`, `.cursor/`, and the shared
+`.claude/` agents/skills; Claude and Grok use `.claude/`; Codex uses
+`.agents/skills/`. The shared project outputs include:
 
 - **`CLAUDE.md`** at the project root — principles, branch rules, agent map, dynamic context section, all referencing the project's actual test/lint/format commands and source dirs.
 - **`.claude/HELP.md`** — decision tree + worked examples customized for the stack.
@@ -135,8 +150,8 @@ After `/setup-template`, both layers are active:
 
 | Layer | Source | Naming |
 |---|---|---|
-| Plugin commands/agents | `${CLAUDE_PLUGIN_ROOT}/...` | Namespaced (`/agent-config-template:feature`) |
-| Project commands/agents | `./.claude/...` | Unnamespaced (`/feature`) |
+| Plugin commands/agents | active plugin root | Host-managed; setup includes `/setup-template` |
+| Project commands/agents | `./.claude/`, `./.cursor/`, or `./.agents/` | Calibrated (`/feature`, etc.) |
 
 The project-root versions take precedence when names collide. This is intentional — the project versions have the calibrated test commands, branch prefixes, and toggles baked in.
 
@@ -144,7 +159,9 @@ Companion tools (graphify, ponytail, ui-ux-pro-max when `has_ui`) follow step 8 
 
 ## Pre-filled examples
 
-If the user wants to skip inference entirely and use a known-good preset, point them at `${CLAUDE_PLUGIN_ROOT}/examples/` (when present). Common stacks: `python-fastapi`, `python-django`, `node-express`, `node-nextjs`. They can copy one and run `setup.sh` directly without going through inference.
+If the user wants to skip inference entirely and use a known-good preset, point
+them at `examples/` under the active plugin root. Common stacks:
+`python-fastapi`, `python-django`, `node-express`, `node-nextjs`.
 
 ## Troubleshooting
 

@@ -1,0 +1,15 @@
+---
+description: "Concise, spec-driven engineering rules with minimal-code defaults"
+alwaysApply: true
+---
+Use the installed `principles`, `patterns`, and `sdd-workflow` skills as the
+full source of truth.
+
+- State assumptions and 2–4 verifiable success criteria before non-trivial work.
+- Read the affected code and callers before editing.
+- Prefer reuse, standard library, and native features before new code or dependencies.
+- Use `/spec` then `/feature` for non-trivial work; use `/fix` for obvious small changes.
+- Never work directly on a protected branch.
+- Keep changes surgical and PRs reviewable.
+- Finish with format, lint, tests, skeptical review, and relevant security review.
+- Default to concise output: code first, no filler or repeated recap.
