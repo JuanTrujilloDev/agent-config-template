@@ -17,6 +17,8 @@
 #                 (comma list of target-relative paths) to take the template
 #                 version of just those files; listing .claude/CLAUDE.md
 #                 replaces a regular file there with the ../CLAUDE.md symlink.
+#                 Add --prune to delete unchanged managed files no longer in
+#                 the template; customized or unproven paths are always kept.
 #   --overwrite   Replace template-managed files. Still never touches
 #                 .claude/settings.local.json, and never deletes files the
 #                 template doesn't manage.
@@ -28,6 +30,8 @@
 #   LEGACY            differs and has no usable baseline yet
 #   CUSTOMIZED        user-filled file differs (root CLAUDE.md, docs/CONTEXT.md,
 #                     docs/design-system/) — yours, kept on --merge, never in the line
+#   OBSOLETE          recorded managed file no longer emitted; baseline unchanged
+#   CUSTOMIZED-OBSOLETE retired managed path that is edited or cannot be proven safe
 #   SYMLINK-CONFLICT  .claude/CLAUDE.md is a regular file where a symlink to
 #                     ../CLAUDE.md is expected
 # The plan ends with one copy-pasteable `--merge --overwrite-files ...` line
@@ -47,7 +51,7 @@
 #   ./setup.sh --target /path/to/project --answers ./answers.env --merge    # existing
 #
 # Usage:
-#   setup.sh --target <dir> --answers <file> [--merge [--overwrite-files a,b]|--overwrite|--abort]
+#   setup.sh --target <dir> --answers <file> [--merge [--overwrite-files a,b] [--prune]|--overwrite|--abort]
 #   setup.sh --target <dir> --answers -        # read answers from stdin
 #   setup.sh --host <list> ...                  # comma-separated target hosts
 #
@@ -81,6 +85,7 @@ ANSWERS_FILE=""
 MODE=""
 HOST_ARG=""
 OVERWRITE_FILES=""
+PRUNE=""
 
 while [ $# -gt 0 ]; do
   case "$1" in
@@ -92,6 +97,7 @@ while [ $# -gt 0 ]; do
     --abort) MODE="abort"; shift ;;
     --mode) MODE="$2"; shift 2 ;;
     --overwrite-files) OVERWRITE_FILES="$2"; shift 2 ;;
+    --prune) PRUNE=1; shift ;;
     -h|--help)
       grep '^#' "$0" | sed 's/^# \?//'
       exit 0
@@ -102,7 +108,7 @@ done
 
 if [ -z "$TARGET" ]; then
   echo "Error: --target is required." >&2
-  echo "Usage: setup.sh --target <dir> --answers <file> [--merge [--overwrite-files a,b]|--overwrite|--abort]" >&2
+  echo "Usage: setup.sh --target <dir> --answers <file> [--merge [--overwrite-files a,b] [--prune]|--overwrite|--abort]" >&2
   exit 1
 fi
 
@@ -126,6 +132,10 @@ case "$MODE" in
 esac
 if [ -n "$OVERWRITE_FILES" ] && [ "$MODE" != "merge" ]; then
   echo "Error: --overwrite-files is only valid together with --merge." >&2
+  exit 1
+fi
+if [ -n "$PRUNE" ] && [ "$MODE" != "merge" ]; then
+  echo "Error: --prune is only valid together with --merge." >&2
   exit 1
 fi
 
@@ -208,6 +218,7 @@ ANSWERS_INPUT="$ANSWERS_INPUT" \
   TARGET="$TARGET" \
   MODE="$MODE" \
   OVERWRITE_FILES="$OVERWRITE_FILES" \
+  PRUNE="$PRUNE" \
   ANSWERS_FILE="$ANSWERS_FILE" \
   SCRIPT="$0" \
   TEMPLATE_VERSION="$TEMPLATE_VERSION" \
@@ -222,6 +233,7 @@ TARGET = os.environ["TARGET"]
 ANSWERS_INPUT = os.environ["ANSWERS_INPUT"]
 MODE = os.environ.get("MODE", "")
 OVERWRITE_FILES = [p for p in os.environ.get("OVERWRITE_FILES", "").split(",") if p]
+PRUNE = os.environ.get("PRUNE") == "1"
 HOSTS = (os.environ.get("HOSTS") or "claude").split()
 CURSOR_DIR = os.environ.get("CURSOR_DIR", "")
 CODEX_SKILLS_DIR = os.environ.get("CODEX_SKILLS_DIR", "")
@@ -524,6 +536,22 @@ try:
         except OSError:
             return "CUSTOMIZED-MANAGED"
 
+    def obsolete_difference(rel):
+        target = tpath(rel)
+        if os.path.islink(target) or not os.path.isfile(target):
+            return "CUSTOMIZED-OBSOLETE"
+        if not os.path.realpath(target).startswith(REAL_TARGET):
+            return "CUSTOMIZED-OBSOLETE"
+        try:
+            return "OBSOLETE" if sha256(target) == previous_files[rel]["sha256"] else "CUSTOMIZED-OBSOLETE"
+        except OSError:
+            return "CUSTOMIZED-OBSOLETE"
+
+    obsolete = [
+        (rel, obsolete_difference(rel))
+        for rel in sorted(set(previous_files) - set(staged))
+    ]
+
     def symlink_conflict():
         t = tpath(DOT_CLAUDE_MD)
         return DOT_CLAUDE_MD not in staged and os.path.isfile(t) and not os.path.islink(t)
@@ -567,9 +595,11 @@ try:
             os.makedirs(d, exist_ok=True)
         shutil.copy2(src, dst)
 
-    def write_lock(advance):
+    def write_lock(advance, remove=()):
         path = tpath(LOCK_REL)
         files = {rel: entry for rel, entry in previous_files.items() if lock_managed(rel)}
+        for rel in remove:
+            files.pop(rel, None)
         for rel in advance:
             target = tpath(rel)
             if not lock_managed(rel):
@@ -598,6 +628,22 @@ try:
             print(f"Error: {LOCK_REL} is not a regular file; refusing to replace it.", file=sys.stderr)
             sys.exit(1)
         check_inside([LOCK_REL])
+
+    def remove_empty_managed_dirs(deleted):
+        roots = tuple(path.rstrip(os.sep) for path in MANAGED_DIRS)
+        candidates = set()
+        for rel in deleted:
+            parent = os.path.dirname(rel)
+            while parent and any(parent == root or parent.startswith(root + os.sep) for root in roots):
+                candidates.add(parent)
+                parent = os.path.dirname(parent)
+        for rel in sorted(candidates, key=lambda path: path.count(os.sep), reverse=True):
+            path = tpath(rel)
+            if os.path.realpath(path).startswith(REAL_TARGET):
+                try:
+                    os.rmdir(path)
+                except OSError:
+                    pass
 
     def merge_settings(rel):
         check_inside([rel])  # never union-merge through a symlink that escapes TARGET
@@ -693,6 +739,8 @@ try:
                     print(f"  {label:<20}{rel}")
             else:
                 sames += 1
+        for rel, label in obsolete:
+            diffs += 1; print(f"  {label:<20}{rel}")
         if symlink_conflict():
             diffs += 1; print(f"  SYMLINK-CONFLICT  {DOT_CLAUDE_MD}  (regular file; expected symlink to ../CLAUDE.md)")
         if sames:
@@ -742,8 +790,21 @@ try:
         elif MODE == "merge":
             added = merged = kept = overwritten = 0
             advance = set()
+            removed = []
             ensure_lock_writable()
-            check_inside([r for r in to_write if not os.path.exists(tpath(r)) or r in OVERWRITE_FILES])
+            prunable = [rel for rel, label in obsolete if PRUNE and label == "OBSOLETE"]
+            check_inside([r for r in to_write if not os.path.exists(tpath(r)) or r in OVERWRITE_FILES] + prunable)
+            for rel, label in obsolete:
+                if PRUNE and label == "OBSOLETE" and obsolete_difference(rel) == "OBSOLETE":
+                    try:
+                        os.remove(tpath(rel))
+                    except OSError as e:
+                        print(f"Error: cannot prune {rel}: {e}", file=sys.stderr)
+                        sys.exit(1)
+                    removed.append(rel); print(f"  - {rel}")
+                else:
+                    kept += 1; print(f"  {obsolete_difference(rel):<20}{rel}  (kept)")
+            remove_empty_managed_dirs(removed)
             for rel in to_write:
                 if not os.path.exists(tpath(rel)):
                     write_file(rel); advance.add(rel); added += 1; print(f"  + {rel}")
@@ -758,8 +819,8 @@ try:
             if DOT_CLAUDE_MD in OVERWRITE_FILES and symlink_conflict():
                 os.remove(tpath(DOT_CLAUDE_MD)); overwritten += 1; print(f"  ~ {DOT_CLAUDE_MD}  (relinked to ../CLAUDE.md)")
             relink_claude_md()
-            write_lock(advance)
-            print(f"✓ Merge complete: {added} added, {merged} settings merged, {overwritten} overwritten, {kept} kept as-is.")
+            write_lock(advance, removed)
+            print(f"✓ Merge complete: {added} added, {merged} settings merged, {overwritten} overwritten, {len(removed)} pruned, {kept} kept as-is.")
 
     print("")
     print("Next steps:")

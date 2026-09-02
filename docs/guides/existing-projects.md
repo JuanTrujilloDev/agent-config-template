@@ -26,7 +26,8 @@ Run without an apply mode first; this prints the plan and writes nothing:
 ./setup.sh --target . --answers ./answers.env --host cursor
 ```
 
-Read every `STALE-MANAGED`, `CUSTOMIZED`, and `SYMLINK-CONFLICT` line.
+Read every `STALE-MANAGED`, `CUSTOMIZED`, `OBSOLETE`,
+`CUSTOMIZED-OBSOLETE`, and `SYMLINK-CONFLICT` line.
 
 ## 4. Resolve source-of-truth conflicts
 
@@ -44,6 +45,16 @@ differs from the template.
 `--merge` adds missing managed files, preserves customized files, and
 union-merges settings. Use the printed `--overwrite-files <paths>` list only for
 stale managed files you reviewed and intentionally want to refresh.
+
+To remove files retired by a newer template, approve each `OBSOLETE` path from
+the preview, then run:
+
+```bash
+./setup.sh --target . --answers ./answers.env --host cursor --merge --prune
+```
+
+Prune deletes only unchanged managed files with recorded baselines.
+`CUSTOMIZED-OBSOLETE`, legacy, unrecorded, user-owned, and unsafe paths remain.
 
 ## 6. Start one contract
 
