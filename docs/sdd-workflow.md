@@ -92,6 +92,20 @@ reassessment. Unrelated statuses stay unchanged. The amendment makes Gate 1
 stale until `progress/gate1.md` appends a later timestamp, approver text, and
 current amendment reference. Only then may work resume at the first ready item.
 
+## Principles double gate
+
+Before Gate 1 PMO records the result; judge rechecks the same table before
+approving the implementation:
+
+### Principles deviation table
+
+| Principle | Decision | Present reason | Mitigation |
+|---|---|---|---|
+| None | No deviation | Current design follows all principles | None |
+
+The explicit `None` row is valid. A real deviation must name a present reason
+and mitigation; missing, speculative, unrecorded, or unused rows block approval.
+
 ## The gates
 
 - **Gate 1 — the contract.** The cheapest place to fix ambiguity is before code

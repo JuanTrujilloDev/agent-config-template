@@ -77,6 +77,13 @@ Default-reject without a stated force: single-implementation Strategy, speculati
 
 For non-trivial features, prefer the spec-driven flow (`/spec` → `/feature`): an approved Given/When/Then contract **before** code, one mini-feature at a time, optionally test-first. See the `sdd-workflow` skill. For a small scoped change with an obvious cause, `/fix` is the right tool — skip the ceremony, keep the Definition of Done.
 
+## Principles Double Gate
+
+Before Gate 1, PMO checks every mini-feature against these principles and
+records the result in the spec's `### Principles deviation table`.
+Judge rechecks the diff against the same table before approval; missing, unrecorded,
+or unused deviations block the mini-feature.
+
 ## Read Before You Write
 
 Never modify code you haven't read. Before editing, read the target file end to

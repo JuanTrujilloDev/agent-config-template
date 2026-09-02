@@ -27,6 +27,11 @@ the mini-feature's scenarios in `docs/specs/<slug>/contract.md`:
 - [ ] No test asserts behaviour the contract never asked for; no production code that no scenario or test requires (**prune it**).
 - [ ] The Design-notes pattern was applied — or the deviation is justified in writing.
 - [ ] Pattern ledger present (`pattern / force / rejected alternative`) and every pattern in the diff traces to a stated force. A pattern without a stated force, or one from the default-reject list with no justification, is pattern-stuffing: a **Blocker**.
+- [ ] Recheck the diff against the same `### Principles deviation table` from
+  `spec.md` and cite the applicable row in the verdict.
+  A missing table is a **Blocker**; an unrecorded principle violation is a **Blocker**.
+  An unused deviation for the reviewed mini-feature is a **Blocker** because its approved exception is stale; a valid
+  citation looks like `Simplicity First — Use a small parser`.
 
 ### Tests bite
 - [ ] Tests hit the real code path, not a wall of mocks. Mock only boundaries you don't own.

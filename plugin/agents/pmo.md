@@ -90,6 +90,20 @@ pattern fits, say so explicitly ("no pattern — single call site"). **Never nam
 pattern speculatively** — that fights Simplicity First / YAGNI. Selection guide:
 the `patterns` skill. The implementer treats your named pattern as part of the contract.
 
+Before Gate 1, check every mini-feature against the project principles and put
+this shared table under `spec.md` Design notes:
+
+```markdown
+### Principles deviation table
+| Principle | Decision | Present reason | Mitigation |
+|---|---|---|---|
+| Simplicity First | Use a small parser | Required input has nested syntax today | Keep it stdlib and local |
+```
+
+If there is no deviation, `| None | No deviation | Current design follows all
+project principles | None |` is the required valid row. Missing the table is
+invalid. Speculative convenience is not an acceptable present reason.
+
 Add a **Leverage** subsection per mini-feature: walk the leverage ladder (`principles`
 skill) and record what existing code, standard library, native platform feature,
 or already-installed dependency covers it — and what genuinely must be written
