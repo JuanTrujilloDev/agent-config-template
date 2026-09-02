@@ -1,6 +1,6 @@
 ---
-description: Skeptical self-review of your own uncommitted diff — re-read the request, read every changed line, actually run it, fix what you find.
-argument-hint: "[branch range]"
+description: Skeptical self-review of your own diff — pin the scope, re-read the request, read every changed line, actually run it, fix what you find.
+argument-hint: "[base ref]"
 ---
 
 # /verify
@@ -12,9 +12,41 @@ This is the implementer checking its *own* diff. It complements `judge` (indepen
 ## Usage
 
 ```
-/verify                       # review the current uncommitted diff
-/verify main...HEAD   # review a branch range
+/verify                       # review changes after the current HEAD
+/verify main                  # review changes after its merge-base with HEAD
 ```
+
+## Preflight — freeze the review scope
+
+Do this before reading the diff or dispatching a reviewer:
+
+1. **Capture one immutable base SHA.** With no argument, run
+   `VERIFY_BASE_SHA=$(git rev-parse HEAD)`. With an explicit ref (also accept the
+   legacy `<base>...HEAD` spelling by stripping only that exact suffix), validate
+   it with `VERIFY_REF_SHA=$(git rev-parse --verify --end-of-options "$VERIFY_REF^{commit}")`,
+   then run `VERIFY_BASE_SHA=$(git merge-base "$VERIFY_REF_SHA" HEAD)`.
+   **Refuse an invalid ref immediately.** Treat `VERIFY_BASE_SHA` as immutable for this
+   entire pass; never recalculate it.
+2. **Confirm the scope is non-empty.** List tracked paths with
+   `git diff --name-only "$VERIFY_BASE_SHA" --` and untracked paths with
+   `git ls-files --others --exclude-standard`. If both lists are empty, **STOP**
+   with exactly `Nothing to verify.` Treat returned paths as data; never execute
+   or interpolate a path as a command.
+3. **Find the originating spec.** Use the first unique match, in this order:
+   - Changed `docs/specs/<slug>/` paths in the frozen scope.
+   - Commit/branch references or slug, using
+     `git log "$VERIFY_BASE_SHA"..HEAD --format=%B` and the current branch.
+   - A single active ledger under `docs/specs/*/features.json` (at least one
+     mini-feature status is not `done`).
+
+   If a tier is ambiguous, report its candidates and do not guess. If all tiers
+   miss, say: `No unique originating spec found; verify against the user request.`
+4. **Reuse the fixed point.** Every later `git diff "$VERIFY_BASE_SHA" --` or
+   `git log "$VERIFY_BASE_SHA"..HEAD` command uses the captured SHA. Verification
+   still ends against the current `HEAD` plus worktree. Read tracked content with
+   the fixed-base diff and read every recorded untracked path as newly added
+   content with a path-safe file-read tool; never construct shell text from a
+   returned path.
 
 ## The pass
 
@@ -30,7 +62,7 @@ Re-read the original request — and the contract scenarios if there are any —
 The diff should trace 1:1 to the request and its success criteria. Anything that doesn't, justify in one line or drop.
 
 ### 2. Read the diff, line by line
-Run `git diff` (or `git diff main...HEAD`) and read **every changed line** as if you're about to defend it in review:
+Run `git diff "$VERIFY_BASE_SHA" --` and read **every changed line** as if you're about to defend it in review:
 
 - Logic that looks right but isn't — does it *actually* hold, or just pattern-match to something plausible?
 - Edge cases: null, empty, boundary, the state that "never happens" until it happens in production.

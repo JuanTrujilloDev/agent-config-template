@@ -104,6 +104,9 @@ def validate_item(item, index, strict, known_scenarios, errors):
         verification = item.get("verified_by_human")
         if not isinstance(verification, str) or verification not in VERIFICATIONS:
             errors.append(f"{where}.verified_by_human: expected yes, no, or skipped")
+        review_cycles = item.get("review_cycles", 0)
+        if type(review_cycles) is not int or not 0 <= review_cycles <= 2:
+            errors.append(f"{where}.review_cycles: expected integer from 0 through 2")
     return item
 
 

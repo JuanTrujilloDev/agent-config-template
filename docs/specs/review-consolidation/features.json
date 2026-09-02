@@ -1,0 +1,133 @@
+{
+  "schema_version": 2,
+  "feature": "review-consolidation",
+  "version": "0.9.1",
+  "rules": {
+    "one_at_a_time": true,
+    "require_approved_contract": true,
+    "workflow_mode": "SDD+TDD",
+    "autonomy_mode": "gated",
+    "generated_mirrors_excluded_from_budget": true
+  },
+  "mini_features": [
+    {
+      "id": 1,
+      "name": "verify-preflight",
+      "scenarios": ["@s1", "@s2", "@s3", "@s4", "@s5", "@s6", "@s7"],
+      "depends_on": [],
+      "parallel": false,
+      "files_hint": [
+        "core/.claude/commands/verify.md",
+        "plugin/commands/verify.md",
+        "scripts/smoke/v091-mf1-verify-preflight.sh",
+        "scripts/smoke.sh"
+      ],
+      "max_files": 4,
+      "max_loc": 3000,
+      "status": "done",
+      "verified_by_human": "skipped",
+      "review_cycles": 1,
+      "reviews": ["judge", "security-reviewer"]
+    },
+    {
+      "id": 2,
+      "name": "two-axis-verdicts",
+      "scenarios": ["@s8", "@s9", "@s10", "@s11", "@s12", "@s13", "@s14", "@s15", "@s16"],
+      "depends_on": [1],
+      "parallel": false,
+      "files_hint": [
+        "core/.claude/agents/judge.md",
+        "plugin/agents/judge.md",
+        "core/.claude/agents/security-reviewer.md",
+        "plugin/agents/security-reviewer.md",
+        "docs/sdd-workflow.md",
+        "plugin/skills/sdd-workflow/SKILL.md",
+        "hosts/codex/skills/sdd-workflow/SKILL.md",
+        "scripts/smoke/mf3-ledger.sh",
+        "scripts/smoke/v090-mf5-principles-gates.sh",
+        "scripts/smoke/v091-mf2-two-axis-verdicts.sh",
+        "scripts/smoke.sh"
+      ],
+      "max_files": 11,
+      "max_loc": 3000,
+      "status": "done",
+      "verified_by_human": "skipped",
+      "review_cycles": 0,
+      "reviews": ["judge", "security-reviewer"]
+    },
+    {
+      "id": 3,
+      "name": "bounded-review-convergence",
+      "scenarios": ["@s17", "@s18", "@s19", "@s20", "@s21", "@s22", "@s23", "@s24", "@s25"],
+      "depends_on": [2],
+      "parallel": false,
+      "files_hint": [
+        "core/.claude/agents/pmo.md",
+        "plugin/agents/pmo.md",
+        "core/.claude/agents/orchestrator.md",
+        "plugin/agents/orchestrator.md",
+        "docs/sdd-workflow.md",
+        "plugin/skills/sdd-workflow/SKILL.md",
+        "hosts/codex/skills/sdd-workflow/SKILL.md",
+        "scripts/validate-specs.py",
+        "scripts/smoke/v091-mf3-review-convergence.sh",
+        "scripts/smoke.sh"
+      ],
+      "max_files": 11,
+      "max_loc": 3000,
+      "status": "done",
+      "verified_by_human": "skipped",
+      "review_cycles": 0,
+      "reviews": ["judge", "security-reviewer"]
+    },
+    {
+      "id": 4,
+      "name": "tdd-quality-guardrails",
+      "scenarios": ["@s26", "@s27", "@s28", "@s29", "@s30", "@s31", "@s32", "@s33"],
+      "depends_on": [3],
+      "parallel": false,
+      "files_hint": [
+        "core/.claude/commands/feature.md",
+        "plugin/commands/feature.md",
+        "hosts/codex/skills/feature/SKILL.md",
+        "core/.claude/agents/orchestrator.md",
+        "plugin/agents/orchestrator.md",
+        "docs/sdd-workflow.md",
+        "plugin/skills/sdd-workflow/SKILL.md",
+        "hosts/codex/skills/sdd-workflow/SKILL.md",
+        "scripts/smoke/v091-mf4-tdd-guardrails.sh",
+        "scripts/smoke.sh"
+      ],
+      "max_files": 10,
+      "max_loc": 3000,
+      "status": "done",
+      "verified_by_human": "skipped",
+      "review_cycles": 0,
+      "reviews": ["judge"]
+    },
+    {
+      "id": 5,
+      "name": "agent-style-and-release",
+      "scenarios": ["@s34", "@s35", "@s36", "@s37", "@s38", "@s39", "@s40"],
+      "depends_on": [4],
+      "parallel": false,
+      "files_hint": [
+        "README.md",
+        "docs/upgrade-guide.md",
+        "plugin/.claude-plugin/plugin.json",
+        ".claude-plugin/marketplace.json",
+        ".cursor-plugin/plugin.json",
+        "codex/.codex-plugin/plugin.json",
+        "scripts/smoke/v090-mf6-release.sh",
+        "scripts/smoke/v091-mf5-release.sh",
+        "scripts/smoke.sh"
+      ],
+      "max_files": 9,
+      "max_loc": 3000,
+      "status": "done",
+      "verified_by_human": "skipped",
+      "review_cycles": 0,
+      "reviews": ["judge"]
+    }
+  ]
+}

@@ -19,10 +19,10 @@ grep_case "@s19 ledger line in Design notes" "$WORK/pmo_dn.md" "$LEDGER"
 grep_case "@s19 ledger per named pattern" "$WORK/pmo_dn.md" '(every|each|per) (named )?pattern'
 grep_case "@s19 refusal form" "$WORK/pmo_dn.md" 'no pattern — single call site'
 grep_case "@s19 Gotchas keep cargo-culting" "$PMO" '\*\*Pattern cargo-culting\.\*\*'
-# @s20 — judge: Traceability ledger line, pattern-stuffing Blocker, Minimalist lens names default-reject list
+# @s20 — judge: Traceability ledger line, pattern-stuffing hard violation, Minimalist lens names default-reject list
 section "$JUDGE" '^### Traceability' >"$WORK/judge_tr.md"
 grep_case "@s20 Traceability ledger line" "$WORK/judge_tr.md" '^- \[ \].*ledger'
-grep_case "@s20 pattern-stuffing is a Blocker" "$JUDGE" 'pattern-stuffing.*Blocker|Blocker.*pattern-stuffing'
+grep_case "@s20 pattern-stuffing is a hard violation" "$JUDGE" 'pattern-stuffing.*hard-violation|hard-violation.*pattern-stuffing'
 grep_case "@s20 stuffing = pattern without a stated force" "$JUDGE" 'without a (stated )?force'
 grep_case "@s20 Minimalist lens names default-reject list" "$JUDGE" "Minimalist.*$REJECT"
 # @s21 — /verify step 1: ledger question + simplest default (patterns.md) tried first

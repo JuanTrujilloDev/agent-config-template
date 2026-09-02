@@ -53,6 +53,13 @@ Mandatory whenever a change touches authentication/authorization, permissions, u
 
 **Severity rubric.** **Critical** = remotely exploitable, secret leak, auth bypass, RCE/injection. **Serious** = should fix before shipping (missing headers/cookie flags, no rate limit on auth, CSRF gap, SSRF, weak reset tokens, a High/Critical CVE). **Moderate** = hardening / defense-in-depth.
 
+**Finding class.** Label every finding `[hard-violation]` or `[judgment-call]`
+independently of severity. A hard violation has a concrete exploit/failure or
+breaks the contract/project security baseline; a judgment call is non-required
+hardening with no concrete failure. Judgment-call findings alone can never block.
+Return `CHANGES REQUESTED` only when at least one `hard-violation` exists;
+otherwise return `APPROVED`.
+
 ## Output
 
 ```markdown
@@ -61,7 +68,7 @@ Mandatory whenever a change touches authentication/authorization, permissions, u
 **Top risk:** <one sentence on the worst finding>
 
 ### Critical
-1. <title> — `file:line`
+1. [hard-violation|judgment-call] <title> — `file:line`
    - Why: <attack/leak> · Fix: <specific> · Risk if changed: <none / …>
 ### Serious
 …
@@ -70,9 +77,13 @@ Mandatory whenever a change touches authentication/authorization, permissions, u
 ### Dependency CVEs
 | Package | Installed | Patched | Severity | Advisory |
 |---|---|---|---|---|
+
+## Verdict
+APPROVED | CHANGES REQUESTED
 ```
 
-A clean review with no critical findings is a real outcome — don't manufacture findings to fill the buckets.
+A clean review is a real outcome — don't manufacture findings to fill the
+buckets. Replace the verdict alternatives with exactly one value.
 
 ## Gotchas
 

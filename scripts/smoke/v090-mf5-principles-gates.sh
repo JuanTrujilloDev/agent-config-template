@@ -11,9 +11,9 @@ done
 for f in "$ROOT/core/.claude/agents/judge.md" "$ROOT/plugin/agents/judge.md"; do
   grep_case "v0.9.0 @s31 $(basename "$f") same table" "$f" 'same.*Principles deviation table'
   grep_case "v0.9.0 @s31 $(basename "$f") cites row" "$f" '[Cc]ite.*applicable row'
-  grep_case "v0.9.0 @s31 $(basename "$f") unrecorded blocker" "$f" '[Uu]nrecorded.*[Bb]locker'
-  grep_case "v0.9.0 @s32 $(basename "$f") missing table fails" "$f" '[Mm]issing.*table.*[Bb]locker'
-  grep_case "v0.9.0 @s32 $(basename "$f") unused row fails" "$f" '[Uu]nused.*deviation.*[Bb]locker'
+  grep_case "v0.9.0 @s31 $(basename "$f") unrecorded hard violation" "$f" '[Uu]nrecorded.*hard-violation'
+  grep_case "v0.9.0 @s32 $(basename "$f") missing table fails" "$f" '[Mm]issing.*table.*hard-violation'
+  grep_case "v0.9.0 @s32 $(basename "$f") unused row fails" "$f" '[Uu]nused.*deviation.*hard-violation'
   grep_case "v0.9.0 @s32 $(basename "$f") justified fixture cited" "$f" 'Simplicity First.*Use a small parser'
 done
 

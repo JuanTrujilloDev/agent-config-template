@@ -91,6 +91,13 @@ The v0.9 contract grammar is explicit:
   reset affected work, and require a newer Gate 1 approval.
 - PMO and judge check the same `Principles deviation table` before planning and
   before approval.
+- `/verify` pins one base SHA and refuses empty review scopes.
+- Judge separates `Spec fidelity` from `Standards & health`; preferences do not
+  become blockers.
+- Review gets at most two fix/re-review cycles before a human resolves the
+  recorded disagreement.
+- TDD names public seams, derives expectations independently, mocks only
+  external boundaries, and completes one vertical red/green slice at a time.
 
 Full rules: [SDD workflow](docs/sdd-workflow.md).
 
@@ -210,6 +217,10 @@ pattern restraint inspired by
 for separating specification, planning, tasks, and convergence.
 No artifacts were copied; this project is not affiliated with or endorsed by
 GitHub.
+
+[Matt Pocock's MIT-licensed skills](https://github.com/mattpocock/skills) inspired
+the fixed-point review and TDD seam/expectation rules. All wording and artifacts
+here are original to this project; this project is not affiliated with Matt Pocock.
 
 ## Support
 
