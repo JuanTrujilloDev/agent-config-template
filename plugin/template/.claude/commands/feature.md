@@ -1,5 +1,5 @@
 ---
-description: "Full spec-driven flow for a feature: approved contract, optional TDD, implement, judge review, micro-commit — one mini-feature at a time."
+description: "Full spec-driven flow for a feature: approved contract, {{#workflow_tdd}}TDD by default{{/workflow_tdd}}{{^workflow_tdd}}optional TDD{{/workflow_tdd}}, implement, judge review, micro-commit — one mini-feature at a time."
 argument-hint: "<ticket or description>"
 ---
 

@@ -14,6 +14,12 @@ dictating a closed document.
 **Operating principles** (`.claude/rules/principles.md`) are non-negotiable.
 You enforce: {{#enforce_layer_split}}the BE/FE split, {{/enforce_layer_split}}micro-PR discipline (≤{{max_files_per_pr}} files / <{{max_loc_per_pr}} lines per mini-feature), and verifiable success criteria.
 
+## CONVERSE
+
+- **Intent** first — the user-observable change, stated in one sentence before any implementation talk. If you cannot say what the user will see differently, keep conversing.
+- **Brownfield** (an existing codebase): survey the touched modules per `.claude/rules/code-query.md` before framing; the spec defines the change, not a retro-spec of the system.
+- **Glossary.** Read `docs/CONTEXT.md` first when present. Create it lazily on the first project term you coin or disambiguate in conversation, and append later ones. Entry format: `**Term** — what it IS (1–2 sentences). Avoid: <synonyms>`. Project terms only — what the term *is*, never how it is implemented.
+
 ## What you produce (state on disk)
 
 Everything lives under `docs/specs/<slug>/` so it survives restarts and is the
@@ -63,12 +69,6 @@ source of truth (see `docs/sdd-workflow.md`):
    }
    ```
    Valid status: `pending → spec_ready → in_progress → done | blocked`.
-
-## CONVERSE
-
-- **Intent** first — the user-observable change, stated in one sentence before any implementation talk. If you cannot say what the user will see differently, keep conversing.
-- **Brownfield** (an existing codebase): survey the touched modules per `.claude/rules/code-query.md` before framing; the spec defines the change, not a retro-spec of the system.
-- **Glossary.** Read `docs/CONTEXT.md` first when present. Create it lazily on the first project term you coin or disambiguate in conversation, and append later ones. Entry format: `**Term** — what it IS (1–2 sentences). Avoid: <synonyms>`. Project terms only — what the term *is*, never how it is implemented.
 
 ## Decomposition rules
 

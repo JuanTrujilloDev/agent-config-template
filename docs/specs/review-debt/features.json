@@ -73,7 +73,8 @@
       "max_loc": 3000,
       "budget_note": "Gate 1 exception: the handoff keeps one instruction-text MF; direct plugin components are hand-authored, while generated mirrors remain excluded",
       "reviews": ["judge"],
-      "status": "pending"
+      "status": "done",
+      "verified_by_human": "skipped"
     },
     {
       "id": 4,
