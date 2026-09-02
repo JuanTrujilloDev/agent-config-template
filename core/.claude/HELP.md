@@ -93,6 +93,16 @@ The agent that did the work runs the checklist and reports results before declar
 
 ## Worked example — feature flow
 
+The spec and contract keep requirements, success, and scenarios traceable:
+
+```markdown
+## Functional requirements
+- FR-001 — Export the visible holdings.
+## Success criteria
+- SC-001 — A user can open the exported file in a spreadsheet.
+- @s1 [FR-001, SC-001] Given visible holdings, When export runs, Then a file downloads.
+```
+
 ```
 You:    /feature {{#branch_prefix}}{{branch_prefix}}-87{{/branch_prefix}}{{^branch_prefix}}add CSV export to holdings list{{/branch_prefix}}
 

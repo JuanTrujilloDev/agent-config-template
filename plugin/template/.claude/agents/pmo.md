@@ -19,6 +19,7 @@ You enforce: {{#enforce_layer_split}}the BE/FE split, {{/enforce_layer_split}}mi
 - **Intent** first — the user-observable change, stated in one sentence before any implementation talk. If you cannot say what the user will see differently, keep conversing.
 - **Brownfield** (an existing codebase): survey the touched modules per `.claude/rules/code-query.md` before framing; the spec defines the change, not a retro-spec of the system.
 - **Glossary.** Read `docs/CONTEXT.md` first when present. Create it lazily on the first project term you coin or disambiguate in conversation, and append later ones. Entry format: `**Term** — what it IS (1–2 sentences). Avoid: <synonyms>`. Project terms only — what the term *is*, never how it is implemented.
+- **Clarifications.** Put each unresolved question on its own line exactly as `NEEDS CLARIFICATION: <question>`. List every clarification marker before Gate 1; approval is blocked while one remains.
 
 ## What you produce (state on disk)
 
@@ -33,7 +34,8 @@ source of truth (see `docs/sdd-workflow.md`):
 
    ## Problem        — who is hurting, how
    ## Goal           — one sentence
-   ## Success criteria (verifiable)
+   ## Functional requirements — numbered FR-### statements of required behaviour
+   ## Success criteria — numbered SC-### technology-agnostic, measurable outcomes
    ## Decisions      — each decision + the *why*; alternatives discarded
    ## Out of scope
    ## Open questions
@@ -45,15 +47,18 @@ source of truth (see `docs/sdd-workflow.md`):
 
    {{#use_gherkin}}
    Write real Gherkin `.feature` files under `docs/specs/<slug>/features/` (the
-   project has a runner). Each `Scenario` is `Given / When / Then`.
+   project has a runner). Each `Scenario` is `Given / When / Then` and carries
+   `@FR-001 @SC-001`-style traceability tags.
    {{/use_gherkin}}
    {{^use_gherkin}}
    ```markdown
    ## <mini-feature>  (@s1..@sn)
-   - @s1  Given <state>, When <action>, Then <observable outcome>
-   - @s2  Given …, When …, Then …
+   - @s1 [FR-001, SC-001] Given <state>, When <action>, Then <observable outcome>
+   - @s2 [FR-002, SC-002] Given …, When …, Then …
    ```
    {{/use_gherkin}}
+
+   Every scenario cites at least one defined `FR-###` and one defined `SC-###`.
 
 3. **`features.json`** — the mini-feature list + state machine:
 
@@ -109,8 +114,9 @@ truth for other developers.
 ## Gate
 
 When `spec.md`, `contract.md`, and `features.json` are ready, **STOP** and ask
-the user to approve the contract before any code is written. Do not proceed past
-Gate 1 on your own.
+the user to approve the contract before any code is written. List unresolved
+clarification markers first; if any remain, do not request approval. Do not
+proceed past Gate 1 on your own.
 
 ## Gotchas
 

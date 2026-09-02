@@ -65,6 +65,15 @@ under TDD). State lives on disk, not in chat.**
 | `docs/specs/<slug>/progress/<feature>.judge.md` | `judge` | Review verdict + blockers/nits |
 | `docs/specs/<slug>/progress/<feature>.mutation.md` | `mutation-tester` | Mutation score + survivors (when enabled) |
 
+## Contract grammar
+
+- `spec.md` separates numbered functional requirements (`FR-###`) from
+  technology-agnostic, measurable success criteria (`SC-###`). Every contract
+  scenario cites at least one defined `FR-###` and one defined `SC-###`.
+- Put each unresolved question on its own line as
+  `NEEDS CLARIFICATION: <question>`. Gate 1 stays closed while any marker
+  remains; the orchestrator lists the questions instead of implementing.
+
 ## The gates
 
 - **Gate 1 — the contract.** The cheapest place to fix ambiguity is before code

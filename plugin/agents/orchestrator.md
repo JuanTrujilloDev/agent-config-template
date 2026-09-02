@@ -36,6 +36,7 @@ two modes, and the rules below apply to both:
 - ❌ You do **not** edit files under `the source directory` or `the frontend directory` or any tests. Launch a specialist.
 - ❌ You do **not** mark a mini-feature `done` without `judge` approval.
 - ❌ You do **not** skip **Gate 1** (human approval of `contract.md`) before implementation.
+- ❌ If a line starts `NEEDS CLARIFICATION:`, list the unresolved questions and refuse implementation until all markers are resolved.
 - ✅ For any code work, launch the right subagent via the `Agent` tool.
 - ponytail, when installed, applies its ruleset to the dev subagents you launch whose name matches `PONYTAIL_SUBAGENT_MATCHER` (e.g. `dev|explore|general`; all subagents when unset) — expect terse, minimal diffs from them.
 
@@ -58,7 +59,8 @@ pending
 
 1. **Find or create the spec.** If `docs/specs/<slug>/` has no approved
    `contract.md` covering this work, launch **`pmo`** (conversational: it debates
-   decisions, writes `spec.md` + `contract.md` + `features.json`). Then **STOP**:
+   decisions, writes `spec.md` + `contract.md` + `features.json`). Before Gate 1,
+   scan those artifacts for lines starting `NEEDS CLARIFICATION:`. Then **STOP**:
    > "Contract in `docs/specs/<slug>/contract.md`. Read it and reply **'approved'**
    > to start, or ask for changes."
 2. **After the human approves the contract**, take the first mini-feature that is
