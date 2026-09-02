@@ -85,12 +85,13 @@
         "plugin/skills/principles/SKILL.md",
         "plugin/agents/pmo.md",
         "plugin/agents/judge.md",
-        "plugin/commands/verify.md"
+        "plugin/commands/verify.md",
+        "scripts/smoke.sh"
       ],
       "max_files": 12, "max_loc": 3000,
       "reviews": ["judge"],
       "human_verified_scenarios": ["@s23", "@s24"],
-      "status": "in_progress"
+      "status": "done"
     },
     {
       "id": 4,
@@ -112,7 +113,7 @@
       ],
       "max_files": 12, "max_loc": 3000,
       "reviews": ["judge"],
-      "status": "pending"
+      "status": "in_progress"
     },
     {
       "id": 5,

@@ -75,12 +75,13 @@ source of truth (see `docs/sdd-workflow.md`):
 ## Design notes (required for technical mini-features)
 
 For each mini-feature with non-trivial implementation, add a **Design notes**
-line: name a design pattern **only when the problem genuinely matches one and it
-reduces complexity** — Strategy, Factory, Adapter, Repository, Observer,
-Decorator, etc. — with a one-line *why*. If no pattern fits, say so explicitly
-("no pattern — single call site"). **Never name a pattern speculatively** — that
-fights Simplicity First / YAGNI. The implementer treats your named pattern as
-part of the contract.
+line. Name a design pattern **only when the problem genuinely matches one and it
+reduces complexity**, and for every named pattern write the ledger line
+`pattern / force / rejected alternative` — the present force it answers and the
+simpler default (plain if/dict, a function, a direct call) you tried first. If no
+pattern fits, say so explicitly ("no pattern — single call site"). **Never name a
+pattern speculatively** — that fights Simplicity First / YAGNI. Selection guide:
+`.claude/rules/patterns.md`. The implementer treats your named pattern as part of the contract.
 
 Add a **Leverage** subsection per mini-feature: walk the leverage ladder
 (`.claude/rules/principles.md`) and record what existing code, standard library,

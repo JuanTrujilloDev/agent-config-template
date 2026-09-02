@@ -65,7 +65,14 @@ For each task:
 
 ## Design Patterns (when warranted)
 
-Reach for a known design pattern **only when the problem genuinely matches one and it reduces complexity for a real, present need** — Strategy, Factory, Adapter, Repository, Observer, etc. Name it in the spec's Design notes with a one-line *why*. Never impose a pattern speculatively: a pattern with no present second caller or real variation is YAGNI (see Principle 2, and the `backend-dev` gotcha about wrapping a single call site in a `*Service` class).
+Catalogue and selection guide: the `patterns` skill. Four hard rules:
+
+1. **Inspect existing patterns first** — reuse what the codebase already does before introducing anything new.
+2. **Name the present force before selecting** — a pattern answers a force that exists now (real variation, a second caller), never one you predict.
+3. **One-line why** in the spec's Design notes: `pattern / force / rejected alternative`.
+4. **Refusal is valid** — "no pattern — single call site" is a complete answer.
+
+Default-reject without a stated force: single-implementation Strategy, speculative Repository, unnecessary Factory, Singleton / Service Locator.
 
 ## Spec-Driven & Test-First (when invoked)
 
