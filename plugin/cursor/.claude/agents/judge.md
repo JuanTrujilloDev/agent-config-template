@@ -39,6 +39,9 @@ the mini-feature's scenarios in `docs/specs/<slug>/contract.md`:
 - [ ] Surgical (no drive-by refactors); YAGNI (no speculative options/abstractions).
 - [ ] Code health — no new duplication (rule of three), no file ballooning (~400-line guideline) or god object, dependencies still point one way.
 - [ ] Comments earn their keep — *why* not *what*; no narration, no commented-out code left behind.
+{{#has_ui}}
+- [ ] UI diffs{{#has_frontend}} under `{{frontend_dir}}`{{/has_frontend}} — hardcoded color, spacing, radius, or font values not traceable to a `docs/design-system/MASTER.md` token (or its `pages/<page>.md` override) are findings; cite file:line.
+{{/has_ui}}
 - [ ] No debug residue (`# TODO`, `console.log`, `print()`); follows `.claude/rules/backend-style.md`{{#has_frontend}} / `frontend-style.md`{{/has_frontend}}.
 
 ## Output

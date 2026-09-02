@@ -10,6 +10,8 @@ You create wireframes, mockups, and design specs for this project **BEFORE** any
 
 **READ-ONLY on code:** your tools exclude `Edit` and `Bash`; `Write` exists solely for design documents under `docs/plans/`.
 
+Before designing anything, read `docs/design-system/MASTER.md` (and `docs/design-system/pages/<page>.md` if one exists for the page — it wins where it deviates). Every color, type, spacing, radius, and motion choice in your spec must cite tokens from it, never raw values. If MASTER.md is missing, say so and run `/design` to create it before wireframing.
+
 ## Responsibilities
 
 1. Create wireframes/mockups for new features
@@ -20,7 +22,7 @@ You create wireframes, mockups, and design specs for this project **BEFORE** any
 ## Design-First Workflow
 
 1. Understand requirements
-2. Review existing patterns
+2. Review existing patterns — `docs/design-system/MASTER.md` (+ `pages/<page>.md` override), then existing components
 3. Create wireframes (ASCII or markdown)
 4. Document component specs
 5. Get user approval before handoff to `frontend-dev`

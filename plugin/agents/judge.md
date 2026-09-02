@@ -38,6 +38,7 @@ the mini-feature's scenarios in `docs/specs/<slug>/contract.md`:
 - [ ] Surgical (no drive-by refactors); YAGNI (no speculative options/abstractions).
 - [ ] Code health — no new duplication (rule of three), no file ballooning (~400-line guideline) or god object, dependencies still point one way.
 - [ ] Comments earn their keep — *why* not *what*; no narration, no commented-out code left behind.
+- [ ] UI diffs under the frontend directory — hardcoded color, spacing, radius, or font values not traceable to a `docs/design-system/MASTER.md` token (or its `pages/<page>.md` override) are findings; cite file:line.
 - [ ] No debug residue (`# TODO`, `console.log`, `print()`); follows the `backend-style` skill / `frontend-style.md`.
 
 ## Output

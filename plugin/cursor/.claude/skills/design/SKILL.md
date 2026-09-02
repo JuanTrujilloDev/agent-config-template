@@ -23,9 +23,11 @@ Start the design workflow for a new UI feature.
    - What problem does it solve?
    - Constraints?
 
-2. **Review existing patterns**
-   - Check `docs/design-system/` for existing components
-   - Identify reusable patterns
+2. **Load the brand system**
+   - Read `docs/design-system/MASTER.md` (and `docs/design-system/pages/<page>.md` if the page has an override). Every spec cites its tokens.
+   - If MASTER.md is missing, create it from the template sections, in this order: Colors & semantic tokens, Typography, Spacing & layout, Radius, shadows & motion, Component conventions, Icon & image style, Voice & tone, Responsive rules, Accessibility & contrast, Anti-patterns. Leave `TODO:` where a value cannot be inferred from the codebase.
+   - If the `ui-ux-pro-max` skill is installed you MAY delegate palette/typography generation to it, then normalize its output into the MASTER.md token table format above. `ui-ux-pro-max` is optional and never vendored into this template; without it, fill the sections by hand.
+   - Identify reusable components under `docs/design-system/` and in the codebase
 
 3. **Spawn `ui-designer`** to produce wireframes + component specs
 

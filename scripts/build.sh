@@ -12,7 +12,7 @@
 #   plugin/examples/            <- examples/
 #   codex/skills/               <- plugin/skills/ + plugin/commands/ + hosts/codex/
 #                                  (+ patterns/references/ <- core/.claude/patterns/)
-#   cursor/                     <- core/ + hosts/cursor/ (incl. .claude/patterns/)
+#   cursor/                     <- core/ + hosts/cursor/ (incl. .claude/patterns/, docs/)
 #   plugin/cursor/              <- cursor/        (so plugin/setup.sh --host cursor|grok works)
 #   plugin/codex/skills/        <- codex/skills/  (so plugin/setup.sh --host codex works)
 #
@@ -84,7 +84,7 @@ build_codex_skills() {
 #   a file-level <!-- requires: --> directive stays on line 1 so setup.sh
 #   still drops the file when the var is falsy.
 # - .cursor/mcp.json derived from core/.claude/mcp.json.example (comment reworded).
-# - .claude/agents/ and .claude/rules/ are byte copies from core/ so the
+# - .claude/agents/, .claude/rules/ and docs/ are byte copies from core/ so the
 #   rendered target is self-contained (Cursor reads them natively).
 # - .cursor/hooks.json + .cursor/hooks/ come from hosts/cursor/ — two
 #   hand-authored adapters (branch-guard on beforeShellExecution, format-on-edit
@@ -127,6 +127,7 @@ build_cursor_tree() {
   cp -R core/.claude/agents "$out/.claude/agents"
   cp -R core/.claude/rules "$out/.claude/rules"
   cp -R core/.claude/patterns "$out/.claude/patterns"
+  cp -R core/docs "$out/docs"
   mkdir -p "$out/.cursor/hooks"
   cp hosts/cursor/hooks.json "$out/.cursor/hooks.json"
   cp hosts/cursor/hooks/branch-guard.sh hosts/cursor/hooks/format-on-edit.sh "$out/.cursor/hooks/"
