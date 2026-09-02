@@ -21,6 +21,10 @@ Before writing ANY code, produce a design artifact and get user approval. Cover:
 
 Save to `docs/plans/<branch-slug>-design.md` for non-trivial work. **Carve-out:** under ~30 lines with no new screen, route, or state shape — a sentence in chat is enough.
 
+## Brand system (read before coding)
+
+Read `docs/design-system/MASTER.md` first, plus `docs/design-system/pages/<page>.md` when one exists for the page you touch (the override wins where it deviates). Cite tokens (`--color-primary`, `--space-4`, `--radius-md`, type scale names) in your design artifact and in code — never raw hex, px, or arbitrary utility values. A value that isn't in MASTER.md is a design question, not a coding decision: raise it, don't invent it.
+
 ## Design notes & TDD
 
 - **Honor the spec's Design notes.** If `pmo` named a pattern for this mini-feature, implement it. If none was named but the problem clearly matches one and it reduces complexity, apply it and note it — never add a pattern speculatively (YAGNI).

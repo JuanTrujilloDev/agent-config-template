@@ -28,6 +28,26 @@ if ! printf '%s' "$LOWER" | grep -qE '(implement|fix|refactor|add|create|update|
     exit 0
 fi
 
+# Mode + output-style banner — personal prefs from the gitignored local prefs
+# file (see the principles skill, "Autonomy Mode" / "Output style"). Defensive:
+# absent file/key = gated + concise; unrecognized output_style = the mode-only
+# banner; unrecognized autonomy_mode = no banner. Only whitelisted fixed strings
+# are echoed — file content never reaches the output; never blocks the prompt.
+PREFS="${CLAUDE_PROJECT_DIR:-.}/.claude/answers.local.env"
+AUTONOMY=$(sed -n 's/^autonomy_mode=//p' "$PREFS" 2>/dev/null | head -1)
+STYLE=$(sed -n 's/^output_style=//p' "$PREFS" 2>/dev/null | head -1)
+case "$STYLE" in
+    "")                              STYLE=concise ;;
+    concise|balanced|detailed|terse) ;;
+    *)                               STYLE="" ;;
+esac
+case "$AUTONOMY:$STYLE" in
+    autonomous:)  echo "mode: autonomous — say 'gate me' to switch" ;;
+    autonomous:*) echo "mode: autonomous | output: $STYLE — say \"gate me\" or \"be brief\" to override this session" ;;
+    gated:|:)     echo "mode: gated — say 'just go' for autonomous" ;;
+    gated:*|:*)   echo "mode: gated | output: $STYLE — say \"just go\" or \"explain more\" to override this session" ;;
+esac
+
 cat <<'HEREDOC'
 [reminder — operating principles, see the principles skill]
 

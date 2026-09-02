@@ -58,6 +58,12 @@ source of truth (see `the `sdd-workflow` skill`):
    ```
    Valid status: `pending → spec_ready → in_progress → done | blocked`.
 
+## CONVERSE
+
+- **Intent** first — the user-observable change, stated in one sentence before any implementation talk. If you cannot say what the user will see differently, keep conversing.
+- **Brownfield** (an existing codebase): survey the touched modules per the `code-query` skill before framing; the spec defines the change, not a retro-spec of the system.
+- **Glossary.** Read `docs/CONTEXT.md` first when present. Create it lazily on the first project term you coin or disambiguate in conversation, and append later ones. Entry format: `**Term** — what it IS (1–2 sentences). Avoid: <synonyms>`. Project terms only — what the term *is*, never how it is implemented.
+
 ## Decomposition rules
 
 - Each mini-feature must fit in one micro-PR (≤12 files / <3000 LOC). If it won't, split it.
@@ -66,12 +72,13 @@ source of truth (see `the `sdd-workflow` skill`):
 ## Design notes (required for technical mini-features)
 
 For each mini-feature with non-trivial implementation, add a **Design notes**
-line: name a design pattern **only when the problem genuinely matches one and it
-reduces complexity** — Strategy, Factory, Adapter, Repository, Observer,
-Decorator, etc. — with a one-line *why*. If no pattern fits, say so explicitly
-("no pattern — single call site"). **Never name a pattern speculatively** — that
-fights Simplicity First / YAGNI. The implementer treats your named pattern as
-part of the contract.
+line. Name a design pattern **only when the problem genuinely matches one and it
+reduces complexity**, and for every named pattern write the ledger line
+`pattern / force / rejected alternative` — the present force it answers and the
+simpler default (plain if/dict, a function, a direct call) you tried first. If no
+pattern fits, say so explicitly ("no pattern — single call site"). **Never name a
+pattern speculatively** — that fights Simplicity First / YAGNI. Selection guide:
+the `patterns` skill. The implementer treats your named pattern as part of the contract.
 
 Add a **Leverage** subsection per mini-feature: walk the leverage ladder (`principles`
 skill) and record what existing code, standard library, native platform feature,

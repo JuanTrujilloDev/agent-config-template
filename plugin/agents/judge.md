@@ -26,6 +26,7 @@ the mini-feature's scenarios in `docs/specs/<slug>/contract.md`:
 - [ ] Every contract scenario (`@s1`…`@sn`) for this mini-feature maps to a test.
 - [ ] No test asserts behaviour the contract never asked for; no production code that no scenario or test requires (**prune it**).
 - [ ] The Design-notes pattern was applied — or the deviation is justified in writing.
+- [ ] Pattern ledger present (`pattern / force / rejected alternative`) and every pattern in the diff traces to a stated force. A pattern without a stated force, or one from the default-reject list with no justification, is pattern-stuffing: a **Blocker**.
 
 ### Tests bite
 - [ ] Tests hit the real code path, not a wall of mocks. Mock only boundaries you don't own.
@@ -37,6 +38,7 @@ the mini-feature's scenarios in `docs/specs/<slug>/contract.md`:
 - [ ] Surgical (no drive-by refactors); YAGNI (no speculative options/abstractions).
 - [ ] Code health — no new duplication (rule of three), no file ballooning (~400-line guideline) or god object, dependencies still point one way.
 - [ ] Comments earn their keep — *why* not *what*; no narration, no commented-out code left behind.
+- [ ] UI diffs under the frontend directory — hardcoded color, spacing, radius, or font values not traceable to a `docs/design-system/MASTER.md` token (or its `pages/<page>.md` override) are findings; cite file:line.
 - [ ] No debug residue (`# TODO`, `console.log`, `print()`); follows the `backend-style` skill / `frontend-style.md`.
 
 ## Output
@@ -67,9 +69,9 @@ Run each lens **independently, from a fresh perspective** — ideally a separate
 
 - **Skeptic — "assume it's broken."** Edge cases; empty/null/boundary inputs; race conditions and concurrency; error paths and partial failures; retries and idempotency; untested branches. Where does this fall over in production?
 - **Architect — "does it fit?"** Module boundaries, coupling, layering, data flow, naming; whether it honors the spec's Design notes; whether it adds an abstraction the codebase will regret. Is this the right shape, or just a working one?
-- **Minimalist — "what can die?"** Dead code; speculative options with no caller; premature abstractions; anything that doesn't trace to a contract scenario. YAGNI, hard.
+- **Minimalist — "what can die?"** Dead code; speculative options with no caller; premature abstractions; anything that doesn't trace to a contract scenario. Default-reject list: single-implementation Strategy, speculative Repository, unnecessary Factory, Singleton / Service Locator — each needs a stated force or dies. YAGNI, hard.
 
-**Optional cross-model (bonus, never required).** If a second-model CLI is available (e.g. `codex`, `gemini`), you MAY route one lens through it via Bash for genuinely different blind spots — pipe the diff plus that lens's brief to it and fold its findings in. The absence of a second model never blocks adversarial mode; the three Claude lenses run regardless. This is the deliberate trade vs. pure cross-model review: separate-context lenses are the portable substitute for "a reviewer who didn't just write this."
+**Optional cross-model (bonus, never required).** If a second-model CLI is available (e.g. `codex`, `gemini`), you MAY route one lens through it via Bash for genuinely different blind spots — pipe the diff plus that lens's brief to it and fold its findings in. The absence of a second model never blocks adversarial mode; the three same-model lenses run regardless. This is the deliberate trade vs. pure cross-model review: separate-context lenses are the portable substitute for "a reviewer who didn't just write this."
 
 **Synthesize.** Merge the lenses' findings, dedupe, and severity-rank: **Blocker** (must fix before merge) / **Major** / **Minor** / **Nit**. Adversarial reviewers **overreach by design** — so the synthesis pass (you, then the human) explicitly down-ranks or drops overreaching findings and says why. A finding nobody can tie to a real failure mode or a principle is a Nit at most. If all three lenses wave a 500-line diff through, you didn't attack hard enough — go again.
 

@@ -24,6 +24,7 @@ Write the minimum code that solves the stated problem. **Nothing speculative.**
 - No abstractions for hypothetical second use cases.
 - Three similar lines beats a premature abstraction.
 - Trust internal code and framework guarantees — only validate at system boundaries.
+- **The senior-engineer test:** before shipping, ask whether a senior engineer would call this overcomplicated for the stated problem — if yes, simplify before moving on.
 
 **The leverage ladder.** Before writing any new code, walk down — stop at the
 first rung that solves it:
@@ -55,7 +56,7 @@ Define success criteria. Loop until verified.
 
 For each task:
 1. Write 2–4 verifiable checks (e.g., *"endpoint X returns 201 with the new record"*, *"`your project's test command` is green"*).
-2. Implement.
+2. Work in the shape `[step] → verify: [check]` — every step names the check that proves it landed (e.g., *"add the redirect → verify: the auth test passes"*).
 3. Run the criteria.
 4. Fix gaps.
 5. Repeat until all criteria pass — *then* declare done.
@@ -63,7 +64,14 @@ For each task:
 
 ## Design Patterns (when warranted)
 
-Reach for a known design pattern **only when the problem genuinely matches one and it reduces complexity for a real, present need** — Strategy, Factory, Adapter, Repository, Observer, etc. Name it in the spec's Design notes with a one-line *why*. Never impose a pattern speculatively: a pattern with no present second caller or real variation is YAGNI (see Principle 2, and the `backend-dev` gotcha about wrapping a single call site in a `*Service` class).
+Catalogue and selection guide: the `patterns` skill. Four hard rules:
+
+1. **Inspect existing patterns first** — reuse what the codebase already does before introducing anything new.
+2. **Name the present force before selecting** — a pattern answers a force that exists now (real variation, a second caller), never one you predict.
+3. **One-line why** in the spec's Design notes: `pattern / force / rejected alternative`.
+4. **Refusal is valid** — "no pattern — single call site" is a complete answer.
+
+Default-reject without a stated force: single-implementation Strategy, speculative Repository, unnecessary Factory, Singleton / Service Locator.
 
 ## Spec-Driven & Test-First (when invoked)
 
@@ -139,6 +147,46 @@ Be brief. Default to short answers and summaries. No filler ("Great question!", 
 - Code blocks only for code or terminal output.
 - For multi-step work: progress note → result. Not progress note → recap → next-steps → meta-commentary.
 - After a tool call, summarize only what's NOT already visible in the tool output.
+
+### Output style
+
+A **personal** preference, read at session time from the gitignored
+`.claude/answers.local.env` (`output_style=concise|balanced|detailed|terse`).
+Absent or empty = `concise`; an unrecognized value is ignored (mode-only banner, as the hook does). Never rendered into committed files.
+
+- **concise** (default):
+  - Answer or action first.
+  - Code or diff before explanation.
+  - Normal grammar — readable sentences, not fragments.
+  - Number only real multi-step actions.
+  - ≤5 bullets unless detail is requested.
+  - End with one concrete next action.
+  - No preamble, filler, recap of visible output, or closing phrase.
+  - Errors stated plainly, with the recovery action.
+- **balanced** / **detailed** — relax *length only*; every other rule above holds.
+- **terse** (opt-in) — telegraphic prose: drop articles and filler; keep negations and every technical token (paths, commands, identifiers, versions, numbers) verbatim; never invent abbreviations; no arrow chains; the revert-to-prose list below applies unchanged. Caveat: on already-short output `terse` is often net-negative versus `concise` — `concise` remains the default.
+- **Prose is mandatory regardless of style** (including `terse`) for: security
+  warnings; irreversible confirmations (push, merge, publish, destructive ops,
+  secrets, data loss); an explicit "explain" request; real ambiguity (present
+  2–4 ranked options); and any debugging loop past three turns (state what
+  is known).
+- **Session overrides** — "explain more" / "detailed for this session" widen,
+  "be brief" tightens, for this session only. Apply immediately and **never
+  write them to any file** — same rule as "just go".
+
+### Report format
+
+A second **personal** preference, `agent_style=terse|descriptive`, read from the same gitignored `.claude/answers.local.env`. Absent, empty, or unrecognized = `terse`. It governs only the return message a subagent hands back to the orchestrator — never human-facing output, never what the agent writes to disk. The orchestrator passes the value as one prompt line; a prompt with no line means `terse`.
+
+- **terse** — a fixed field schema, exactly these fields in this order, no prose, ≤ ~25 lines, paths and commands verbatim:
+  - `RESULT:` — one of `pass|fail|approved|changes-requested|blocked`
+  - `FILES:` — `path:+n/-m`, one per file touched
+  - `CHECKS:` — `name=pass|fail`, one per check run
+  - `FINDINGS:` — severity + one line each (never drop a finding to fit the budget)
+  - `DECISIONS:` — one line each
+  - `NEXT:` — one line
+- **descriptive** — the prose report; the choice for debugging the workflow or onboarding a human to it.
+- **Boundary rule** — verdict and findings files under `docs/specs/*/progress/`, `spec.md`/`contract.md`, commit messages, PR bodies, and docs are always normal prose regardless of `agent_style` or `output_style`. Human-facing output follows `output_style`, never `agent_style`. The revert-to-prose list above applies to both channels.
 
 ## Branch Discipline
 

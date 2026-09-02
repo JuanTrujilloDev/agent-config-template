@@ -1,0 +1,18 @@
+#!/bin/bash
+# Smoke harness for docs/specs/adaptive-skills/contract.md **(smoke)** scenarios.
+# Thin runner: renders examples/python-fastapi into mktemp -d (scripts/smoke/lib.sh),
+# then sources scripts/smoke/mf*.sh in mini-feature run order. Bash 3.2 + python3
+# stdlib only. Extend by adding `hook_case` / `check` / `grep_case` lines to an mf file.
+set -uo pipefail
+
+ROOT=$(cd "$(dirname "$0")/.." && pwd)
+WORK=$(mktemp -d)
+trap 'rm -rf "$WORK"' EXIT
+FAIL=0
+
+. "$ROOT/scripts/smoke/lib.sh"
+for mf in mf1-output-style mf8-agent-style mf2-patterns mf3-ledger mf4-brand mf5-vocabulary mf6-companions mf7-merge; do
+  . "$ROOT/scripts/smoke/$mf.sh"
+done
+
+exit $FAIL

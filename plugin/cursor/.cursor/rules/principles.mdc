@@ -20,6 +20,10 @@ What it covers:
 - **Definition of Done** — format → lint → unit tests → review, in order, before declaring done.
 - **Conciseness** — no filler, no recaps of visible output.
 - **Branch Discipline** — never code on `{{default_branch}}`; check out a typed branch first.
+- **Autonomy Mode / Output style** — Cursor runs no prompt hook, so at task
+  start read `autonomy_mode` and `output_style` from `.claude/answers.local.env`
+  if present (absent = `gated` + `concise`) and print the one-line banner:
+  `mode: gated | output: concise — say "just go" or "explain more" to override this session`.
 
 When a request conflicts with a principle, surface the conflict and ask — do
 not silently override.

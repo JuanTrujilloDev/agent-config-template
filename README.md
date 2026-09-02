@@ -149,7 +149,7 @@ Every agent ships with a **Gotchas** section listing its role-specific failure m
 | `/commit`, `/pr` | Conventional commit / open PR, with confirmation gates |
 | `/design` | Wireframe + spec via `ui-designer` (folds into `/feature` for UI work) |
 | `/setup-template` | Render a calibrated `.claude/` tree into the current project (non-destructive) |
-| `/setup-companions` | Optionally install graphify + ponytail with a confirmation gate |
+| `/setup-companions [list]` | Optionally install the companions — graphify + ponytail, plus ui-ux-pro-max when `has_ui` is set — with a confirmation gate. `/setup-template` records the answer as `companions=yes`, `not_now`, `never` or a comma list such as `companions=graphify,ponytail` (unlisted tools are not re-recommended) |
 
 
 ---
@@ -229,7 +229,7 @@ The spec-driven, test-first spine (conversation, then an executable contract, th
 
 Several patterns (embedded "Gotchas" in agents, tighter permission wildcards, dynamic context injection) were adapted from [shanraisshan/claude-code-best-practice](https://github.com/shanraisshan/claude-code-best-practice).
 
-The **leverage ladder** in the principles (does it need to exist → reuse → stdlib → native platform → installed dep → minimum solution, without ever trimming security/validation/error handling/a11y) is adapted from [dietrichgebert/ponytail](https://github.com/dietrichgebert/ponytail). The graph-first `code-query` skill is designed around [Graphify-Labs/graphify](https://github.com/Graphify-Labs/graphify), a local-first codebase knowledge graph.
+The **leverage ladder** in the principles (does it need to exist → reuse → stdlib → native platform → installed dep → minimum solution, without ever trimming security/validation/error handling/a11y) is adapted from [dietrichgebert/ponytail](https://github.com/dietrichgebert/ponytail). The graph-first `code-query` skill is designed around [Graphify-Labs/graphify](https://github.com/Graphify-Labs/graphify), a local-first codebase knowledge graph. The `patterns` rule/skill (name the force, simplest default first, `pattern / force / rejected alternative` ledger, six domain references) is inspired by [00suryavanshi00/code-design-patterns](https://github.com/00suryavanshi00/code-design-patterns) (MIT) — restated in our own wording.
 
 ---
 

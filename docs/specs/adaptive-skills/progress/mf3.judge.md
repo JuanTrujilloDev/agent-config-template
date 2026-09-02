@@ -1,0 +1,36 @@
+## Judge: pattern-ledger-integration  (@s18..@s24)
+
+**Stats:** 9 hand-authored files (4 core: `principles.md`, `pmo.md`, `judge.md`, `verify.md`; 4 plugin mirrors: `skills/principles/SKILL.md`, `agents/{pmo,judge}.md`, `commands/verify.md`; `scripts/smoke.sh`), ~105 hand LOC (+60 smoke, +~45/-~25 prose); 16 generated files (`cursor/`, `codex/`, `plugin/{template,cursor,codex}`) regenerated, not hand-edited. Whole tree 25 files, +168/-42. Branch `feature/v0.8.2-adaptive-skills`, `main` untouched.
+**Scenario → test:** @s18 → smoke `@s18 …` ×7 (section extract; pointer; inspect / force / one-line why / refusal greps; default-reject on one line) + lean-surface ×2 (CLAUDE.md pointer stays 1, no ledger text) ✓ ; @s19 → smoke `@s19 …` ×4 (ledger literal, "every named pattern", refusal literal, Gotcha kept) ✓ ; @s20 → smoke `@s20 …` ×4 (Traceability `- [ ] …ledger`, pattern-stuffing↔Blocker, "without a stated force", Minimalist names reject list) ✓ ; @s21 → smoke `@s21 …` ×2 (step-1 extract asks ledger; simplest default + `patterns.md`) ✓ ; @s22 → smoke `parity` ×10 + skill-style ref ✓, plus manual `diff core/… plugin/…` below ✓ ; @s23 → human; recorded below ✓ ; @s24 → human; recorded below ✓.
+
+### Checks run
+- `bash scripts/smoke.sh` → 172 PASS, 0 FAIL, exit 0.
+- `bash scripts/build.sh --check` → "generated trees in sync", exit 0 (on the submitted tree, before rebuild).
+- `bash scripts/build.sh` twice → `git status --short` and `git diff` hashes identical (`90a0c104…`) both runs; double build identical.
+- `python3 scripts/validate-packaging.py` → valid @ v0.8.1.
+- @s22 manual: `diff core/.claude/agents/pmo.md plugin/agents/pmo.md` (and judge, verify, principles) — every differing line is a `{{placeholder}}` / path→skill substitution; the MF3 lines differ only on `.claude/rules/patterns.md` ↔ the `patterns` skill. One pre-existing non-MF3 drift noted under Nits.
+- Rewritten Design Patterns section read in full: 8 lines; one pointer (`.claude/rules/patterns.md`, the only `rules/patterns.md` reference in the file — MF2's ≤1 check still holds); four numbered rules matching D6 (inspect first / name the present force / one-line why as `pattern / force / rejected alternative` / refusal valid); one default-reject line naming the five from D7. The old inline catalogue ("Strategy, Factory, Adapter, Repository, Observer, etc.") is gone — no catalogue. Rule 2 ("a force that exists now … never one you predict") restates Simplicity First's "No abstractions for hypothetical second use cases"; no contradiction, and the two sections cross-reference by wording rather than by copy.
+- pmo Design notes: ledger requirement is one sentence with the literal format plus the refusal literal; the three example defaults (plain if/dict, a function, a direct call) are the *shape* of a rejected alternative, not a routing table — `patterns.md` still owns selection via the "Selection guide" pointer. No duplication. Gotcha "Pattern cargo-culting" untouched at pmo.md:115.
+- judge Blocker wording: "A pattern without a stated force, or one from the default-reject list with no justification, is pattern-stuffing: a **Blocker**." Two disjoint conditions, each decidable from the diff + Design notes; no judgment call hidden in an adverb. Minimalist lens names the list and says "each needs a stated force or dies".
+- `/verify` step 1: two yes/no questions with a directive ("If yes, use it") — actionable; parallels the existing Over-engineering bullet's shape.
+- Harness: `section()` keys the exit on the heading level of the matched line (`##`/`###`), so a nested `###` inside the Design Patterns `##` would not truncate; `parity()` requires core==plugin and ≥1 so a regression to 0 on both sides fails rather than passes.
+
+### Human restraint tests (performed by judge)
+- **@s17 (MF2, re-run under MF3 wording):** already recorded in `mf2.judge.md`; re-checked against the new pmo text — brief "single CSV export endpoint for orders": force sentence can only be written as a prediction → rule 2 blocks it → Design notes `no pattern — single call site`, **no ledger row** (the ledger is "for every named pattern"; none named). Passes.
+- **@s23 (pmo, three real payment providers present today — Stripe, PayPal, Adyen):** step 1 inspect via code-query → no existing provider abstraction. Step 2 force: three variants ship now, each carrying its own client config and webhook-signature verification state. Step 3 simplest default first: dict of provider functions → rejected because per-provider state leaks into closures/module globals; Strategy row condition ("each variant carries its own state") met. Design notes: `Strategy / three providers ship today, each with own client + webhook-verification state / dict of functions (rejected: per-provider state leaked into closures)`. Nothing else: provider construction is a dict lookup, not a Factory (default-reject "unnecessary Factory"); no Repository. One pattern, one force, one rejected alternative. Passes.
+- **@s24 (judge, diff wraps one `send_notification()` call site in `NotificationStrategy` ABC + single `EmailNotificationStrategy`, no ledger row):** Traceability line 4 → ledger absent → pattern in diff with no stated force; also on default-reject list (single-implementation Strategy) with no justification → both disjuncts fire. Verdict entry: "### Blockers — `notifications/strategy.py:1-40` `NotificationStrategy` wraps a single call site with one implementation; no ledger row, no stated force; default-reject (single-implementation Strategy). Pattern-stuffing. Replace with the direct call." Minimalist lens names it independently. Passes.
+
+### Blockers
+- None.
+
+### Minor
+- Micro-PR budget: 9 hand-authored vs the orchestrator's ≤8 (features.json `max_files: 12` — within). Overage is `scripts/smoke.sh`, which `files` omits although every scenario must map to a test — same shape as MF2's ruling. Accept; add `scripts/smoke.sh` to MF3 `files` when flipping status.
+- `core/.claude/agents/judge.md:29` implements the second stuffing condition as "one from the default-reject list with no justification"; contract @s20 and spec D7 word it "a simpler rejected alternative not tried". The shipped form is the more decidable one (a reviewer can read the reject list; cannot read what the author tried), and the orchestrator's brief asked for exactly this wording — but the contract text now lags. Amend @s20/D7 wording on status flip, or add the clause. Related: smoke case name "@s20 stuffing = no force or untried simpler alt" asserts only `without a (stated )?force` — rename to match what it checks.
+
+### Nits
+- `core/.claude/agents/pmo.md:81` — one 91-col line in an otherwise ~80-col wrapped paragraph (`\`.claude/rules/patterns.md\`. The implementer treats …`). Cosmetic.
+- Pre-existing drift, not this diff: core `judge.md` says "the three same-model lenses", plugin says "the three Claude lenses". Out of MF3 scope; recording so it is not mistaken for an @s22 failure.
+- Removing the `backend-dev` `*Service` gotcha cross-reference from the Design Patterns section is fine (the gotcha still lives in `backend-dev.md`; `patterns.md` covers the case), noting it as a deliberate deletion.
+
+### Verdict
+- [x] APPROVED   - [ ] CHANGES REQUESTED

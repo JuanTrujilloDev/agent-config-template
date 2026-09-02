@@ -21,7 +21,7 @@ Read `.claude/rules/principles.md`. The principles are **non-negotiable**:
 - **Definition of Done** — Format → Lint → Unit tests → `judge` → `security-reviewer` (when relevant){{#has_e2e}} → live browser verification (auto for FE / big changes){{/has_e2e}}.
 - **Conciseness** — Be brief. No filler, no recaps of visible output, no preambles.
 - **Branch Discipline** — Never code on `{{default_branch}}`. Always check out a typed branch first.
-- **Autonomy Mode** — read `.claude/answers.local.env` if present (gitignored; absent = `gated`) and print the one-line mode banner at task start on hosts without hooks. `gated` = pause for review before each micro-commit; `autonomous` = proceed through the flow. Session keywords "just go" / "gate me" override for this session only — never persist them. Push, merge, publish, and destructive ops ALWAYS require confirmation regardless of mode. Full text: `.claude/rules/principles.md`.
+- **Autonomy Mode** — read `.claude/answers.local.env` if present (gitignored; absent = `gated`) and print the one-line banner at task start on hosts without hooks: `mode: <gated|autonomous> | output: <concise|balanced|detailed|terse> — say "just go" or "explain more" to override this session` (`output_style`, absent = `concise`, governs reply length only — see Conciseness → Output style). `gated` = pause for review before each micro-commit; `autonomous` = proceed through the flow. Session keywords "just go" / "gate me" override for this session only — never persist them. Push, merge, publish, and destructive ops ALWAYS require confirmation regardless of mode. Full text: `.claude/rules/principles.md`.
 
 Before any coding task: restate the goal in one sentence + list 2–4 verifiable success criteria.
 
@@ -52,7 +52,7 @@ Tests: `{{tests_glob}}`
 - **Formatter:** {{formatter}} — run `{{format_cmd}}`
 - **Linter:** {{linter}} — run `{{lint_cmd}}`
 
-Detailed patterns: `.claude/rules/backend-style.md`{{#has_frontend}}, `.claude/rules/frontend-style.md`{{/has_frontend}}. Structural code questions (what depends on what): `.claude/rules/code-query.md` — graph first, grep second.
+Detailed patterns: `.claude/rules/backend-style.md`{{#has_frontend}}, `.claude/rules/frontend-style.md`{{/has_frontend}}. Structural code questions (what depends on what): `.claude/rules/code-query.md` — graph first, grep second. Before adding any abstraction: `.claude/rules/patterns.md` — name the force or refuse.
 
 ## Git Workflow
 
