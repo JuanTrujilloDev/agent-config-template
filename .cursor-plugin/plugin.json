@@ -10,7 +10,7 @@
   "repository": "https://github.com/JuanTrujilloDev/agent-config-template",
   "license": "MIT",
   "keywords": ["cursor", "agents", "sdd", "tdd", "code-review", "workflow"],
-  "logo": "docs/logo.svg",
+  "logo": "docs/logo.png",
   "rules": "plugin/.cursor-plugin/rules",
   "agents": "plugin/agents",
   "skills": "plugin/skills",

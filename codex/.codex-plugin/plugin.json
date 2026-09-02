@@ -29,7 +29,7 @@
       "Plan and implement this feature with SDD.",
       "Integrate an MCP tool safely."
     ],
-    "logo": "./assets/logo.svg",
-    "composerIcon": "./assets/logo.svg"
+    "logo": "./assets/logo.png",
+    "composerIcon": "./assets/logo.png"
   }
 }

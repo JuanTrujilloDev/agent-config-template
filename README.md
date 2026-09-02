@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="docs/logo.svg" width="120" alt="agent-config-template logo" />
+<img src="docs/logo.png" width="160" alt="agent-config-template logo" />
 
 # agent-config-template
 
