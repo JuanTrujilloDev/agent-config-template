@@ -137,8 +137,9 @@ grep_case "@s55 ci runs bash scripts/smoke.sh" "$CI" 'bash scripts/smoke\.sh'
 # @s56 — --help documents the flag
 grep_case "@s56 --help documents --overwrite-files" <(bash "$SETUP" --help 2>&1) '--overwrite-files'
 grep_case "@s56 header usage line lists --overwrite-files" "$SETUP" 'setup\.sh --target <dir> --answers <file>.*--overwrite-files'
-# @s57 — release: three manifests at 0.8.2, validator agrees
+# @s57 — release manifests remain versioned and validator agrees; the current
+# release test owns the exact version assertion.
 for m in plugin/.claude-plugin/plugin.json .claude-plugin/marketplace.json codex/.codex-plugin/plugin.json; do
-  grep_case "@s57 $m version 0.8.2" "$ROOT/$m" '"version": *"0\.8\.2"'
+  grep_case "@s57 $m has a semantic version" "$ROOT/$m" '"version": *"[0-9]+\.[0-9]+\.[0-9]+"'
 done
-check "@s57 validate-packaging reports v0.8.2" "1" "$(cd "$ROOT" && python3 scripts/validate-packaging.py 2>&1 | grep -c 'packaging valid @ v0\.8\.2'; true)"
+check "@s57 validate-packaging passes" "0" "$(cd "$ROOT" && python3 scripts/validate-packaging.py >/dev/null 2>&1; echo $?)"

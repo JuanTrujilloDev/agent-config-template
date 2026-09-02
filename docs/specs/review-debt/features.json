@@ -118,12 +118,14 @@
         "codex/.codex-plugin/plugin.json",
         "docs/upgrade-guide.md",
         "scripts/smoke/v083-mf5-release.sh",
+        "scripts/smoke/mf7-merge.sh",
         "scripts/smoke.sh"
       ],
       "max_files": 12,
       "max_loc": 3000,
       "reviews": ["judge"],
-      "status": "pending"
+      "status": "done",
+      "verified_by_human": "skipped"
     }
   ]
 }
