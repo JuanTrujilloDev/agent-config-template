@@ -90,7 +90,7 @@
       ],
       "max_files": 10,
       "max_loc": 3000,
-      "status": "pending",
+      "status": "done",
       "verified_by_human": "skipped",
       "review_cycles": 0,
       "reviews": ["judge", "security-reviewer"]

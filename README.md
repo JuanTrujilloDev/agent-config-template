@@ -150,6 +150,14 @@ template supports `SDD` or `SDD+TDD`, project type, language/framework,
 commands, directories, branch policy, PR limits, Gherkin, layer split,
 mutation testing, background jobs, and UI toggles.
 
+Successful renders maintain `agent-config.lock.json` with exact managed-file
+baselines. Preview distinguishes `STALE-MANAGED`, `CUSTOMIZED-MANAGED`, or
+`LEGACY`, plus retired `OBSOLETE` or `CUSTOMIZED-OBSOLETE` files. After review,
+`--merge --prune` deletes only unchanged `OBSOLETE` files; user edits stay.
+Fully quoted `answers.env` values are accepted, host names are case-insensitive,
+and an existing `.claude/answers.local.env` is automatically added to
+`.gitignore` after a successful write.
+
 For a configured codebase, use the short
 [existing-project guide](docs/guides/existing-projects.md). For every setting,
 see [template.config.yaml](template.config.yaml).

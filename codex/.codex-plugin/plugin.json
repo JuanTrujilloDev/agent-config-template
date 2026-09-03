@@ -1,6 +1,6 @@
 {
   "name": "agent-config-template",
-  "version": "0.9.1",
+  "version": "0.9.2",
   "description": "Spec-driven config for any stack: SDD/TDD workflow (spec, feature, fix, integrate, verify, audit, commit, pr, design), operating principles incl. the leverage ladder, graph-first code-query, style guides. Ported from the Claude Code plugin; roles are played in sequence (no subagents).",
   "skills": "./skills/",
   "author": {
