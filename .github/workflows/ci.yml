@@ -12,6 +12,8 @@ jobs:
       - uses: actions/checkout@v4
       - name: Validate SDD artifacts
         run: python3 scripts/validate-specs.py
+      - name: Validate model-eval catalog
+        run: python3 scripts/evals/run.py validate
 
   plugin-mirror:
     name: Plugin mirror in sync

@@ -58,11 +58,11 @@ something the render fakes. The nearest equivalent ships as a
 `beforeShellExecution` hook: `git commit` / `git push` on a protected branch is
 denied with the typed-branch guidance; edits themselves are not blocked.
 
-The guard is a word-scan, not a shell parser. It flattens newlines and catches
-`sh -c "git push"`, `/usr/bin/git push`, and command chains — but it deliberately
-over-blocks (`git log --grep commit` on a protected branch is denied too), and a
-determined bypass can defeat it. Treat it as a guardrail for a cooperating
-agent, not a security boundary.
+The guard tokenizes common shell forms with Python's standard library. It
+catches direct/path-qualified git, command chains, newlines, and
+`sh|bash|zsh -c "git push"`, while allowing quoted prose, searches, and read-only
+git commands. Unsupported or malformed shell syntax fails open. Treat it as a
+guardrail for a cooperating agent, not a security boundary.
 
 Protected branches come from `AGENT_CONFIG_PROTECTED_BRANCHES`; both Cursor and
 Claude guards honor `CLAUDE_CONFIG_PROTECTED_BRANCHES` as a legacy fallback.

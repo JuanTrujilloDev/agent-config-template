@@ -33,7 +33,7 @@ git add answers.env   # the source of truth — re-renders the same config later
 
 ```bash
 # 1. Pull the latest template (or check out a tag for stability)
-cd ~/code/agent-config-template && git pull origin main   # or: git checkout v0.9.2
+cd ~/code/agent-config-template && git pull origin main   # or: git checkout v0.10.0
 
 # 2. Preview what would change in your project
 cd ~/code/my-project
@@ -43,7 +43,7 @@ cd ~/code/my-project
 ~/code/agent-config-template/setup.sh --target . --answers ./answers.env --merge
 
 # 4. Commit
-git add .claude/ CLAUDE.md docs/ agent-config.lock.json && git commit -m "chore: upgrade agent-config-template to v0.9.2"
+git add .claude/ CLAUDE.md docs/ agent-config.lock.json && git commit -m "chore: upgrade agent-config-template to v0.10.0"
 ```
 
 A template upgrade (`setup.sh --merge`) is its own `chore:` commit — never mixed into a feature PR.
@@ -55,6 +55,30 @@ TMP=$(mktemp -d)
 ~/code/agent-config-template/setup.sh --target "$TMP" --answers ./answers.env --overwrite
 diff -r .claude "$TMP/.claude"
 ```
+
+---
+
+## Upgrading from v0.9.2 to v0.10.0 (ecosystem)
+
+v0.10.0 adds four opt-in or capability-gated surfaces without changing
+`answers.env` or `features.json` schema v2:
+
+- `python3 scripts/evals/run.py validate` checks the six-case model behavior
+  catalog without calling a model. Add `--run` to execute a selected host;
+  write-capable `/spec` → `/feature` evaluation also requires `--allow-writes`
+  and uses a disposable project.
+- UI renders add `docs/design-system/tokens.json`. Run `/design` to resolve the
+  values used by the feature, generate exactly one stack-native theme target,
+  and record both files in `tokens.lock.json`.
+- `/setup-companions plan|doctor|install|update|uninstall [list]` reads pinned
+  metadata from `companions.lock.json`. Plan/doctor are offline; install, update,
+  and removal still stop for per-tool confirmation.
+- Cursor now tokenizes direct, chained, path-qualified, and common shell-wrapped
+  git commands. It allows quoted/search mentions but remains a guardrail, not a
+  security boundary.
+
+Preview and merge as usual. Existing `docs/design-system/` files remain
+user-owned; review the new token source instead of overwriting your brand work.
 
 ---
 

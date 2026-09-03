@@ -1,0 +1,29 @@
+{
+  "schema_version": 1,
+  "companions": {
+    "graphify": {
+      "install_method": "python-package",
+      "package": "graphifyy==0.9.38",
+      "probe": "graphify --version",
+      "source": "https://pypi.org/project/graphifyy/",
+      "version": "0.9.38"
+    },
+    "ponytail": {
+      "direct_download": {
+        "sha256": "e5b63124834c65e73208e8349e6cfd90b56757646c576a393932a01adc63940f",
+        "url": "https://raw.githubusercontent.com/DietrichGebert/ponytail/v4.9.0/.cursor/rules/ponytail.mdc"
+      },
+      "install_method": "host-plugin-or-verified-file",
+      "probe": "host plugin list or .cursor/rules/ponytail.mdc SHA-256",
+      "source": "https://github.com/DietrichGebert/ponytail",
+      "version": "4.9.0"
+    },
+    "ui-ux-pro-max": {
+      "install_method": "npm-package-and-project-init",
+      "package": "ui-ux-pro-max-cli@2.15.0",
+      "probe": "uipro --version and host skill directory",
+      "source": "https://github.com/nextlevelbuilder/ui-ux-pro-max-skill",
+      "version": "2.15.0"
+    }
+  }
+}

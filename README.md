@@ -11,10 +11,16 @@
 
 </div>
 
-It turns a task into an approved contract, PR-sized implementation slices,
-skeptical review, checks, and small commits. Project state lives on disk, so the
-workflow survives restarts and works across web, backend, mobile, Unity,
-desktop, CLI, and data projects.
+It turns a task into an approved contract, PR-sized implementation slices, skeptical review, checks, and small commits. Project state lives on disk, so the workflow survives restarts across web, backend, mobile, Unity, desktop, CLI, and data projects.
+
+## v0.10.0
+
+- Opt-in model behavior evaluations for Claude, Codex, Cursor, and Grok.
+- UI projects get semantic `tokens.json`; `/design` emits one stack-native theme plus a `tokens.lock.json` hash record.
+- `/setup-companions plan|doctor|install|update|uninstall [list]` uses one pinned lock; every network or removal action remains confirmed.
+- Cursor tokenizes commit/push commands instead of blocking quoted mentions.
+
+Upgrade path: `0.9.2 → 0.10.0` via the existing preview + merge flow.
 
 ## Install
 
@@ -114,18 +120,15 @@ Full rules: [SDD workflow](docs/sdd-workflow.md).
 | `/audit` | Adversarial code-quality and security review |
 | `/design` | UI wireframe and component contract before code |
 | `/integrate <tool>` | Research and connect the user's chosen MCP/tool |
-| `/setup-companions [list]` | Offer selected optional quality/UI helpers |
+| `/setup-companions <action> [list]` | Plan, inspect, install, update, or remove optional helpers |
 | `/commit`, `/pr` | Commit or open a PR behind confirmation gates |
 
 ## What gets installed
 
-- Stack-matched dev agents plus `pmo`, `orchestrator`, `judge`, and security
-  review.
-- Always-loaded principles, backend/frontend style rules, and the restrained
-  `patterns` guide.
+- Stack-matched dev agents plus `pmo`, `orchestrator`, `judge`, and security review.
+- Always-loaded principles, backend/frontend style rules, and the restrained `patterns` guide.
 - Branch protection, targeted formatting hooks, and host-native skills.
-- `docs/design-system/MASTER.md` for UI brand colors, typography, spacing,
-  radius, motion, and accessibility.
+- `docs/design-system/MASTER.md` plus machine-readable `tokens.json` for UI brand colors, typography, spacing, radius, motion, and accessibility.
 - `docs/CONTEXT.md`, created lazily when the project needs a shared glossary.
 - Versioned specs and progress under `docs/specs/<slug>/`.
 
@@ -133,9 +136,7 @@ See [what each file does](docs/what-each-file-does.md).
 
 ## Adapt it to a project
 
-Run `/setup-template` from Cursor, or `/agent-config-template:setup-template`
-in Claude Code. It infers the project,
-asks one decision round, previews conflicts, and renders the selected hosts.
+Run `/setup-template` from Cursor, or `/agent-config-template:setup-template` in Claude Code. It infers the project, asks one decision round, previews conflicts, and renders the selected hosts.
 
 For CI or offline rendering, use the repository CLI with `answers.env`:
 
@@ -144,19 +145,9 @@ For CI or offline rendering, use the repository CLI with `answers.env`:
 ./setup.sh --target . --answers ./answers.env --host cursor --merge
 ```
 
-The preview is read-only. `--merge` keeps custom files and union-merges settings;
-`--overwrite-files <paths>` replaces only selected stale managed files. The
-template supports `SDD` or `SDD+TDD`, project type, language/framework,
-commands, directories, branch policy, PR limits, Gherkin, layer split,
-mutation testing, background jobs, and UI toggles.
+The preview is read-only. `--merge` keeps custom files and union-merges settings; `--overwrite-files <paths>` replaces only selected stale managed files. The template supports `SDD` or `SDD+TDD`, project type, language/framework, commands, directories, branch policy, PR limits, Gherkin, layer split, mutation testing, background jobs, and UI toggles.
 
-Successful renders maintain `agent-config.lock.json` with exact managed-file
-baselines. Preview distinguishes `STALE-MANAGED`, `CUSTOMIZED-MANAGED`, or
-`LEGACY`, plus retired `OBSOLETE` or `CUSTOMIZED-OBSOLETE` files. After review,
-`--merge --prune` deletes only unchanged `OBSOLETE` files; user edits stay.
-Fully quoted `answers.env` values are accepted, host names are case-insensitive,
-and an existing `.claude/answers.local.env` is automatically added to
-`.gitignore` after a successful write.
+Successful renders maintain `agent-config.lock.json` with exact managed-file baselines. Preview distinguishes `STALE-MANAGED`, `CUSTOMIZED-MANAGED`, or `LEGACY`, plus retired `OBSOLETE` or `CUSTOMIZED-OBSOLETE` files. After review, `--merge --prune` deletes only unchanged `OBSOLETE` files; user edits stay. Fully quoted `answers.env` values are accepted, host names are case-insensitive, and an existing `.claude/answers.local.env` is automatically added to `.gitignore` after a successful write.
 
 For a configured codebase, use the short
 [existing-project guide](docs/guides/existing-projects.md). For every setting,
@@ -180,13 +171,23 @@ Push, merge, publish, and destructive actions still require explicit approval.
 
 ## Optional companions
 
-Run `/setup-companions [list]` after setup. `graphify` adds graph-first code
-queries; `ponytail` enforces the smallest useful solution; `ui-ux-pro-max` is offered only when `has_ui` is enabled. Use
-`companions=yes|not_now|never|<comma list>`, for example
-`companions=graphify,ponytail`. Install plans are shown before anything changes.
+Run `/setup-companions plan|doctor|install|update|uninstall [list]` after setup. `graphify` adds graph-first code queries; `ponytail` enforces the smallest useful solution; `ui-ux-pro-max` is offered only when `has_ui` is enabled. Use `companions=yes|not_now|never|<comma list>`, for example `companions=graphify,ponytail`. Pins and the verified Cursor download digest live in `plugin/companions.lock.json`; mutations are shown and confirmed first.
 
 Trackers and external MCP tools are also opt-in. `/integrate <tool>` asks what
 you already use, researches the official integration, and shows the exact plan.
+
+## Model behavior checks
+
+These commands are inert unless `--run` is present:
+
+```bash
+python3 scripts/evals/run.py validate
+python3 scripts/evals/run.py run --host cursor --case pattern-restraint
+python3 scripts/evals/run.py run --host cursor --case pattern-restraint --run
+```
+
+The `/spec` → `/feature` workspace case additionally needs `--allow-writes` and
+runs in a disposable rendered project. See [evaluation details](scripts/evals/README.md).
 
 ## Examples
 
@@ -213,22 +214,11 @@ Never mix a template upgrade into a feature commit. See the
 
 ## Credits & inspiration
 
-The operating principles build on
-[forrestchang/andrej-karpathy-skills](https://github.com/forrestchang/andrej-karpathy-skills),
-with a leverage ladder adapted from
-[ponytail](https://github.com/dietrichgebert/ponytail), graph-first querying
-designed around [Graphify](https://github.com/Graphify-Labs/graphify), and
-pattern restraint inspired by
-[code-design-patterns](https://github.com/00suryavanshi00/code-design-patterns).
+The operating principles build on [forrestchang/andrej-karpathy-skills](https://github.com/forrestchang/andrej-karpathy-skills), with a leverage ladder adapted from [ponytail](https://github.com/dietrichgebert/ponytail), graph-first querying designed around [Graphify](https://github.com/Graphify-Labs/graphify), and pattern restraint inspired by [code-design-patterns](https://github.com/00suryavanshi00/code-design-patterns).
 
-[GitHub Spec Kit](https://github.com/github/spec-kit) is MIT-licensed inspiration
-for separating specification, planning, tasks, and convergence.
-No artifacts were copied; this project is not affiliated with or endorsed by
-GitHub.
+[GitHub Spec Kit](https://github.com/github/spec-kit) is MIT-licensed inspiration for separating specification, planning, tasks, and convergence. No artifacts were copied; this project is not affiliated with or endorsed by GitHub.
 
-[Matt Pocock's MIT-licensed skills](https://github.com/mattpocock/skills) inspired
-the fixed-point review and TDD seam/expectation rules. All wording and artifacts
-here are original to this project; this project is not affiliated with Matt Pocock.
+[Matt Pocock's MIT-licensed skills](https://github.com/mattpocock/skills) inspired the fixed-point review and TDD seam/expectation rules. All wording and artifacts here are original to this project; this project is not affiliated with Matt Pocock.
 
 ## Support
 
