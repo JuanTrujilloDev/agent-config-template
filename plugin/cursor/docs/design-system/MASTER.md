@@ -8,10 +8,12 @@ Stack: {{frontend_framework}}.
 
 Rules of use:
 
+- `docs/design-system/tokens.json` is the machine-readable value source. These
+  tables explain intent for humans; `/design` updates both together.
 - Implementers (`ui-designer`, dev agents, humans) **cite tokens, not raw values**. `var(--color-primary)` / `$space-4` / `theme.radius.md` — never `#3B82F6`, `17px`, or `rounded-[6px]`.
 - Page-specific overrides live in `docs/design-system/pages/<page>.md`, **only when a page must genuinely deviate** from this file. An override uses the same section names as below and wins over MASTER for that page only. No override file means MASTER applies unchanged.
 - `TODO:` marks a value not yet decided. Resolve it here (once) rather than inventing a value at the call site.
-- Change a token here first; then propagate. A value that appears in code but not in this file is a defect (see Anti-patterns).
+- Change a token in `tokens.json` and its table here first; then propagate. A value that appears in code but not in the token source is a defect (see Anti-patterns).
 
 ## Colors & semantic tokens
 

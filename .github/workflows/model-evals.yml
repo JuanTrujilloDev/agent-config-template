@@ -1,0 +1,50 @@
+name: model-evals
+
+on:
+  workflow_dispatch:
+    inputs:
+      host:
+        description: Host adapter to run
+        required: true
+        type: choice
+        options: [claude, codex, cursor, grok]
+      case:
+        description: Optional single case ID
+        required: false
+        type: string
+      allow_writes:
+        description: Allow workspace cases in disposable copies
+        required: true
+        default: false
+        type: boolean
+
+permissions:
+  contents: read
+
+jobs:
+  evaluate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run selected evaluations
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          CURSOR_API_KEY: ${{ secrets.CURSOR_API_KEY }}
+          XAI_API_KEY: ${{ secrets.XAI_API_KEY }}
+          EVAL_HOST: ${{ inputs.host }}
+          EVAL_CASE: ${{ inputs.case }}
+          EVAL_ALLOW_WRITES: ${{ inputs.allow_writes }}
+        run: |
+          args=(run --run --host "$EVAL_HOST" --results eval-results/results.json)
+          [ -z "$EVAL_CASE" ] || args+=(--case "$EVAL_CASE")
+          [ "$EVAL_ALLOW_WRITES" != "true" ] || args+=(--allow-writes)
+          python3 scripts/evals/run.py "${args[@]}"
+      - name: Upload sanitized results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: model-evals-${{ inputs.host }}
+          path: eval-results/results.json
+          if-no-files-found: ignore

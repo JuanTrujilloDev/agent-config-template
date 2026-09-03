@@ -81,4 +81,6 @@ the isolated upgrade branch; never delete the whole agent directory blindly.
 - `ui-ux-pro-max`: UI design help only when `has_ui` is enabled.
 
 Run `/setup-companions [list]` to see an install plan. Nothing installs without
-approval. Use `/integrate <tool>` for a tracker or MCP the user already chose.
+approval. Use `/setup-companions plan|doctor|install|update|uninstall [list]`
+for the pinned lifecycle, and `/integrate <tool>` for a tracker or MCP the user
+already chose.

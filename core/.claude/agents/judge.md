@@ -45,7 +45,8 @@ the mini-feature's scenarios in `docs/specs/<slug>/contract.md`:
 - [ ] Code health — no new duplication (rule of three), no file ballooning (~400-line guideline) or god object, dependencies still point one way.
 - [ ] Comments earn their keep — *why* not *what*; no narration, no commented-out code left behind.
 {{#has_ui}}
-- [ ] UI diffs{{#has_frontend}} under `{{frontend_dir}}`{{/has_frontend}} — hardcoded color, spacing, radius, or font values not traceable to a `docs/design-system/MASTER.md` token (or its `pages/<page>.md` override) are findings; cite file:line.
+- [ ] UI diffs{{#has_frontend}} under `{{frontend_dir}}`{{/has_frontend}} — hardcoded color, spacing, radius, or font values not traceable to `docs/design-system/tokens.json` and `docs/design-system/MASTER.md` (or a `pages/<page>.md` override) are findings; cite file:line.
+- [ ] Read `docs/design-system/tokens.json` and `tokens.lock.json`. A missing target or stale `source_sha256` / `target_sha256` is a **hard-violation**; a raw brand value or undocumented page-level token fork is a **hard-violation**.
 {{/has_ui}}
 - [ ] No debug residue (`# TODO`, `console.log`, `print()`); follows `.claude/rules/backend-style.md`{{#has_frontend}} / `frontend-style.md`{{/has_frontend}}.
 

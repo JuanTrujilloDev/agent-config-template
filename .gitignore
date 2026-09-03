@@ -13,3 +13,4 @@ Thumbs.db
 
 # Per-user setup answers (when developing the template itself)
 /answers.env
+/eval-results/

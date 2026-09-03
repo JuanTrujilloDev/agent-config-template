@@ -11,7 +11,8 @@
 #   plugin/template.config.yaml <- template.config.yaml
 #   plugin/examples/            <- examples/
 #   codex/skills/               <- plugin/skills/ + plugin/commands/ + hosts/codex/
-#                                  (+ patterns/references/ <- core/.claude/patterns/)
+#                                  (+ patterns/references/ <- core/.claude/patterns/;
+#                                   setup-companions/companions.lock.json)
 #   cursor/                     <- core/ + hosts/cursor/ (incl. .claude/patterns/, docs/)
 #   plugin/cursor/              <- cursor/        (so plugin/setup.sh --host cursor|grok works)
 #   plugin/codex/skills/        <- codex/skills/  (so plugin/setup.sh --host codex works)
@@ -74,6 +75,7 @@ build_codex_skills() {
     mkdir -p "$out/$name"
     cp "$o/SKILL.md" "$out/$name/SKILL.md"
   done
+  cp plugin/companions.lock.json "$out/setup-companions/companions.lock.json"
   # Domain references ride along with the patterns skill (D5).
   cp -R core/.claude/patterns "$out/patterns/references"
 }

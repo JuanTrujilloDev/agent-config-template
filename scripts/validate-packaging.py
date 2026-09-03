@@ -62,6 +62,7 @@ if mk:
         if isinstance(src, str) and src.startswith("./") and not os.path.isdir(os.path.join(REPO, src)):
             err(f"marketplace.json source does not resolve: {src}")
 load("plugin/hooks/hooks.json")  # must be valid JSON if present
+companions = load("plugin/companions.lock.json")
 for d in ("plugin/agents", "plugin/commands", "plugin/skills", "plugin/template/.claude"):
     if not os.path.isdir(os.path.join(REPO, d)):
         err(f"Claude plugin: missing dir {d}")
@@ -245,12 +246,45 @@ walk_components("cursor/.claude/skills", "skills",
 
 # --- Codex tree ---
 walk_components("codex/skills", "skills", require=("name", "description"))
+codex_companions = load("codex/skills/setup-companions/companions.lock.json")
 cx = load("codex/.codex-plugin/plugin.json")
 if cx:
     for k in ("name", "version", "description"):
         if k not in cx:
             err(f"codex plugin.json missing '{k}'")
     versions["codex plugin.json"] = cx.get("version")
+
+# --- Companion lock ---
+if companions:
+    if companions.get("schema_version") != 1:
+        err("plugin/companions.lock.json: schema_version must be 1")
+    tools = companions.get("companions")
+    if not isinstance(tools, dict) or list(tools) != ["graphify", "ponytail", "ui-ux-pro-max"]:
+        err("plugin/companions.lock.json: companions must be sorted graphify, ponytail, ui-ux-pro-max")
+    else:
+        for name, item in tools.items():
+            if not isinstance(item, dict):
+                err(f"plugin/companions.lock.json: {name} must be an object")
+                continue
+            for key in ("install_method", "probe", "source", "version"):
+                if not str(item.get(key) or "").strip():
+                    err(f"plugin/companions.lock.json: {name}.{key} is required")
+            if not re.fullmatch(r"[0-9]+\.[0-9]+\.[0-9]+", str(item.get("version") or "")):
+                err(f"plugin/companions.lock.json: {name}.version must be pinned X.Y.Z")
+        graphify = tools["graphify"]
+        ui = tools["ui-ux-pro-max"]
+        ponytail = tools["ponytail"]
+        if graphify.get("package") != f"graphifyy=={graphify.get('version')}":
+            err("plugin/companions.lock.json: graphify package/version mismatch")
+        if ui.get("package") != f"ui-ux-pro-max-cli@{ui.get('version')}":
+            err("plugin/companions.lock.json: ui-ux-pro-max package/version mismatch")
+        direct = ponytail.get("direct_download") or {}
+        if not re.fullmatch(r"[0-9a-f]{64}", str(direct.get("sha256") or "")):
+            err("plugin/companions.lock.json: ponytail direct-download SHA-256 is invalid")
+        if f"/v{ponytail.get('version')}/" not in str(direct.get("url") or ""):
+            err("plugin/companions.lock.json: ponytail direct-download URL is not version-pinned")
+    if codex_companions != companions:
+        err("codex setup-companions lock differs from plugin/companions.lock.json")
 
 # --- Version consistency ---
 distinct = {v for v in versions.values() if v}

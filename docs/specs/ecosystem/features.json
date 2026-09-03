@@ -1,0 +1,128 @@
+{
+  "schema_version": 2,
+  "feature": "ecosystem",
+  "version": "0.10.0",
+  "rules": {
+    "one_at_a_time": true,
+    "require_approved_contract": true,
+    "workflow_mode": "SDD+TDD",
+    "autonomy_mode": "gated",
+    "generated_mirrors_excluded_from_budget": true
+  },
+  "mini_features": [
+    {
+      "id": 1,
+      "name": "model-eval-harness",
+      "scenarios": ["@s1", "@s2", "@s3", "@s4", "@s5", "@s6", "@s7", "@s8"],
+      "depends_on": [],
+      "parallel": false,
+      "files_hint": [
+        "scripts/evals/cases.jsonl",
+        "scripts/evals/run.py",
+        "scripts/evals/README.md",
+        ".github/workflows/model-evals.yml",
+        ".gitignore",
+        "scripts/smoke/v010-mf1-model-evals.sh",
+        "scripts/smoke.sh"
+      ],
+      "max_files": 7,
+      "max_loc": 3000,
+      "status": "done",
+      "verified_by_human": "no",
+      "review_cycles": 0,
+      "reviews": ["judge", "security-reviewer"]
+    },
+    {
+      "id": 2,
+      "name": "brand-tokens-code",
+      "scenarios": ["@s9", "@s10", "@s11", "@s12", "@s13", "@s14", "@s15"],
+      "depends_on": [1],
+      "parallel": false,
+      "files_hint": [
+        "core/docs/design-system/tokens.json",
+        "core/docs/design-system/MASTER.md",
+        "core/.claude/commands/design.md",
+        "plugin/commands/design.md",
+        "core/.claude/agents/judge.md",
+        "plugin/agents/judge.md",
+        "scripts/smoke/v010-mf2-brand-tokens.sh",
+        "scripts/smoke.sh"
+      ],
+      "max_files": 8,
+      "max_loc": 3000,
+      "status": "done",
+      "verified_by_human": "no",
+      "review_cycles": 0,
+      "reviews": ["judge"]
+    },
+    {
+      "id": 3,
+      "name": "companion-lifecycle",
+      "scenarios": ["@s16", "@s17", "@s18", "@s19", "@s20", "@s21", "@s22"],
+      "depends_on": [2],
+      "parallel": false,
+      "files_hint": [
+        "plugin/companions.lock.json",
+        "plugin/commands/setup-companions.md",
+        "hosts/codex/skills/setup-companions/SKILL.md",
+        "scripts/build.sh",
+        "scripts/validate-packaging.py",
+        "docs/guides/existing-projects.md",
+        "scripts/smoke/v010-mf3-companions.sh",
+        "scripts/smoke.sh"
+      ],
+      "max_files": 8,
+      "max_loc": 3000,
+      "status": "done",
+      "verified_by_human": "no",
+      "review_cycles": 0,
+      "reviews": ["judge", "security-reviewer"]
+    },
+    {
+      "id": 4,
+      "name": "branch-guard-tokenizer",
+      "scenarios": ["@s23", "@s24", "@s25", "@s26", "@s27", "@s28"],
+      "depends_on": [3],
+      "parallel": false,
+      "files_hint": [
+        "hosts/cursor/hooks/branch-guard.sh",
+        "plugin/.cursor-plugin/hooks/branch-guard.sh",
+        "docs/install/host-capability-matrix.md",
+        "docs/install/cursor.md",
+        "scripts/smoke/v010-mf4-branch-tokenizer.sh",
+        "scripts/smoke.sh"
+      ],
+      "max_files": 6,
+      "max_loc": 3000,
+      "status": "done",
+      "verified_by_human": "no",
+      "review_cycles": 0,
+      "reviews": ["judge", "security-reviewer"]
+    },
+    {
+      "id": 5,
+      "name": "release-0-10-0",
+      "scenarios": ["@s29", "@s30", "@s31", "@s32", "@s33"],
+      "depends_on": [4],
+      "parallel": false,
+      "files_hint": [
+        "README.md",
+        "plugin/README.md",
+        "docs/upgrade-guide.md",
+        "plugin/.claude-plugin/plugin.json",
+        ".claude-plugin/marketplace.json",
+        ".cursor-plugin/plugin.json",
+        "codex/.codex-plugin/plugin.json",
+        "scripts/smoke/v092-mf4-parser-release.sh",
+        "scripts/smoke/v010-mf5-release.sh",
+        "scripts/smoke.sh"
+      ],
+      "max_files": 10,
+      "max_loc": 3000,
+      "status": "done",
+      "verified_by_human": "no",
+      "review_cycles": 0,
+      "reviews": ["judge"]
+    }
+  ]
+}

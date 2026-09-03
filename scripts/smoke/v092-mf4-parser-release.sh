@@ -162,8 +162,8 @@ for V092_MF4_MANIFEST in \
   .cursor-plugin/plugin.json \
   codex/.codex-plugin/plugin.json
 do
-  grep_case "v0.9.2 @s32 $V092_MF4_MANIFEST version" \
-    "$ROOT/$V092_MF4_MANIFEST" '"version": "0\.9\.2"'
+  grep_case "v0.9.2 @s32 $V092_MF4_MANIFEST semantic version" \
+    "$ROOT/$V092_MF4_MANIFEST" '"version": "[0-9]+\.[0-9]+\.[0-9]+"'
 done
 
 V092_MF4_README="$ROOT/README.md"
@@ -204,8 +204,8 @@ check "v0.9.2 @s33 build check passes" "0" \
   "$(cd "$ROOT" && bash scripts/build.sh --check >/dev/null 2>&1; echo $?)"
 V092_MF4_PACKAGING=$(cd "$ROOT" && python3 scripts/validate-packaging.py 2>&1)
 check "v0.9.2 @s33 packaging validates" "0" "$?"
-grep_case "v0.9.2 @s33 packaging reports v0.9.2" \
-  <(printf '%s\n' "$V092_MF4_PACKAGING") 'packaging valid @ v0\.9\.2'
+grep_case "v0.9.2 @s33 packaging reports current semantic version" \
+  <(printf '%s\n' "$V092_MF4_PACKAGING") 'packaging valid @ v[0-9]+\.[0-9]+\.[0-9]+'
 check "v0.9.2 @s33 setup scripts parse" "0" \
   "$(bash -n "$ROOT/setup.sh" "$ROOT/plugin/setup.sh"; echo $?)"
 check "v0.9.2 @s33 manifests parse as JSON" "0" \

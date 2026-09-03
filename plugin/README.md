@@ -26,7 +26,7 @@ Then, optionally, install the companion tools (one confirmation, skips what's al
 After install you immediately get:
 
 - **11 agents** (`/agents` to list): `orchestrator`, `pmo`, `judge`, `security-reviewer`, `ui-designer`, plus a dev library Claude picks from per project type — `backend-dev` (web/API), `frontend-dev` (web UI), `mobile-dev`, `game-dev`, `desktop-dev`, `core-dev` (library/CLI/data). Each with an embedded "Gotchas" section.
-- **11 slash commands** namespaced under `/agent-config-template:*` — `spec`, `feature`, `fix`, `integrate`, `verify`, `audit`, `commit`, `pr`, `design`, **`setup-template`**, **`setup-companions [list]`** (install graphify + ponytail — and ui-ux-pro-max when `has_ui` — with a confirmation gate).
+- **11 slash commands** namespaced under `/agent-config-template:*` — `spec`, `feature`, `fix`, `integrate`, `verify`, `audit`, `commit`, `pr`, `design`, **`setup-template`**, **`setup-companions plan|doctor|install|update|uninstall [list]`** (optional graphify + ponytail, and ui-ux-pro-max when `has_ui`).
 - **7 skills**: `principles` (incl. the leverage ladder — reuse > stdlib > native > installed deps > new code), `sdd-workflow`, `code-query` (graph-first codebase querying — uses a knowledge graph like [graphify](https://github.com/Graphify-Labs/graphify) when available, deterministic repo map otherwise), `patterns` (design-pattern restraint — name the force, try the simplest default, keep a `pattern / force / rejected alternative` ledger; six domain references), `backend-style`, `frontend-style`, `port-config` (generate this config for another agent host from its current docs).
 - **3 hooks**: branch discipline (hard block on protected branches), agent guidance (advisory — guides, doesn't block), targeted auto-format on Edit/Write.
 
@@ -40,11 +40,15 @@ export CLAUDE_CONFIG_PROTECTED_BRANCHES="main,qa,prod"  # default: main,master
 
 ### Companion tools (optional, auto-detected)
 
-Three external tools slot straight into the workflow when installed — nothing here depends on them. **`/agent-config-template:setup-companions [list]` installs them** (with a confirmation gate; idempotent; a comma list installs exactly those), or install by hand:
+Three external tools slot straight into the workflow when installed—nothing
+here depends on them. Use
+**`/agent-config-template:setup-companions plan|doctor|install|update|uninstall [list]`**;
+the pinned metadata comes from `companions.lock.json`, and every mutation has a
+per-tool confirmation gate.
 
-- **[graphify](https://github.com/Graphify-Labs/graphify)** — codebase knowledge graph. Install with `uv tool install graphifyy && graphify install`. The `code-query` skill prefers the graph (`/graphify query|path|explain`) for structural questions during `/spec`, `/feature`, and `/fix`; without it, the skill falls back to a deterministic repo map.
+- **[graphify](https://github.com/Graphify-Labs/graphify)** — codebase knowledge graph. The pinned install is `uv tool install graphifyy==0.9.38 && graphify install`. The `code-query` skill prefers the graph (`/graphify query|path|explain`) for structural questions during `/spec`, `/feature`, and `/fix`; without it, the skill falls back to a deterministic repo map.
 - **[ponytail](https://github.com/dietrichgebert/ponytail)** — runtime minimal-code enforcement (`/plugin marketplace add DietrichGebert/ponytail`, then `/plugin install ponytail@ponytail`). It enforces at generation time what this config's **leverage ladder** (`principles` skill) bakes into `/spec` Design notes and the `/verify` over-engineering check — the ladder keeps behavior consistent on hosts where ponytail isn't installed. To have ponytail's ruleset reach this plugin's dev subagents too, widen its matcher: `export PONYTAIL_SUBAGENT_MATCHER="dev|explore|general"`.
-- **[ui-ux-pro-max](https://github.com/nextlevelbuilder/ui-ux-pro-max-skill)** (MIT) — design-system skill for `ui-designer` / `frontend-dev`; recommended only when `has_ui` is truthy. Install with `npx ui-ux-pro-max-cli init --ai claude` (writes `.claude/skills/ui-ux-pro-max/`).
+- **[ui-ux-pro-max](https://github.com/nextlevelbuilder/ui-ux-pro-max-skill)** (MIT) — design-system skill for `ui-designer` / `frontend-dev`; recommended only when `has_ui` is truthy. Install with `npm install -g ui-ux-pro-max-cli@2.15.0`, then `uipro init --ai claude` (writes `.claude/skills/ui-ux-pro-max/`).
 
 `/setup-template` records the choice in `.claude/answers.local.env` as `companions=yes|not_now|never|<comma list>` — a list such as `graphify,ponytail` installs only those, and the omitted tools are not re-recommended.
 
