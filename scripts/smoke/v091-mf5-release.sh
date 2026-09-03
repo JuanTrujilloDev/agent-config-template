@@ -23,8 +23,10 @@ grep_case "v0.9.1 @s37 README names original material" "$ROOT/README.md" '[Ww]or
 grep_case "v0.9.1 @s37 README says original" "$ROOT/README.md" '[Oo]riginal to this project'
 grep_case "v0.9.1 @s37 README denies affiliation" "$ROOT/README.md" '[Nn]ot affiliated.*Matt Pocock|Matt Pocock.*not affiliated'
 
+V091_CURRENT_VERSION=$(python3 -c 'import json,sys; d=json.load(open(sys.argv[1])); print(d["version"])' "$ROOT/plugin/.claude-plugin/plugin.json")
 for f in "$ROOT/plugin/.claude-plugin/plugin.json" "$ROOT/.claude-plugin/marketplace.json" "$ROOT/.cursor-plugin/plugin.json" "$ROOT/codex/.codex-plugin/plugin.json"; do
-  grep_case "v0.9.1 @s38 $(basename "$f") version" "$f" '"version": "0\.9\.1"'
+  V091_MANIFEST_VERSION=$(python3 -c 'import json,sys; d=json.load(open(sys.argv[1])); print((d.get("plugins") or [d])[0]["version"])' "$f")
+  check "v0.9.1 @s38 $(basename "$f") version stays aligned" "$V091_CURRENT_VERSION" "$V091_MANIFEST_VERSION"
 done
 
 grep_case "v0.9.1 @s39 upgrade section" "$ROOT/docs/upgrade-guide.md" '^## Upgrading to v0\.9\.1'
@@ -35,4 +37,4 @@ done
 check "v0.9.1 @s40 build --check" "0" "$(cd "$ROOT" && bash scripts/build.sh --check >/dev/null 2>&1; echo $?)"
 V091_PACKAGING=$(cd "$ROOT" && python3 scripts/validate-packaging.py 2>&1); V091_PACKAGING_RC=$?
 check "v0.9.1 @s40 packaging valid" "0" "$V091_PACKAGING_RC"
-grep_case "v0.9.1 @s40 packaging reports version" <(printf '%s\n' "$V091_PACKAGING") 'v0\.9\.1'
+grep_case "v0.9.1 @s40 packaging reports current version" <(printf '%s\n' "$V091_PACKAGING") "v${V091_CURRENT_VERSION}"

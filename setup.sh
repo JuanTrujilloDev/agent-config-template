@@ -149,8 +149,6 @@ if ! command -v python3 >/dev/null 2>&1; then
   exit 1
 fi
 
-mkdir -p "$TARGET"
-
 # Pipe answers (file or stdin) into python; everything else happens there.
 if [ "$ANSWERS_FILE" = "-" ]; then
   ANSWERS_INPUT="$(cat)"
@@ -162,35 +160,6 @@ else
   ANSWERS_INPUT="$(cat "$ANSWERS_FILE")"
 fi
 
-# Host selection (D4/D11): --host wins; else TARGET_HOSTS recorded in the
-# answers file; else claude. Comma-separated, order-insensitive, deduped.
-HOSTS_RAW="$HOST_ARG"
-if [ -z "$HOSTS_RAW" ]; then
-  HOSTS_RAW="$(printf '%s\n' "$ANSWERS_INPUT" | sed -n 's/^TARGET_HOSTS=//p' | tail -1)"
-fi
-HOSTS_RAW="${HOSTS_RAW:-claude}"
-WANT_CLAUDE=""; WANT_CURSOR=""; WANT_CODEX=""; WANT_GROK=""
-for h in $(printf '%s' "$HOSTS_RAW" | tr ',' ' '); do
-  case "$h" in
-    claude) WANT_CLAUDE=1 ;;
-    cursor) WANT_CURSOR=1 ;;
-    codex)  WANT_CODEX=1 ;;
-    grok)   WANT_GROK=1 ;;
-    *)
-      echo "Error: unsupported host '$h'. Supported hosts: claude, cursor, codex (alias: grok)." >&2
-      echo "For other hosts (opencode, gemini, windsurf, ...) use the port-config skill" >&2
-      echo "to generate a port of this config for that host." >&2
-      exit 1
-      ;;
-  esac
-done
-HOSTS=""
-[ -n "$WANT_CLAUDE" ] && HOSTS="$HOSTS claude"
-[ -n "$WANT_GROK" ]   && HOSTS="$HOSTS grok"
-[ -n "$WANT_CURSOR" ] && HOSTS="$HOSTS cursor"
-[ -n "$WANT_CODEX" ]  && HOSTS="$HOSTS codex"
-HOSTS="${HOSTS# }"
-
 # Non-claude hosts render from the generated trees shipped next to this script
 # (repo root: cursor/, codex/skills/; plugin bundle: same relative paths).
 CURSOR_DIR="$SCRIPT_DIR/cursor"
@@ -199,14 +168,6 @@ if [ -f "$SCRIPT_DIR/scripts/build.sh" ]; then
   SOURCE_TREE_HINT="run scripts/build.sh first"
 else
   SOURCE_TREE_HINT="reinstall/update the plugin"
-fi
-if [ -n "$WANT_CURSOR$WANT_GROK$WANT_CODEX" ] && [ ! -f "$CURSOR_DIR/AGENTS.md" ]; then
-  echo "Error: cursor source tree not found at $CURSOR_DIR ($SOURCE_TREE_HINT)." >&2
-  exit 1
-fi
-if [ -n "$WANT_CODEX" ] && [ ! -d "$CODEX_SKILLS_DIR" ]; then
-  echo "Error: codex skills tree not found at $CODEX_SKILLS_DIR ($SOURCE_TREE_HINT)." >&2
-  exit 1
 fi
 
 # All real work happens in python3 — works on macOS bash 3.2 because we
@@ -222,9 +183,10 @@ ANSWERS_INPUT="$ANSWERS_INPUT" \
   ANSWERS_FILE="$ANSWERS_FILE" \
   SCRIPT="$0" \
   TEMPLATE_VERSION="$TEMPLATE_VERSION" \
-  HOSTS="$HOSTS" \
+  HOST_ARG="$HOST_ARG" \
   CURSOR_DIR="$CURSOR_DIR" \
   CODEX_SKILLS_DIR="$CODEX_SKILLS_DIR" \
+  SOURCE_TREE_HINT="$SOURCE_TREE_HINT" \
   python3 - <<'PYEOF' || PY_RC=$?
 import hashlib, json, os, re, shlex, shutil, stat, sys, tempfile
 
@@ -234,21 +196,66 @@ ANSWERS_INPUT = os.environ["ANSWERS_INPUT"]
 MODE = os.environ.get("MODE", "")
 OVERWRITE_FILES = [p for p in os.environ.get("OVERWRITE_FILES", "").split(",") if p]
 PRUNE = os.environ.get("PRUNE") == "1"
-HOSTS = (os.environ.get("HOSTS") or "claude").split()
 CURSOR_DIR = os.environ.get("CURSOR_DIR", "")
 CODEX_SKILLS_DIR = os.environ.get("CODEX_SKILLS_DIR", "")
+SOURCE_TREE_HINT = os.environ["SOURCE_TREE_HINT"]
 TEMPLATE_VERSION = os.environ["TEMPLATE_VERSION"]
 
 # 1. Parse KEY=VALUE answers (skip blank lines + #-comments).
+def answer_value(value, line_number):
+    if not value or value[0] not in "\"'":
+        return value
+    quote = value[0]
+    escaped = False
+    closing = None
+    for index, char in enumerate(value[1:], 1):
+        if quote == '"' and char == "\\" and not escaped:
+            escaped = True
+            continue
+        if char == quote and not escaped:
+            closing = index
+            break
+        escaped = False
+    if closing != len(value) - 1:
+        print(f"Error: answers line {line_number}: malformed quoted value.", file=sys.stderr)
+        sys.exit(1)
+    try:
+        parsed = shlex.split(value, comments=False, posix=True)
+    except ValueError:
+        parsed = []
+    if len(parsed) != 1:
+        print(f"Error: answers line {line_number}: malformed quoted value.", file=sys.stderr)
+        sys.exit(1)
+    return parsed[0]
+
 ANS = {}
-for line in ANSWERS_INPUT.splitlines():
+for line_number, line in enumerate(ANSWERS_INPUT.splitlines(), 1):
     line = line.rstrip("\n")
     if not line or line.lstrip().startswith("#"):
         continue
     if "=" not in line:
         continue
     k, v = line.split("=", 1)
-    ANS[k.strip()] = v
+    ANS[k.strip()] = answer_value(v, line_number)
+
+# Host selection (D4/D11): --host wins; else parsed TARGET_HOSTS; else claude.
+HOST_ORDER = ("claude", "grok", "cursor", "codex")
+raw_hosts = os.environ.get("HOST_ARG") or ANS.get("TARGET_HOSTS") or "claude"
+selected_hosts = {host.strip().lower() for host in raw_hosts.replace(",", " ").split()}
+unsupported = sorted(selected_hosts - set(HOST_ORDER))
+if unsupported:
+    print(f"Error: unsupported host '{unsupported[0]}'. Supported hosts: claude, cursor, codex (alias: grok).", file=sys.stderr)
+    print("For other hosts (opencode, gemini, windsurf, ...) use the port-config skill", file=sys.stderr)
+    print("to generate a port of this config for that host.", file=sys.stderr)
+    sys.exit(1)
+HOSTS = [host for host in HOST_ORDER if host in selected_hosts]
+if any(host in HOSTS for host in ("cursor", "grok", "codex")) and not os.path.isfile(os.path.join(CURSOR_DIR, "AGENTS.md")):
+    print(f"Error: cursor source tree not found at {CURSOR_DIR} ({SOURCE_TREE_HINT}).", file=sys.stderr)
+    sys.exit(1)
+if "codex" in HOSTS and not os.path.isdir(CODEX_SKILLS_DIR):
+    print(f"Error: codex skills tree not found at {CODEX_SKILLS_DIR} ({SOURCE_TREE_HINT}).", file=sys.stderr)
+    sys.exit(1)
+os.makedirs(TARGET, exist_ok=True)
 
 # 2. Synthesize ticket_tracker_<flag>=yes for {{#flag}} sections.
 tt = ANS.get("ticket_tracker", "")
@@ -400,6 +407,8 @@ try:
 
     SETTINGS_REL = os.path.join(".claude", "settings.json")
     LOCAL_SETTINGS = "settings.local.json"
+    LOCAL_ANSWERS_REL = os.path.join(".claude", "answers.local.env")
+    GITIGNORE_REL = ".gitignore"
     LOCK_REL = "agent-config.lock.json"
     LOCK_SCHEMA = 1
     DOT_CLAUDE_MD = os.path.join(".claude", "CLAUDE.md")  # never staged: the template's version is the ../CLAUDE.md symlink
@@ -629,6 +638,25 @@ try:
             sys.exit(1)
         check_inside([LOCK_REL])
 
+    def ignore_local_answers():
+        if not os.path.isfile(tpath(LOCAL_ANSWERS_REL)):
+            return
+        check_inside([GITIGNORE_REL])
+        path = tpath(GITIGNORE_REL)
+        try:
+            data = open(path, "rb").read() if os.path.exists(path) else b""
+            rule = LOCAL_ANSWERS_REL.encode()
+            if rule in data.splitlines():
+                return
+            with open(path, "ab") as f:
+                if data and not data.endswith(b"\n"):
+                    f.write(b"\n")
+                f.write(rule + b"\n")
+        except OSError as e:
+            print(f"Error: cannot update {GITIGNORE_REL}: {e}", file=sys.stderr)
+            sys.exit(1)
+        print(f"  Added {LOCAL_ANSWERS_REL} to {GITIGNORE_REL}")
+
     def remove_empty_managed_dirs(deleted):
         roots = tuple(path.rstrip(os.sep) for path in MANAGED_DIRS)
         candidates = set()
@@ -822,11 +850,12 @@ try:
             write_lock(advance, removed)
             print(f"✓ Merge complete: {added} added, {merged} settings merged, {overwritten} overwritten, {len(removed)} pruned, {kept} kept as-is.")
 
+    ignore_local_answers()
     print("")
     print("Next steps:")
     print("  1. Review CLAUDE.md and .claude/HELP.md — adjust if needed")
     print("  2. cp .claude/mcp.json.example .claude/mcp.json  (if you use MCPs)")
-    print("  3. Add to .gitignore:  .claude/settings.local.json, .claude/mcp.json, .claude/answers.local.env")
+    print("  3. Add to .gitignore:  .claude/settings.local.json, .claude/mcp.json (answers.local.env is automatic)")
     print("  4. (Re)start Claude Code to load the new config")
 finally:
     shutil.rmtree(STAGING, ignore_errors=True)

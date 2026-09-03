@@ -10,7 +10,9 @@ already has a Claude config, it renders to a staging dir, detects your existing
 
 - `--merge` — add files that don't exist, **union-merge `.claude/settings.json`**
   (combine `permissions.allow/deny/ask` + additive hooks), and **keep every other
-  existing file as-is**. Never touches `.claude/settings.local.json`.
+  existing file as-is**. Add `--prune` only after reviewing the plan to remove
+  unchanged managed files retired by the template. Never touches
+  `.claude/settings.local.json`.
 - `--overwrite` — replace template-managed files (still never touches
   `settings.local.json`, never deletes files the template doesn't manage).
 - `--abort` — do nothing (the default).
@@ -31,7 +33,7 @@ git add answers.env   # the source of truth — re-renders the same config later
 
 ```bash
 # 1. Pull the latest template (or check out a tag for stability)
-cd ~/code/agent-config-template && git pull origin main   # or: git checkout v0.9.1
+cd ~/code/agent-config-template && git pull origin main   # or: git checkout v0.9.2
 
 # 2. Preview what would change in your project
 cd ~/code/my-project
@@ -41,7 +43,7 @@ cd ~/code/my-project
 ~/code/agent-config-template/setup.sh --target . --answers ./answers.env --merge
 
 # 4. Commit
-git add .claude/ CLAUDE.md docs/ && git commit -m "chore: upgrade agent-config-template to v0.9.1"
+git add .claude/ CLAUDE.md docs/ agent-config.lock.json && git commit -m "chore: upgrade agent-config-template to v0.9.2"
 ```
 
 A template upgrade (`setup.sh --merge`) is its own `chore:` commit — never mixed into a feature PR.
@@ -53,6 +55,45 @@ TMP=$(mktemp -d)
 ~/code/agent-config-template/setup.sh --target "$TMP" --answers ./answers.env --overwrite
 diff -r .claude "$TMP/.claude"
 ```
+
+---
+
+## Upgrading to v0.9.2 (upgrade fidelity)
+
+v0.9.2 makes upgrade decisions evidence-based without adding dependencies:
+
+- Each successful render maintains `agent-config.lock.json` with the current
+  hosts and SHA-256 baselines for overwrite-managed files.
+- Preview labels changed files `STALE-MANAGED`, `CUSTOMIZED-MANAGED`, or
+  `LEGACY`. Retired managed paths are `OBSOLETE` when unchanged and
+  `CUSTOMIZED-OBSOLETE` when edited or unsafe.
+- Ordinary `--merge` deletes nothing. After approving every `OBSOLETE` path,
+  `--merge --prune` deletes only those unchanged regular files and updates the
+  lock; customized, unrecorded, user-owned, and symlinked paths remain.
+- Fully quoted answers are unwrapped, unquoted spaces and `#` remain literal,
+  and host lists are case-insensitive and deduplicated. `--host` still wins.
+- After a successful write, an existing `.claude/answers.local.env` adds one
+  exact rule to `.gitignore`; preview, abort, and parse failures do not touch it.
+
+On the first upgrade from an older release there is no baseline, so differing
+managed files are `LEGACY`. Review them and explicitly select only the upstream
+files you want with `--merge --overwrite-files <paths>`; that successful write
+establishes their v0.9.2 baselines. Then future previews can distinguish stale
+template output from user edits exactly.
+
+```bash
+# Preview only
+./setup.sh --target . --answers ./answers.env --host cursor
+
+# Keep all existing files; establish baselines for additions and identical files
+./setup.sh --target . --answers ./answers.env --host cursor --merge
+
+# Optional, only after approving every OBSOLETE line from preview
+./setup.sh --target . --answers ./answers.env --host cursor --merge --prune
+```
+
+Commit `agent-config.lock.json` with the generated project configuration. Keep
+`.claude/answers.local.env` local; setup now protects it automatically.
 
 ---
 
@@ -347,9 +388,9 @@ copy that one file over.
 
 ### File removed / deprecated
 
-The renderer never deletes. Remove deprecated files by hand (e.g. the old
-`pm`/`po-manager`/`code-reviewer` stubs, removed upstream in v0.5.x) once
-you're ready.
+Preview labels a recorded, unchanged retired file `OBSOLETE`. Review it, then
+use `--merge --prune`; edited, unrecorded, and older pre-lock files remain for
+manual resolution.
 
 ---
 
