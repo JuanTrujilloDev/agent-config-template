@@ -10,6 +10,8 @@ BD=.claude/agents/backend-dev.md; FD=.claude/agents/frontend-dev.md; BS=.claude/
 cp -R "$CLEAN" "$FIX"
 rm "$FIX/$DCM"
 cp -R "$STALE_FIXTURE/.claude/." "$FIX/.claude/"
+python3 -c 'import hashlib,json,sys; p=sys.argv[1]; d=json.load(open(p)); root=sys.argv[2]; rels=sys.argv[3:]; d["files"].update({r:{"template_version":"0.8.2","sha256":hashlib.sha256(open(root+"/"+r,"rb").read()).hexdigest()} for r in rels}); json.dump(d,open(p,"w"),indent=2,sort_keys=True); open(p,"a").write("\n")' \
+  "$FIX/agent-config.lock.json" "$FIX" "$BD" "$FD" "$BS"
 printf '\n## Team conventions\n\nWe deploy on Fridays. Really.\n' >>"$FIX/CLAUDE.md"           # root CLAUDE.md differs
 MASTER=docs/design-system/MASTER.md; printf '\n## Colors\n\nprimary: #0044cc\n' >>"$FIX/$MASTER"  # D13 user-filled brand file
 printf '{"permissions":{"allow":["Bash(make:*)"]}}\n' >"$FIX/$SL"

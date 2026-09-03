@@ -2,6 +2,9 @@
 description: The always-loaded operating principles for coding tasks (Think Before Coding, Simplicity First, Surgical Changes, Goal-Driven Execution, Read Before You Write, Code Health, Commits, Micro-PR Discipline, Definition of Done, Conciseness, Branch Discipline). Reference these whenever starting any non-trivial coding task.
 ---
 
+<!-- override-ignore-h2: 5. Backend / Frontend Split -->
+<!-- override-ignore-h2: Autonomy Mode -->
+
 # Core Operating Principles
 
 > Always-loaded. These principles apply to **every** coding task in this project. They are non-negotiable. When a request conflicts with a principle, surface the conflict and ask — do not silently override.

@@ -66,12 +66,16 @@ The interview is **infer → show → ask once → record → render**. Facts ar
    # Existing config — run with no mode first to show the user the change plan
    # (writes nothing, exits 1), then apply with one of:
    #   --merge      add missing files, deep-merge .claude/settings.json, keep your other files
+   #   --merge --prune  also delete unchanged managed files labelled OBSOLETE
    #   --overwrite  replace template-managed files (settings.local.json is never touched)
    #   --abort      do nothing (the default)
    PLUGIN_ROOT="${CURSOR_PLUGIN_ROOT:-${CLAUDE_PLUGIN_ROOT:-}}"
    bash "$PLUGIN_ROOT/setup.sh" --target . --answers ./answers.env --merge
    ```
    For a project that already has config, default to `--merge`. Only use `--overwrite` when the user explicitly wants the template versions to win, and only after they've seen the plan.
+   Use `--merge --prune` only after the user explicitly approves the preview's
+   `OBSOLETE` paths. `CUSTOMIZED-OBSOLETE`, legacy, unrecorded, user-owned, and
+   unsafe paths are always kept.
 
 6. **Adds to `.gitignore`** (creating it if missing):
    ```
@@ -112,6 +116,8 @@ Every config value lives in exactly one of three scopes:
 - **Don't modify anything outside `answers.env`, `.claude/`, `.cursor/`,
   `.agents/`, `CLAUDE.md`, `AGENTS.md`, and `.gitignore`.**
 - **Never overwrite an existing config silently.** The renderer now enforces this — against an existing `.claude/` tree (or root `CLAUDE.md`) it writes nothing without an explicit `--merge`/`--overwrite`. Run it once with no mode to show the user the per-file plan, then let them choose. Explicit setup just-go may print the plan and apply `--merge` in the same run; automatic `--overwrite` is never allowed, including in just-go mode. `.claude/settings.local.json` is never touched. If both root `CLAUDE.md` and `.claude/CLAUDE.md` exist with different content, the renderer warns — surface that to the user and ask which is canonical.
+- **Never prune automatically.** `--merge --prune` requires explicit approval
+  of the preview's `OBSOLETE` paths, including in just-go mode.
 
 ## Honor conditional questions (`when:` clauses)
 

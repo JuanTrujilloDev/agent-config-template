@@ -1,0 +1,99 @@
+{
+  "schema_version": 2,
+  "feature": "upgrade-fidelity",
+  "version": "0.9.2",
+  "rules": {
+    "one_at_a_time": true,
+    "require_approved_contract": true,
+    "workflow_mode": "SDD+TDD",
+    "autonomy_mode": "gated",
+    "generated_mirrors_excluded_from_budget": true
+  },
+  "mini_features": [
+    {
+      "id": 1,
+      "name": "managed-baseline",
+      "scenarios": ["@s1", "@s2", "@s3", "@s4", "@s5", "@s6", "@s7", "@s8", "@s9"],
+      "depends_on": [],
+      "parallel": false,
+      "files_hint": [
+        "setup.sh",
+        "plugin/commands/setup-template.md",
+        "docs/guides/existing-projects.md",
+        "scripts/smoke/v092-mf1-managed-state.sh",
+        "scripts/smoke.sh"
+      ],
+      "max_files": 5,
+      "max_loc": 3000,
+      "status": "done",
+      "verified_by_human": "skipped",
+      "review_cycles": 0,
+      "reviews": ["judge", "security-reviewer"]
+    },
+    {
+      "id": 2,
+      "name": "override-drift",
+      "scenarios": ["@s10", "@s11", "@s12", "@s13", "@s14", "@s15"],
+      "depends_on": [1],
+      "parallel": false,
+      "files_hint": [
+        "scripts/build.sh",
+        "scripts/check-override-headings.py",
+        "plugin/skills/principles/SKILL.md",
+        "scripts/smoke/v092-mf2-override-drift.sh",
+        "scripts/smoke.sh"
+      ],
+      "max_files": 5,
+      "max_loc": 3000,
+      "status": "done",
+      "verified_by_human": "skipped",
+      "review_cycles": 0,
+      "reviews": ["judge"]
+    },
+    {
+      "id": 3,
+      "name": "safe-prune",
+      "scenarios": ["@s16", "@s17", "@s18", "@s19", "@s20", "@s21", "@s22", "@s23"],
+      "depends_on": [2],
+      "parallel": false,
+      "files_hint": [
+        "setup.sh",
+        "plugin/commands/setup-template.md",
+        "docs/guides/existing-projects.md",
+        "scripts/smoke/v092-mf3-prune.sh",
+        "scripts/smoke.sh"
+      ],
+      "max_files": 5,
+      "max_loc": 3000,
+      "status": "done",
+      "verified_by_human": "skipped",
+      "review_cycles": 0,
+      "reviews": ["judge", "security-reviewer"]
+    },
+    {
+      "id": 4,
+      "name": "answers-and-release",
+      "scenarios": ["@s24", "@s25", "@s26", "@s27", "@s28", "@s29", "@s30", "@s31", "@s32", "@s33"],
+      "depends_on": [3],
+      "parallel": false,
+      "files_hint": [
+        "setup.sh",
+        "plugin/commands/setup-template.md",
+        "README.md",
+        "docs/upgrade-guide.md",
+        "plugin/.claude-plugin/plugin.json",
+        ".claude-plugin/marketplace.json",
+        ".cursor-plugin/plugin.json",
+        "codex/.codex-plugin/plugin.json",
+        "scripts/smoke/v092-mf4-parser-release.sh",
+        "scripts/smoke.sh"
+      ],
+      "max_files": 10,
+      "max_loc": 3000,
+      "status": "pending",
+      "verified_by_human": "skipped",
+      "review_cycles": 0,
+      "reviews": ["judge", "security-reviewer"]
+    }
+  ]
+}

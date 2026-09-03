@@ -17,19 +17,26 @@
 #                 (comma list of target-relative paths) to take the template
 #                 version of just those files; listing .claude/CLAUDE.md
 #                 replaces a regular file there with the ../CLAUDE.md symlink.
+#                 Add --prune to delete unchanged managed files no longer in
+#                 the template; customized or unproven paths are always kept.
 #   --overwrite   Replace template-managed files. Still never touches
 #                 .claude/settings.local.json, and never deletes files the
 #                 template doesn't manage.
 #   --abort       Do nothing (this is the default if no mode is given).
 #
 # Run with no mode against an existing config to see a per-file change plan:
-#   STALE-MANAGED     template-managed file differs (usually an old render)
+#   STALE-MANAGED     differs from the new render but matches its saved baseline
+#   CUSTOMIZED-MANAGED differs from both the new render and saved baseline
+#   LEGACY            differs and has no usable baseline yet
 #   CUSTOMIZED        user-filled file differs (root CLAUDE.md, docs/CONTEXT.md,
 #                     docs/design-system/) — yours, kept on --merge, never in the line
+#   OBSOLETE          recorded managed file no longer emitted; baseline unchanged
+#   CUSTOMIZED-OBSOLETE retired managed path that is edited or cannot be proven safe
 #   SYMLINK-CONFLICT  .claude/CLAUDE.md is a regular file where a symlink to
 #                     ../CLAUDE.md is expected
 # The plan ends with one copy-pasteable `--merge --overwrite-files ...` line
-# listing every STALE-MANAGED path; delete entries you want to keep.
+# listing every STALE-MANAGED path; customized and legacy paths must be named
+# explicitly if you decide to replace them.
 #
 # This is NOT an interactive setup. The expected workflow is:
 #
@@ -44,7 +51,7 @@
 #   ./setup.sh --target /path/to/project --answers ./answers.env --merge    # existing
 #
 # Usage:
-#   setup.sh --target <dir> --answers <file> [--merge [--overwrite-files a,b]|--overwrite|--abort]
+#   setup.sh --target <dir> --answers <file> [--merge [--overwrite-files a,b] [--prune]|--overwrite|--abort]
 #   setup.sh --target <dir> --answers -        # read answers from stdin
 #   setup.sh --host <list> ...                  # comma-separated target hosts
 #
@@ -64,6 +71,7 @@
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+TEMPLATE_VERSION="0.9.2"
 # Canonical source is core/ at the repo root; the bundled plugin copy ships as
 # template/. The same script works in both locations by auto-detecting.
 if [ -d "$SCRIPT_DIR/core" ]; then
@@ -77,6 +85,7 @@ ANSWERS_FILE=""
 MODE=""
 HOST_ARG=""
 OVERWRITE_FILES=""
+PRUNE=""
 
 while [ $# -gt 0 ]; do
   case "$1" in
@@ -88,6 +97,7 @@ while [ $# -gt 0 ]; do
     --abort) MODE="abort"; shift ;;
     --mode) MODE="$2"; shift 2 ;;
     --overwrite-files) OVERWRITE_FILES="$2"; shift 2 ;;
+    --prune) PRUNE=1; shift ;;
     -h|--help)
       grep '^#' "$0" | sed 's/^# \?//'
       exit 0
@@ -98,7 +108,7 @@ done
 
 if [ -z "$TARGET" ]; then
   echo "Error: --target is required." >&2
-  echo "Usage: setup.sh --target <dir> --answers <file> [--merge [--overwrite-files a,b]|--overwrite|--abort]" >&2
+  echo "Usage: setup.sh --target <dir> --answers <file> [--merge [--overwrite-files a,b] [--prune]|--overwrite|--abort]" >&2
   exit 1
 fi
 
@@ -122,6 +132,10 @@ case "$MODE" in
 esac
 if [ -n "$OVERWRITE_FILES" ] && [ "$MODE" != "merge" ]; then
   echo "Error: --overwrite-files is only valid together with --merge." >&2
+  exit 1
+fi
+if [ -n "$PRUNE" ] && [ "$MODE" != "merge" ]; then
+  echo "Error: --prune is only valid together with --merge." >&2
   exit 1
 fi
 
@@ -204,22 +218,26 @@ ANSWERS_INPUT="$ANSWERS_INPUT" \
   TARGET="$TARGET" \
   MODE="$MODE" \
   OVERWRITE_FILES="$OVERWRITE_FILES" \
+  PRUNE="$PRUNE" \
   ANSWERS_FILE="$ANSWERS_FILE" \
   SCRIPT="$0" \
+  TEMPLATE_VERSION="$TEMPLATE_VERSION" \
   HOSTS="$HOSTS" \
   CURSOR_DIR="$CURSOR_DIR" \
   CODEX_SKILLS_DIR="$CODEX_SKILLS_DIR" \
   python3 - <<'PYEOF' || PY_RC=$?
-import os, re, sys, shutil, stat, json, tempfile, shlex
+import hashlib, json, os, re, shlex, shutil, stat, sys, tempfile
 
 TEMPLATE_DIR = os.environ["TEMPLATE_DIR"]
 TARGET = os.environ["TARGET"]
 ANSWERS_INPUT = os.environ["ANSWERS_INPUT"]
 MODE = os.environ.get("MODE", "")
 OVERWRITE_FILES = [p for p in os.environ.get("OVERWRITE_FILES", "").split(",") if p]
+PRUNE = os.environ.get("PRUNE") == "1"
 HOSTS = (os.environ.get("HOSTS") or "claude").split()
 CURSOR_DIR = os.environ.get("CURSOR_DIR", "")
 CODEX_SKILLS_DIR = os.environ.get("CODEX_SKILLS_DIR", "")
+TEMPLATE_VERSION = os.environ["TEMPLATE_VERSION"]
 
 # 1. Parse KEY=VALUE answers (skip blank lines + #-comments).
 ANS = {}
@@ -382,10 +400,34 @@ try:
 
     SETTINGS_REL = os.path.join(".claude", "settings.json")
     LOCAL_SETTINGS = "settings.local.json"
+    LOCK_REL = "agent-config.lock.json"
+    LOCK_SCHEMA = 1
     DOT_CLAUDE_MD = os.path.join(".claude", "CLAUDE.md")  # never staged: the template's version is the ../CLAUDE.md symlink
     # D13: user-filled files are yours — never labelled stale, never in --overwrite-files.
     NON_MANAGED = {"CLAUDE.md", os.path.join("docs", "CONTEXT.md")}
     NON_MANAGED_DIRS = (os.path.join("docs", "design-system") + os.sep,)
+    MANAGED_EXACT = {
+        "AGENTS.md",
+        os.path.join(".claude", "HELP.md"),
+        os.path.join(".claude", "mcp.json.example"),
+        os.path.join(".cursor", "hooks.json"),
+        os.path.join(".cursor", "mcp.json"),
+    }
+    MANAGED_DIRS = tuple(
+        path + os.sep
+        for path in (
+            os.path.join(".agents", "skills"),
+            os.path.join(".claude", "agents"),
+            os.path.join(".claude", "commands"),
+            os.path.join(".claude", "hooks"),
+            os.path.join(".claude", "patterns"),
+            os.path.join(".claude", "rules"),
+            os.path.join(".claude", "skills"),
+            os.path.join(".cursor", "hooks"),
+            os.path.join(".cursor", "rules"),
+            "tools",
+        )
+    )
     REAL_TARGET = os.path.realpath(TARGET) + os.sep
 
     def non_managed(rel):
@@ -401,15 +443,114 @@ try:
             print(f"Error: path(s) resolve outside {TARGET} via symlink; refusing to write: {','.join(outside)}", file=sys.stderr)
             sys.exit(1)
 
+    def lock_managed(rel):
+        return (
+            rel != LOCK_REL
+            and rel != SETTINGS_REL
+            and rel != DOT_CLAUDE_MD
+            and os.path.basename(rel) != LOCAL_SETTINGS
+            and not non_managed(rel)
+            and (rel in MANAGED_EXACT or rel.startswith(MANAGED_DIRS))
+        )
+
+    def safe_lock_rel(rel):
+        return (
+            isinstance(rel, str)
+            and rel not in ("", ".")
+            and "\0" not in rel
+            and not os.path.isabs(rel)
+            and os.path.normpath(rel) == rel
+            and not rel.startswith(".." + os.sep)
+            and rel != LOCK_REL
+        )
+
+    def sha256(path):
+        digest = hashlib.sha256()
+        with open(path, "rb") as f:
+            for chunk in iter(lambda: f.read(1024 * 1024), b""):
+                digest.update(chunk)
+        return digest.hexdigest()
+
+    def load_lock():
+        path = tpath(LOCK_REL)
+        if not os.path.lexists(path):
+            return None
+        try:
+            if os.path.islink(path) or not os.path.isfile(path):
+                raise ValueError("state path is not a regular file")
+            if not os.path.realpath(path).startswith(REAL_TARGET):
+                raise ValueError("state path resolves outside target")
+            with open(path, encoding="utf-8") as f:
+                data = json.load(f)
+            if not isinstance(data, dict) or data.get("schema_version") != LOCK_SCHEMA:
+                raise ValueError("unsupported schema")
+            if not isinstance(data.get("template_version"), str):
+                raise ValueError("invalid template version")
+            hosts = data.get("hosts")
+            if not isinstance(hosts, list) or any(not isinstance(h, str) for h in hosts):
+                raise ValueError("invalid hosts")
+            files = data.get("files")
+            if not isinstance(files, dict):
+                raise ValueError("invalid files map")
+            for rel, entry in files.items():
+                if not safe_lock_rel(rel) or not lock_managed(rel) or not isinstance(entry, dict):
+                    raise ValueError("unsafe managed path")
+                if not isinstance(entry.get("template_version"), str):
+                    raise ValueError("invalid file version")
+                if not re.fullmatch(r"[0-9a-f]{64}", str(entry.get("sha256", ""))):
+                    raise ValueError("invalid file hash")
+            return data
+        except (OSError, ValueError, json.JSONDecodeError) as e:
+            print(f"  ⚠ Ignoring invalid {LOCK_REL}: {e}")
+            return None
+
+    previous_lock = load_lock()
+    previous_files = {
+        rel: {"template_version": entry["template_version"], "sha256": entry["sha256"]}
+        for rel, entry in (previous_lock["files"].items() if previous_lock else [])
+    }
+
     def classify(rel):
         t = tpath(rel)
-        if not os.path.exists(t):
+        if not os.path.lexists(t):
             return "ADD"
+        if os.path.islink(t) or not os.path.isfile(t):
+            return "DIFFERS"
         try:
             with open(os.path.join(STAGING, rel), "rb") as a, open(t, "rb") as b:
                 return "SAME" if a.read() == b.read() else "DIFFERS"
         except OSError:
             return "DIFFERS"
+
+    def managed_difference(rel):
+        entry = previous_files.get(rel)
+        target = tpath(rel)
+        if not entry:
+            return "LEGACY"
+        if os.path.islink(target) or not os.path.isfile(target):
+            return "CUSTOMIZED-MANAGED"
+        if not os.path.realpath(target).startswith(REAL_TARGET):
+            return "CUSTOMIZED-MANAGED"
+        try:
+            return "STALE-MANAGED" if sha256(target) == entry["sha256"] else "CUSTOMIZED-MANAGED"
+        except OSError:
+            return "CUSTOMIZED-MANAGED"
+
+    def obsolete_difference(rel):
+        target = tpath(rel)
+        if os.path.islink(target) or not os.path.isfile(target):
+            return "CUSTOMIZED-OBSOLETE"
+        if not os.path.realpath(target).startswith(REAL_TARGET):
+            return "CUSTOMIZED-OBSOLETE"
+        try:
+            return "OBSOLETE" if sha256(target) == previous_files[rel]["sha256"] else "CUSTOMIZED-OBSOLETE"
+        except OSError:
+            return "CUSTOMIZED-OBSOLETE"
+
+    obsolete = [
+        (rel, obsolete_difference(rel))
+        for rel in sorted(set(previous_files) - set(staged))
+    ]
 
     def symlink_conflict():
         t = tpath(DOT_CLAUDE_MD)
@@ -431,6 +572,7 @@ try:
 
     # 7. Detect existing Claude config in the target.
     markers = [
+        LOCK_REL,
         os.path.join(".claude", "CLAUDE.md"), "CLAUDE.md",
         os.path.join(".claude", "settings.json"),
         os.path.join(".claude", "agents"), os.path.join(".claude", "commands"),
@@ -452,6 +594,56 @@ try:
         if d:
             os.makedirs(d, exist_ok=True)
         shutil.copy2(src, dst)
+
+    def write_lock(advance, remove=()):
+        path = tpath(LOCK_REL)
+        files = {rel: entry for rel, entry in previous_files.items() if lock_managed(rel)}
+        for rel in remove:
+            files.pop(rel, None)
+        for rel in advance:
+            target = tpath(rel)
+            if not lock_managed(rel):
+                files.pop(rel, None)
+            elif os.path.isfile(target) and not os.path.islink(target) and os.path.realpath(target).startswith(REAL_TARGET):
+                files[rel] = {"template_version": TEMPLATE_VERSION, "sha256": sha256(target)}
+        state = {
+            "schema_version": LOCK_SCHEMA,
+            "template_version": TEMPLATE_VERSION,
+            "hosts": HOSTS,
+            "files": dict(sorted(files.items())),
+        }
+        fd, temporary = tempfile.mkstemp(prefix=".agent-config.lock.", dir=TARGET)
+        try:
+            with os.fdopen(fd, "w", encoding="utf-8") as f:
+                json.dump(state, f, indent=2, sort_keys=True)
+                f.write("\n")
+            os.replace(temporary, path)
+        finally:
+            if os.path.exists(temporary):
+                os.remove(temporary)
+
+    def ensure_lock_writable():
+        path = tpath(LOCK_REL)
+        if os.path.lexists(path) and (os.path.islink(path) or not os.path.isfile(path)):
+            print(f"Error: {LOCK_REL} is not a regular file; refusing to replace it.", file=sys.stderr)
+            sys.exit(1)
+        check_inside([LOCK_REL])
+
+    def remove_empty_managed_dirs(deleted):
+        roots = tuple(path.rstrip(os.sep) for path in MANAGED_DIRS)
+        candidates = set()
+        for rel in deleted:
+            parent = os.path.dirname(rel)
+            while parent and any(parent == root or parent.startswith(root + os.sep) for root in roots):
+                candidates.add(parent)
+                parent = os.path.dirname(parent)
+        for rel in sorted(candidates, key=lambda path: path.count(os.sep), reverse=True):
+            path = tpath(rel)
+            if os.path.realpath(path).startswith(REAL_TARGET):
+                try:
+                    os.rmdir(path)
+                except OSError:
+                    pass
 
     def merge_settings(rel):
         check_inside([rel])  # never union-merge through a symlink that escapes TARGET
@@ -541,9 +733,14 @@ try:
                 elif rel == SETTINGS_REL:
                     print(f"  STALE-MANAGED     {rel}  (mergeable)")
                 else:
-                    stale.append(rel); print(f"  STALE-MANAGED     {rel}")
+                    label = managed_difference(rel)
+                    if label == "STALE-MANAGED":
+                        stale.append(rel)
+                    print(f"  {label:<20}{rel}")
             else:
                 sames += 1
+        for rel, label in obsolete:
+            diffs += 1; print(f"  {label:<20}{rel}")
         if symlink_conflict():
             diffs += 1; print(f"  SYMLINK-CONFLICT  {DOT_CLAUDE_MD}  (regular file; expected symlink to ../CLAUDE.md)")
         if sames:
@@ -558,12 +755,15 @@ try:
 
     # 8. Apply according to MODE.
     to_write = [r for r in staged if os.path.basename(r) != LOCAL_SETTINGS]
+    initial_state = {rel: classify(rel) for rel in to_write}
     if not present:
         # Fresh target: write everything.
+        ensure_lock_writable()
         check_inside(to_write)
         for rel in to_write:
             write_file(rel)
         relink_claude_md()
+        write_lock(to_write)
         print(f"✓ Template rendered to {TARGET}" + (f" (skipped {len(skipped)} files)" if skipped else ""))
     else:
         warn_dual_claude_md()
@@ -580,27 +780,47 @@ try:
                 print("Aborted — nothing was written.")
                 sys.exit(0)
         elif MODE == "overwrite":
+            ensure_lock_writable()
             check_inside(to_write)
             for rel in to_write:
                 write_file(rel)
             relink_claude_md()
+            write_lock(to_write)
             print(f"✓ Overwrote template-managed files in {TARGET} (your settings.local.json untouched)")
         elif MODE == "merge":
             added = merged = kept = overwritten = 0
-            check_inside([r for r in to_write if not os.path.exists(tpath(r)) or r in OVERWRITE_FILES])
+            advance = set()
+            removed = []
+            ensure_lock_writable()
+            prunable = [rel for rel, label in obsolete if PRUNE and label == "OBSOLETE"]
+            check_inside([r for r in to_write if not os.path.exists(tpath(r)) or r in OVERWRITE_FILES] + prunable)
+            for rel, label in obsolete:
+                if PRUNE and label == "OBSOLETE" and obsolete_difference(rel) == "OBSOLETE":
+                    try:
+                        os.remove(tpath(rel))
+                    except OSError as e:
+                        print(f"Error: cannot prune {rel}: {e}", file=sys.stderr)
+                        sys.exit(1)
+                    removed.append(rel); print(f"  - {rel}")
+                else:
+                    kept += 1; print(f"  {obsolete_difference(rel):<20}{rel}  (kept)")
+            remove_empty_managed_dirs(removed)
             for rel in to_write:
                 if not os.path.exists(tpath(rel)):
-                    write_file(rel); added += 1; print(f"  + {rel}")
+                    write_file(rel); advance.add(rel); added += 1; print(f"  + {rel}")
                 elif rel in OVERWRITE_FILES:
-                    write_file(rel); overwritten += 1; print(f"  ~ {rel}")
+                    write_file(rel); advance.add(rel); overwritten += 1; print(f"  ~ {rel}")
                 elif rel == SETTINGS_REL:
                     merge_settings(rel); merged += 1
                 else:
                     kept += 1  # keep the user's existing file
+                    if initial_state[rel] == "SAME":
+                        advance.add(rel)
             if DOT_CLAUDE_MD in OVERWRITE_FILES and symlink_conflict():
                 os.remove(tpath(DOT_CLAUDE_MD)); overwritten += 1; print(f"  ~ {DOT_CLAUDE_MD}  (relinked to ../CLAUDE.md)")
             relink_claude_md()
-            print(f"✓ Merge complete: {added} added, {merged} settings merged, {overwritten} overwritten, {kept} kept as-is.")
+            write_lock(advance, removed)
+            print(f"✓ Merge complete: {added} added, {merged} settings merged, {overwritten} overwritten, {len(removed)} pruned, {kept} kept as-is.")
 
     print("")
     print("Next steps:")
