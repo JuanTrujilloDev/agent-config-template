@@ -90,6 +90,10 @@ Prefer the appropriate agent role for non-trivial work (>50 lines changed or mor
 | Review before commit/PR | `judge` | code + tests vs contract, micro-PR limits, principles |
 | Security audit | `security-reviewer` | mandatory for auth/permissions/data |
 
+## Visual review (lavish)
+
+For a plan, comparison, diagram, table, or report the user asked to mark up, use the `lavish` skill. Pin `lavish-axi@0.1.90`. Set `LAVISH_AXI_TELEMETRY=0` and leave `LAVISH_AXI_HOST` unset. Write the HTML outside this repository and never beside `.env`. Do not run `share`, `update`, `setup hooks`, or `setup plugin`. Product UI follows this project's design system, not the lavish CDN snippet. The review server has no password; stop it when the review ends.
+
 ## Detail
 
 - Project skills: `.claude/skills/` — Cursor reads these rendered, stack-dependent skills natively

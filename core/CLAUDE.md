@@ -188,6 +188,10 @@ Pick the lines that are useful for your team and uncomment them. Skip everything
 
 Inject only what's cheap to compute (sub-second commands). Anything slow makes session start sluggish.
 
+## Visual review (lavish)
+
+For a plan, comparison, diagram, table, or report the user asked to mark up, use the `lavish` skill. Pin `lavish-axi@0.1.90`. Set `LAVISH_AXI_TELEMETRY=0` and leave `LAVISH_AXI_HOST` unset. Write the HTML outside this repository and never beside `.env`. Do not run `share`, `update`, `setup hooks`, or `setup plugin`. Product UI follows this project's design system, not the lavish CDN snippet. The review server has no password; stop it when the review ends.
+
 ## Security
 
 - Never commit `.env` files; use env vars for secrets
