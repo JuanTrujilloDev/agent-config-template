@@ -58,6 +58,10 @@ diff -r .claude "$TMP/.claude"
 
 ---
 
+## Unreleased
+
+- New optional `orchestrator-init` skill and `/orchestrator-init` command: scaffolds an orchestrator folder and prints two T3 schedule prompts to create by hand; nothing changes for projects that do not run it.
+
 ## Upgrading from v0.9.2 to v0.10.0 (ecosystem)
 
 v0.10.0 adds four opt-in or capability-gated surfaces without changing
