@@ -2,12 +2,12 @@
 # output / UI), `companions` grammar gains `<comma list>`, /setup-companions learns ui-ux-pro-max
 # (has_ui only), caveman never appears. Instruction text — asserted by grep, not by rendering.
 ST="$ROOT/plugin/commands/setup-template.md"; SC="$ROOT/plugin/commands/setup-companions.md"
-X_SC="$ROOT/hosts/codex/skills/setup-companions/SKILL.md"; RD="$ROOT/README.md"; P_RD="$ROOT/plugin/README.md"
+X_SC="$ROOT/hosts/codex/skills/setup-companions/SKILL.md"; RD="$ROOT/README.md"; P_RD="$ROOT/plugin/README.md"; UPG="$ROOT/docs/upgrade-guide.md"
 GRAMMAR='companions=yes\|not_now\|never\|<comma list>'
-# item 4 of the frontier round: from "   4. " to the next numbered item
-awk '/^   4\. /{on=1} /^   5\. /{exit} on' "$ST" >"$WORK/item4.md"
-# @s40 — still item 4, still 5 numbered items, three groups, recommended Not now
-check "@s40 frontier round still has exactly 5 numbered items" "5" "$(grep -cE '^   [0-9]+\. ' "$ST" | tr -d ' ')"
+# companions item of the frontier round (item 3 since v0.11 dropped workflow_mode): from "   3. " to the next
+awk '/^   3\. /{on=1} /^   4\. /{exit} on' "$ST" >"$WORK/item4.md"
+# @s40 — companions item, 4 numbered items (v0.11), three groups, recommended Not now
+check "@s40 frontier round has exactly 4 numbered items" "4" "$(grep -cE '^   [0-9]+\. ' "$ST" | tr -d ' ')"
 grep_case "@s40 item 4 is the companions item" "$WORK/item4.md" '[Cc]ompanion'
 grep_case "@s40 item 4 core quality group: graphify + ponytail" "$WORK/item4.md" '[Cc]ore quality.*graphify.*ponytail'
 grep_case "@s40 item 4 output group: native concise, nothing to install" "$WORK/item4.md" '[Oo]utput.*`concise`.*(nothing to install|on by default)'

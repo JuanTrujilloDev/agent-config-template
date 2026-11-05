@@ -1,10 +1,9 @@
 # v0.8.3 MF3 instruction-text debt (@s15..@s23).
-PLUGIN_PMO="$ROOT/plugin/agents/pmo.md"
 CORE_FIX="$ROOT/core/.claude/commands/fix.md"; PLUGIN_FIX="$ROOT/plugin/commands/fix.md"
 CORE_PRINCIPLES="$ROOT/core/.claude/rules/principles.md"; PLUGIN_PRINCIPLES="$ROOT/plugin/skills/principles/SKILL.md"
 SETUP_TEMPLATE="$ROOT/plugin/commands/setup-template.md"; MASTER="$ROOT/core/docs/design-system/MASTER.md"
 
-before "v0.8.3 @s15 plugin CONVERSE before artifacts" "$PLUGIN_PMO" '^## CONVERSE$' '^## What you produce'
+# @s15 (pmo CONVERSE order) retired in v0.11 with the pmo agent.
 
 for f in "$CORE_FIX" "$PLUGIN_FIX"; do
   grep_case "v0.8.3 @s16 $(basename "$f") paragraph ends after cause" "$f" 'before naming the cause\.$'
@@ -26,13 +25,11 @@ done
 
 # v0.11 chunk 1: core principles keep only the session-scoped "just go"
 grep_case "v0.11 @s18 principles.md just-go is session-only" "$CORE_PRINCIPLES" '"just go".*this session only; never write'
-for f in "$PLUGIN_PRINCIPLES"; do
-  grep_case "v0.8.3 @s18 $(basename "$f") names three just-go meanings" "$f" 'Read Before You Write.*autonomy.*setup|narration.*autonomy.*setup'
-  grep_case "v0.8.3 @s18 $(basename "$f") stored autonomy does not trigger setup" "$f" 'autonomy_mode=autonomous.*(does not|doesn.t).*setup'
-done
+grep_case "v0.11 @s18 plugin principles just-go is session-only" "$PLUGIN_PRINCIPLES" '"just go".*this session only; never write'
 
-grep_case "v0.8.3 @s19 setup item 5 is explicit" "$SETUP_TEMPLATE" '^   5\. [A-Za-z]'
-check "v0.8.3 @s19 setup item 5 has no ellipsis" "0" "$(grep -c '^   5\. …' "$SETUP_TEMPLATE"; true)"
+# v0.11 dropped the workflow_mode question, so the last round item is 4.
+grep_case "v0.11 @s19 setup item 4 is explicit" "$SETUP_TEMPLATE" '^   4\. [A-Za-z]'
+check "v0.11 @s19 setup item 4 has no ellipsis" "0" "$(grep -c '^   4\. …' "$SETUP_TEMPLATE"; true)"
 grep_case "v0.8.3 @s20 hard rule has just-go merge carve-out" "$SETUP_TEMPLATE" '[Jj]ust-go.*--merge|--merge.*[Jj]ust-go'
 grep_case "v0.8.3 @s20 carve-out still forbids automatic overwrite" "$SETUP_TEMPLATE" '[Jj]ust-go.*--overwrite.*never|--overwrite.*never.*[Jj]ust-go'
 grep_case "v0.8.3 @s21 --auto belongs to this command" "$SETUP_TEMPLATE" 'passes `--auto` to this command'

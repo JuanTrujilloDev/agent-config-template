@@ -14,9 +14,10 @@ python3 -c '
 import hashlib, json, pathlib, re, sys
 
 target = pathlib.Path(sys.argv[1])
+version = re.search(r"^TEMPLATE_VERSION=\"([^\"]+)\"", open(sys.argv[2]).read(), re.M).group(1)
 lock = json.loads((target / "agent-config.lock.json").read_text())
 assert lock["schema_version"] == 1
-assert lock["template_version"] == "0.9.2"
+assert lock["template_version"] == version
 assert lock["hosts"] == ["claude"]
 assert list(lock["files"]) == sorted(lock["files"])
 assert "CLAUDE.md" not in lock["files"]
@@ -25,10 +26,10 @@ assert ".claude/CLAUDE.md" not in lock["files"]
 assert "docs/CONTEXT.md" not in lock["files"]
 assert not any(rel.startswith("docs/design-system/") for rel in lock["files"])
 for rel, entry in lock["files"].items():
-    assert entry["template_version"] == "0.9.2"
+    assert entry["template_version"] == version
     assert re.fullmatch(r"[0-9a-f]{64}", entry["sha256"])
     assert hashlib.sha256((target / rel).read_bytes()).hexdigest() == entry["sha256"]
-' "$V092_MF1_TARGET" || V092_MF1_RC=$?
+' "$V092_MF1_TARGET" "$ROOT/setup.sh" || V092_MF1_RC=$?
 check "v0.9.2 @s1 fresh render writes deterministic managed baseline" "0" "$V092_MF1_RC"
 
 cp "$V092_MF1_LOCK" "$WORK/v092-mf1-lock-before.json"

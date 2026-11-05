@@ -1,5 +1,5 @@
 # MF4 brand-system (@s25..@s32) — templated docs/design-system/MASTER.md gated by has_ui,
-# read-before-act lines in UI agents, judge brand check, /design refresh, cursor + plugin parity.
+# read-before-act lines in ui-designer and implement, code-review brand check, /design refresh, cursor + plugin parity.
 MASTER_SRC="$ROOT/core/docs/design-system/MASTER.md"
 SECTIONS='Colors & semantic tokens|Typography|Spacing & layout|Radius, shadows & motion|Component conventions|Icon & image style|Voice & tone|Responsive rules|Accessibility & contrast|Anti-patterns'
 
@@ -24,26 +24,24 @@ check "@s26 python-fastapi (has_frontend=no) MASTER.md absent" "0" "$([ -e "$WOR
 H="$WORK/brand-cursor"; bash "$ROOT/setup.sh" --target "$H" --host cursor --answers "$ROOT/examples/node-nextjs/answers.env" >/dev/null 2>&1
 check "@s27 cursor MASTER.md rendered" "1" "$([ -f "$H/docs/design-system/MASTER.md" ] && echo 1 || echo 0)"
 check "@s27 cursor zero {{ leftovers" "0" "$(grep -cE "$PH" "$H/docs/design-system/MASTER.md" 2>/dev/null; true)"
-# @s28 — UI agents read MASTER.md (+ pages/<page>.md) and cite tokens BEFORE their design/implementation step
+# @s28 — v0.11: ui-designer and the implement skill read MASTER.md (+ pages/<page>.md) and cite tokens
+# before UI work (the frontend-dev/mobile-dev agents are gone).
 NEXT="$WORK/brand-node-nextjs"
-for a in ui-designer frontend-dev mobile-dev; do
-  A="$ROOT/core/.claude/agents/$a.md"
-  grep_case "@s28 $a reads MASTER.md" "$A" 'docs/design-system/MASTER\.md'
-  grep_case "@s28 $a pages override" "$A" 'pages/<page>\.md'
-  grep_case "@s28 $a cites tokens" "$A" '[Cc]ite.*tokens'
+for A in "$ROOT/core/.claude/agents/ui-designer.md" "$ROOT/core/.claude/skills/implement/SKILL.md"; do
+  n=$(basename "$(dirname "$A")")/$(basename "$A")
+  grep_case "@s28 $n reads MASTER.md" "$A" 'docs/design-system/MASTER\.md'
+  grep_case "@s28 $n pages override" "$A" 'pages/<page>\.md'
+  grep_case "@s28 $n cites tokens" "$A" '[Cc]ite.*tokens'
 done
 before "@s28 ui-designer reads before wireframes" "$ROOT/core/.claude/agents/ui-designer.md" 'docs/design-system/MASTER\.md' 'Create wireframes'
-before "@s28 frontend-dev reads before Design notes & TDD" "$ROOT/core/.claude/agents/frontend-dev.md" 'docs/design-system/MASTER\.md' '^## Design notes & TDD'
-before "@s28 mobile-dev reads before Design notes & TDD" "$ROOT/core/.claude/agents/mobile-dev.md" 'docs/design-system/MASTER\.md' '^## Design notes & TDD'
-grep_case "@s28 frontend-dev inline-styles gotcha refs MASTER.md" "$ROOT/core/.claude/agents/frontend-dev.md" '\*\*Using inline styles.*MASTER\.md'
-grep_case "@s28 rendered frontend-dev placeholder-free ref" "$NEXT/.claude/agents/frontend-dev.md" 'docs/design-system/MASTER\.md'
-# @s29 — judge checklist: UI-diff brand line (no hardcoded color/spacing/radius/font outside MASTER.md; file:line)
-J="$ROOT/core/.claude/agents/judge.md"
-grep_case "@s29 judge UI checklist line" "$J" '^- \[ \].*\{\{frontend_dir\}\}.*docs/design-system/MASTER\.md'
-grep_case "@s29 judge names color/spacing/radius/font" "$J" '^- \[ \].*hardcoded.*colou?r.*spacing.*radius.*font'
-grep_case "@s29 judge reports file:line" "$J" '^- \[ \].*MASTER\.md.*file:line'
-grep_case "@s29 rendered judge frontend_dir resolved" "$NEXT/.claude/agents/judge.md" 'docs/design-system/MASTER\.md'
-check "@s29 rendered judge zero {{ leftovers" "0" "$(grep -cE "$PH" "$NEXT/.claude/agents/judge.md" 2>/dev/null; true)"
+before "@s28 implement reads before writing code" "$ROOT/core/.claude/skills/implement/SKILL.md" 'docs/design-system/MASTER\.md' 'Implement to green'
+grep_case "@s28 rendered implement keeps the MASTER.md ref" "$NEXT/.claude/skills/implement/SKILL.md" 'docs/design-system/MASTER\.md'
+# @s29 — v0.11: code-review (judge's successor) flags untraceable UI values, citing file:line
+J="$ROOT/core/.claude/skills/code-review/SKILL.md"
+grep_case "@s29 code-review UI design-system source" "$J" 'docs/design-system/MASTER\.md'
+grep_case "@s29 code-review names color/spacing/radius/font" "$J" 'hardcoded.*colou?r.*spacing.*radius.*font'
+grep_case "@s29 code-review reports file:line" "$J" 'file:line'
+check "@s29 rendered code-review zero {{ leftovers" "0" "$(grep -cE "$PH" "$NEXT/.claude/skills/code-review/SKILL.md" 2>/dev/null; true)"
 # @s30 — /design step 2: read MASTER.md, create from the @s25 list when missing, optional ui-ux-pro-max delegate then normalize
 D="$ROOT/core/.claude/commands/design.md"
 awk '/^2\. /{on=1} /^3\. /{exit} on' "$D" >"$WORK/design_2.md"
@@ -54,11 +52,9 @@ grep_case "@s30 step 2 may delegate to ui-ux-pro-max" "$WORK/design_2.md" 'ui-ux
 grep_case "@s30 step 2 normalizes after delegation" "$WORK/design_2.md" '[Nn]ormali[sz]e'
 grep_case "@s30 ui-ux-pro-max optional, never vendored" "$D" 'ui-ux-pro-max.*optional.*never vendored|optional.*never vendored.*ui-ux-pro-max'
 # @s31 — plugin mirrors carry the same additions, placeholder-free
-for a in ui-designer frontend-dev mobile-dev judge; do
-  parity "@s31 plugin $a MASTER.md refs" 'docs/design-system/MASTER\.md' "$ROOT/core/.claude/agents/$a.md" "$ROOT/plugin/agents/$a.md"
-  check "@s31 plugin $a zero {{" "0" "$(grep -cE "$PH" "$ROOT/plugin/agents/$a.md" 2>/dev/null; true)"
-done
-parity "@s31 plugin judge brand check" 'hardcoded.*colou?r.*spacing.*radius.*font' "$J" "$ROOT/plugin/agents/judge.md"
+parity "@s31 plugin ui-designer MASTER.md refs" 'docs/design-system/MASTER\.md' "$ROOT/core/.claude/agents/ui-designer.md" "$ROOT/plugin/agents/ui-designer.md"
+check "@s31 plugin ui-designer zero {{" "0" "$(grep -cE "$PH" "$ROOT/plugin/agents/ui-designer.md" 2>/dev/null; true)"
+parity "@s31 plugin code-review brand check" 'hardcoded.*colou?r.*spacing.*radius.*font' "$J" "$ROOT/plugin/skills/code-review/SKILL.md"
 parity "@s31 plugin design MASTER.md refs" 'docs/design-system/MASTER\.md' "$D" "$ROOT/plugin/commands/design.md"
 parity "@s31 plugin design ui-ux-pro-max" 'ui-ux-pro-max' "$D" "$ROOT/plugin/commands/design.md"
 check "@s31 plugin design zero {{" "0" "$(grep -cE "$PH" "$ROOT/plugin/commands/design.md" 2>/dev/null; true)"

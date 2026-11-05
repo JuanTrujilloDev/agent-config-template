@@ -6,7 +6,7 @@
 SETUP="$ROOT/setup.sh"; DJ="$ROOT/examples/python-django/answers.env"
 CLEAN="$WORK/mf7-clean"; FIX="$WORK/mf7-fixture"; STALE_FIXTURE="$ROOT/scripts/smoke/fixtures/stale-render"
 bash "$SETUP" --target "$CLEAN" --answers "$DJ" >/dev/null 2>&1 || { echo "FAIL @s48 render python-django"; FAIL=1; }
-BD=.claude/agents/security-reviewer.md; FD=.claude/agents/ui-designer.md; BS=.claude/rules/backend-style.md; DCM=.claude/CLAUDE.md; SL=.claude/settings.local.json
+BD=.claude/agents/security-reviewer.md; FD=.claude/agents/ui-designer.md; BS=.claude/skills/backend-style/SKILL.md; DCM=.claude/CLAUDE.md; SL=.claude/settings.local.json
 cp -R "$CLEAN" "$FIX"
 rm "$FIX/$DCM"
 cp -R "$STALE_FIXTURE/.claude/." "$FIX/.claude/"
@@ -31,7 +31,7 @@ fresh_fix; run_setup
 check "@s48 plan exits 1" "1" "$RC"
 grep_case "@s48 STALE-MANAGED security-reviewer.md" <(printf '%s\n' "$OUT") "STALE-MANAGED +$BD"
 grep_case "@s48 STALE-MANAGED ui-designer.md" <(printf '%s\n' "$OUT") "STALE-MANAGED +$FD"
-grep_case "@s48 STALE-MANAGED backend-style.md (rules/ is template-managed)" <(printf '%s\n' "$OUT") "STALE-MANAGED +$BS"
+grep_case "@s48 STALE-MANAGED backend-style.md (skills/ is template-managed)" <(printf '%s\n' "$OUT") "STALE-MANAGED +$BS"
 grep_case "@s48 SYMLINK-CONFLICT .claude/CLAUDE.md" <(printf '%s\n' "$OUT") "SYMLINK-CONFLICT +$DCM"
 grep_case "@s48 CUSTOMIZED CLAUDE.md with keep hint" <(printf '%s\n' "$OUT") 'CUSTOMIZED +CLAUDE\.md.*keep'
 check "@s48 CUSTOMIZED never applied to managed files" "0" "$(printf '%s\n' "$OUT" | grep -c "CUSTOMIZED.*\.claude/"; true)"

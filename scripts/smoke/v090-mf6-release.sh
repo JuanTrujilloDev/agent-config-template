@@ -15,7 +15,7 @@ done
 grep_case "v0.9.0 @s35 UI companion conditional" "$V090_MF6_GUIDE" 'ui-ux-pro-max.*`has_ui`|`has_ui`.*ui-ux-pro-max'
 
 check "v0.9.0 @s38 README line budget" "0" "$(test "$(wc -l <"$V090_MF6_README" | tr -d ' ')" -le 253; echo $?)"
-grep_case "v0.9.0 @s36 first 80 value" "$V090_MF6_FIRST" '[Ss]pec-driven.*(workflow|config)|[Ww]orkflow.*spec-driven'
+grep_case "v0.11 @s36 first 80 value" "$V090_MF6_FIRST" 'epic → story → slice.*workflow'
 for host in Claude Cursor Grok Codex; do
   grep_case "v0.9.0 @s36 first 80 names $host" "$V090_MF6_FIRST" "$host"
 done
@@ -23,11 +23,12 @@ grep_case "v0.9.0 @s36 first 80 Claude install" "$V090_MF6_FIRST" 'plugin market
 grep_case "v0.9.0 @s36 first 80 Cursor install" "$V090_MF6_FIRST" 'Customize.*Plugins'
 grep_case "v0.9.0 @s36 first 80 Grok install" "$V090_MF6_FIRST" 'Grok in Cursor'
 grep_case "v0.9.0 @s36 first 80 Codex install" "$V090_MF6_FIRST" 'codex plugin marketplace add'
-grep_case "v0.9.0 @s36 first 80 first command" "$V090_MF6_FIRST" '/(spec|feature)'
+grep_case "v0.11 @s36 first 80 first command" "$V090_MF6_FIRST" '^/epic '
 check "v0.9.0 @s37 one workflow diagram" "1" "$(grep -c '<!-- workflow-diagram -->' "$V090_MF6_README" | tr -d ' ')"
 check "v0.9.0 @s37 one command table" "1" "$(grep -c '<!-- command-table -->' "$V090_MF6_README" | tr -d ' ')"
-for term in 'FR-###' 'SC-###' 'NEEDS CLARIFICATION:' 'schema_version' 'Amended at' 'Principles deviation table'; do
-  grep_case "v0.9.0 @s37 README grammar $term" "$V090_MF6_README" "$term"
+# v0.11 grammar replaces FR/SC, Gherkin tags and the ledger.
+for term in 'One case per story' 'test_S<n>_<case>' '## Approved tests' 'db → be → fe' 'validate-epics\.py' 'source=local'; do
+  grep_case "v0.11 @s37 README grammar $term" "$V090_MF6_README" "$term"
 done
 for term in 'docs/upgrade-guide\.md' 'examples/' 'graphify' 'ponytail' 'ui-ux-pro-max' 'Credits' 'Support' 'License'; do
   grep_case "v0.9.0 @s38 README retains $term" "$V090_MF6_README" "$term"
