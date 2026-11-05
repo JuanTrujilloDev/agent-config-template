@@ -113,4 +113,10 @@ for h in "$WORK/.claude/hooks/agent-enforcement.sh" "$ROOT/plugin/hooks/agent-en
   fi
 done
 
+# 6. /epic asks before creating tracker cards; no is the default (design decision 16).
+F_EP="$ROOT/core/.claude/skills/epic/SKILL.md"
+grep_case "v0.11.1 F10 epic asks about tracker cards, default no" "$F_EP" 'cards on a tracker\? \(default: no\)'
+grep_case "v0.11.1 F10 epic creates cards only on an explicit yes" "$F_EP" 'only on an explicit yes'
+grep_case "v0.11.1 F10 epic No branch is the default" "$F_EP" '^- \*\*No\*\* \(the default\): create no cards'
+
 [ -n "${V0111_ALONE:-}" ] && exit $FAIL

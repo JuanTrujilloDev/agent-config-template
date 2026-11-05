@@ -58,10 +58,10 @@ End the draft with a numbered list of open questions (only real blockers) and: `
 
 ## 4. Where it lives
 
-After approval, ask once: **Do you want this epic and its slices on a tracker?**
+After approval, ask once: **Do you want this epic and its slices as cards on a tracker? (default: no)** Create cards only on an explicit yes; no answer, or anything else, means no.
 
 - **Yes**: create the epic card (label `epic`) with the approved body, then one sub-issue per Technical task (labels `slice` + layer), through the tracker MCP; when you cannot create cards, give the user the bodies to paste. Then run `/epic render <ID>` with the card id. The cards are the source of truth.
-- **No**: pick the ID (the user's, else a short uppercase slug) and write the draft to `docs/epics/<ID>/epic.md` with this first line, then run the validator. These files are the source of truth.
+- **No** (the default): create no cards; pick the ID (the user's, else a short uppercase slug) and write the draft to `docs/epics/<ID>/epic.md` with this first line, then run the validator. These files are the source of truth.
 
 ```
 <!-- source=local; docs/epics/<ID>/ is the source of truth; edit here, then run validate-epics.py -->
