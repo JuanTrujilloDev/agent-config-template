@@ -1,7 +1,8 @@
 # v0.9.1 MF5 agent-style evidence and release (@s34..@s40).
 for side in core plugin; do
-  if [ "$side" = core ]; then command_dir="$ROOT/core/.claude/commands"; else command_dir="$ROOT/plugin/commands"; fi
-  for name in audit design feature fix; do
+  # v0.11 chunk 2: core feature.md is gone; the plugin copy stays until chunk 7.
+  if [ "$side" = core ]; then command_dir="$ROOT/core/.claude/commands"; names="audit design fix"; else command_dir="$ROOT/plugin/commands"; names="audit design feature fix"; fi
+  for name in $names; do
     f="$command_dir/$name.md"
     grep_case "v0.9.1 @s34 $side/$name reads style once" "$f" '[Rr]ead `agent_style`.*once'
     grep_case "v0.9.1 @s34 $side/$name terse fallback" "$f" '(absent|missing).*`terse`|fallback.*`terse`'
@@ -11,8 +12,7 @@ for side in core plugin; do
 done
 
 V091_STYLE_AGENTS=$(grep -Rl 'agent_style' "$ROOT/core/.claude/agents" "$ROOT/plugin/agents" 2>/dev/null | sed "s#$ROOT/##" | sort)
-V091_STYLE_EXPECTED='core/.claude/agents/orchestrator.md
-plugin/agents/orchestrator.md'
+V091_STYLE_EXPECTED='plugin/agents/orchestrator.md'
 check "v0.9.1 @s35/@s36 no redundant agent pointers" "$V091_STYLE_EXPECTED" "$V091_STYLE_AGENTS"
 grep_case "v0.9.1 @s35 upgrade records evidence" "$ROOT/docs/upgrade-guide.md" '[Ff]ocused check.*agent_style'
 grep_case "v0.9.1 @s35 upgrade records no pointers" "$ROOT/docs/upgrade-guide.md" '[Nn]o per-agent pointers were added'

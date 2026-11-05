@@ -3,7 +3,6 @@
 # (has_ui only), caveman never appears. Instruction text — asserted by grep, not by rendering.
 ST="$ROOT/plugin/commands/setup-template.md"; SC="$ROOT/plugin/commands/setup-companions.md"
 X_SC="$ROOT/hosts/codex/skills/setup-companions/SKILL.md"; RD="$ROOT/README.md"; P_RD="$ROOT/plugin/README.md"
-ORCH_SRC="$ROOT/core/.claude/agents/orchestrator.md"; P_ORCH="$ROOT/plugin/agents/orchestrator.md"
 GRAMMAR='companions=yes\|not_now\|never\|<comma list>'
 # item 4 of the frontier round: from "   4. " to the next numbered item
 awk '/^   4\. /{on=1} /^   5\. /{exit} on' "$ST" >"$WORK/item4.md"
@@ -40,12 +39,6 @@ grep_case "@s43 codex SKILL install step for ui-ux-pro-max" "$X_SC" '\*\*Install
 check "@s43 codex SKILL uses codex, not claude, commands" "0" "$(grep -cE '^\s*claude (plugin|mcp)' "$X_SC"; true)"
 check "@s43 codex SKILL caveman absent" "0" "$(grep -ci caveman "$X_SC"; true)"
 check "@s43 build --check clean" "0" "$(cd "$ROOT" && bash scripts/build.sh --check >/dev/null 2>&1; echo $?)"
-# @s44 — orchestrator: one line, ponytail reaches dev subagents via PONYTAIL_SUBAGENT_MATCHER
-check "@s44 core orchestrator one PONYTAIL_SUBAGENT_MATCHER line" "1" "$(grep -c 'PONYTAIL_SUBAGENT_MATCHER' "$ORCH_SRC"; true)"
-grep_case "@s44 core orchestrator: applies to dev subagents when matcher matches dev" "$ORCH_SRC" 'PONYTAIL_SUBAGENT_MATCHER.*dev|dev.*PONYTAIL_SUBAGENT_MATCHER'
-grep_case "@s44 core orchestrator: when installed" "$ORCH_SRC" 'PONYTAIL_SUBAGENT_MATCHER.*(when|if) installed|(when|if) installed.*PONYTAIL_SUBAGENT_MATCHER'
-parity "@s44 plugin orchestrator parity" 'PONYTAIL_SUBAGENT_MATCHER' "$ORCH_SRC" "$P_ORCH"
-grep_case "@s44 rendered orchestrator carries the line" "$ORCH" 'PONYTAIL_SUBAGENT_MATCHER'
 # @s45 — docs name the three tools, ui-ux-pro-max has_ui-only, no caveman, list grammar, no tracker requirement
 for f in "$RD" "$P_RD" "$UPG"; do
   b=$(basename "$(dirname "$f")")/$(basename "$f")

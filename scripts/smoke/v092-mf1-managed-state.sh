@@ -43,34 +43,34 @@ V092_MF1_OUT=$(bash "$ROOT/setup.sh" \
   --answers "$ROOT/examples/python-django/answers.env" 2>&1)
 V092_MF1_PREVIEW_RC=$?
 check "v0.9.2 @s2 stale preview exits without writing" "1" "$V092_MF1_PREVIEW_RC"
-grep_case "v0.9.2 @s2 baseline match is stale" <(printf '%s\n' "$V092_MF1_OUT") 'STALE-MANAGED +\.claude/agents/backend-dev\.md'
+grep_case "v0.9.2 @s2 baseline match is stale" <(printf '%s\n' "$V092_MF1_OUT") 'STALE-MANAGED +\.claude/agents/security-reviewer\.md'
 
-V092_MF1_OLD_HASH=$(python3 -c 'import json,sys; print(json.load(open(sys.argv[1]))["files"][".claude/agents/backend-dev.md"]["sha256"])' "$V092_MF1_LOCK")
-printf '\nuser edit\n' >>"$V092_MF1_TARGET/.claude/agents/backend-dev.md"
+V092_MF1_OLD_HASH=$(python3 -c 'import json,sys; print(json.load(open(sys.argv[1]))["files"][".claude/agents/security-reviewer.md"]["sha256"])' "$V092_MF1_LOCK")
+printf '\nuser edit\n' >>"$V092_MF1_TARGET/.claude/agents/security-reviewer.md"
 V092_MF1_OUT=$(bash "$ROOT/setup.sh" \
   --target "$V092_MF1_TARGET" \
   --answers "$ROOT/examples/python-django/answers.env" 2>&1)
-grep_case "v0.9.2 @s3 edited baseline is customized-managed" <(printf '%s\n' "$V092_MF1_OUT") 'CUSTOMIZED-MANAGED +\.claude/agents/backend-dev\.md'
+grep_case "v0.9.2 @s3 edited baseline is customized-managed" <(printf '%s\n' "$V092_MF1_OUT") 'CUSTOMIZED-MANAGED +\.claude/agents/security-reviewer\.md'
 V092_MF1_LINE=$(printf '%s\n' "$V092_MF1_OUT" | grep -E -e '--merge --overwrite-files ' | tail -1)
-check "v0.9.2 @s3 customized path absent from suggestion" "0" "$(printf '%s\n' "$V092_MF1_LINE" | grep -c '\.claude/agents/backend-dev\.md'; true)"
+check "v0.9.2 @s3 customized path absent from suggestion" "0" "$(printf '%s\n' "$V092_MF1_LINE" | grep -c '\.claude/agents/security-reviewer\.md'; true)"
 
 bash "$ROOT/setup.sh" \
   --target "$V092_MF1_TARGET" \
   --answers "$ROOT/examples/python-django/answers.env" \
   --merge >/dev/null 2>&1
-check "v0.9.2 @s6 merge preserves customized baseline" "$V092_MF1_OLD_HASH" "$(python3 -c 'import json,sys; print(json.load(open(sys.argv[1]))["files"][".claude/agents/backend-dev.md"]["sha256"])' "$V092_MF1_LOCK")"
+check "v0.9.2 @s6 merge preserves customized baseline" "$V092_MF1_OLD_HASH" "$(python3 -c 'import json,sys; print(json.load(open(sys.argv[1]))["files"][".claude/agents/security-reviewer.md"]["sha256"])' "$V092_MF1_LOCK")"
 bash "$ROOT/setup.sh" \
   --target "$V092_MF1_TARGET" \
   --answers "$ROOT/examples/python-django/answers.env" \
-  --merge --overwrite-files .claude/agents/backend-dev.md >/dev/null 2>&1
-check "v0.9.2 @s6 explicit overwrite advances baseline" "0" "$(python3 -c 'import hashlib,json,sys; d=json.load(open(sys.argv[1])); print(0 if d["files"][".claude/agents/backend-dev.md"]["sha256"] == hashlib.sha256(open(sys.argv[2],"rb").read()).hexdigest() else 1)' "$V092_MF1_LOCK" "$V092_MF1_TARGET/.claude/agents/backend-dev.md")"
+  --merge --overwrite-files .claude/agents/security-reviewer.md >/dev/null 2>&1
+check "v0.9.2 @s6 explicit overwrite advances baseline" "0" "$(python3 -c 'import hashlib,json,sys; d=json.load(open(sys.argv[1])); print(0 if d["files"][".claude/agents/security-reviewer.md"]["sha256"] == hashlib.sha256(open(sys.argv[2],"rb").read()).hexdigest() else 1)' "$V092_MF1_LOCK" "$V092_MF1_TARGET/.claude/agents/security-reviewer.md")"
 
 rm "$V092_MF1_LOCK"
-printf '\nlegacy edit\n' >>"$V092_MF1_TARGET/.claude/agents/backend-dev.md"
+printf '\nlegacy edit\n' >>"$V092_MF1_TARGET/.claude/agents/security-reviewer.md"
 V092_MF1_OUT=$(bash "$ROOT/setup.sh" \
   --target "$V092_MF1_TARGET" \
   --answers "$ROOT/examples/python-fastapi/answers.env" 2>&1)
-grep_case "v0.9.2 @s4/@s7 missing state is legacy" <(printf '%s\n' "$V092_MF1_OUT") 'LEGACY +\.claude/agents/backend-dev\.md'
+grep_case "v0.9.2 @s4/@s7 missing state is legacy" <(printf '%s\n' "$V092_MF1_OUT") 'LEGACY +\.claude/agents/security-reviewer\.md'
 
 for V092_MF1_BAD_STATE in \
   '{' \
@@ -78,14 +78,14 @@ for V092_MF1_BAD_STATE in \
   '{"schema_version":1,"template_version":"old","hosts":[],"files":{"../escape":{"template_version":"old","sha256":"0000000000000000000000000000000000000000000000000000000000000000"}}}' \
   '{"schema_version":1,"template_version":"old","hosts":[],"files":{"/escape":{"template_version":"old","sha256":"0000000000000000000000000000000000000000000000000000000000000000"}}}' \
   '{"schema_version":1,"template_version":"old","hosts":[],"files":{"README.md":{"template_version":"old","sha256":"0000000000000000000000000000000000000000000000000000000000000000"}}}' \
-  '{"schema_version":1,"template_version":"old","hosts":[],"files":{".claude/agents/backend-dev.md":{"template_version":"old","sha256":"bad"}}}'
+  '{"schema_version":1,"template_version":"old","hosts":[],"files":{".claude/agents/security-reviewer.md":{"template_version":"old","sha256":"bad"}}}'
 do
   printf '%s\n' "$V092_MF1_BAD_STATE" >"$V092_MF1_LOCK"
   V092_MF1_OUT=$(bash "$ROOT/setup.sh" \
     --target "$V092_MF1_TARGET" \
     --answers "$ROOT/examples/python-fastapi/answers.env" 2>&1)
   check "v0.9.2 @s8 invalid state warns once" "1" "$(printf '%s\n' "$V092_MF1_OUT" | grep -c 'Ignoring invalid agent-config.lock.json'; true)"
-  grep_case "v0.9.2 @s8 invalid state cannot claim baseline" <(printf '%s\n' "$V092_MF1_OUT") 'LEGACY +\.claude/agents/backend-dev\.md'
+  grep_case "v0.9.2 @s8 invalid state cannot claim baseline" <(printf '%s\n' "$V092_MF1_OUT") 'LEGACY +\.claude/agents/security-reviewer\.md'
 done
 
 V092_MF1_OUTSIDE="$WORK/v092-mf1-outside-lock"

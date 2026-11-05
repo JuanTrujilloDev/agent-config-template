@@ -2,7 +2,6 @@
 TOKENS_SRC="$ROOT/core/docs/design-system/tokens.json"
 DESIGN_SRC="$ROOT/core/.claude/commands/design.md"
 DESIGN_PLUGIN="$ROOT/plugin/commands/design.md"
-JUDGE_SRC="$ROOT/core/.claude/agents/judge.md"
 JUDGE_PLUGIN="$ROOT/plugin/agents/judge.md"
 UI_ANS="$ROOT/examples/node-nextjs/answers.env"
 NO_UI_ANS="$ROOT/examples/python-fastapi/answers.env"
@@ -33,8 +32,8 @@ for file in "$DESIGN_SRC" "$DESIGN_PLUGIN"; do
   grep_case "v0.10.0 @s12 $(basename "$file") relative paths" "$file" '[Rr]elative.*path|paths.*relative'
 done
 
-# @s13/@s14 — judge blocks drift/raw forks.
-for file in "$JUDGE_SRC" "$JUDGE_PLUGIN"; do
+# @s13/@s14 — judge blocks drift/raw forks. v0.11 chunk 2 dropped core judge; the plugin copy stays until chunk 7.
+for file in "$JUDGE_PLUGIN"; do
   grep_case "v0.10.0 @s13 $(basename "$file") reads token source" "$file" 'tokens\.json'
   grep_case "v0.10.0 @s13 $(basename "$file") checks hashes" "$file" 'source_sha256.*target_sha256|target_sha256.*source_sha256'
   grep_case "v0.10.0 @s13 $(basename "$file") blocks stale" "$file" '[Ss]tale.*hard-violation|hard-violation.*[Ss]tale'

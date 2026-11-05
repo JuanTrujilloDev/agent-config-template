@@ -31,7 +31,7 @@ check "v0.11 c2 core/ names no /spec or /feature" "0" "$n"
 for a in security-reviewer mutation-tester; do
   f="$ROOT/core/.claude/agents/$a.md"
   check "v0.11 c2 $a has no mini-feature/contract/FR-SC/docs/specs" "0" \
-    "$(grep -ciE 'mini-feature|contract|\bFR-?[0-9]|\bSC-?[0-9]|docs/specs' "$f" 2>/dev/null || echo missing)"
+    "$(grep -ciE 'mini-feature|contract|\bFR-?[0-9]|\bSC-?[0-9]|docs/specs' "$f" || true)"
   grep_case "v0.11 c2 $a writes under docs/epics/<ID>/slices/" "$f" 'docs/epics/<ID>/slices/<n>\.'
 done
 grep_case "v0.11 c2 mutation-tester targets the slice's approved tests" "$ROOT/core/.claude/agents/mutation-tester.md" 'Approved tests'

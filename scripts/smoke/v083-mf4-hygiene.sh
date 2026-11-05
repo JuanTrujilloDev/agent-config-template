@@ -33,8 +33,8 @@ check "v0.8.3 @s27 before accepts ordered matches" "0" "$(FAIL=0; before test "$
 check "v0.8.3 @s27 before rejects missing matches" "1" "$(FAIL=0; before test "$WORK/order.txt" missing beta >/dev/null; echo "$FAIL")"
 
 EXPECTED='.claude/CLAUDE.md
-.claude/agents/backend-dev.md
-.claude/agents/frontend-dev.md
+.claude/agents/security-reviewer.md
+.claude/agents/ui-designer.md
 .claude/rules/backend-style.md'
 ACTUAL="$(cd "$FIXTURE" 2>/dev/null && find . -type f | sed 's#^./##' | sort)"
 check "v0.8.3 @s28 stale fixture has exactly four expected files" "$EXPECTED" "$ACTUAL"
@@ -48,10 +48,10 @@ if [ -d "$FIXTURE/.claude" ]; then
   cp -R "$FIXTURE/.claude/." "$fixture_target/.claude/"
   python3 -c 'import hashlib,json,sys; p=sys.argv[1]; d=json.load(open(p)); root=sys.argv[2]; rels=sys.argv[3:]; d["files"].update({r:{"template_version":"0.8.2","sha256":hashlib.sha256(open(root+"/"+r,"rb").read()).hexdigest()} for r in rels}); json.dump(d,open(p,"w"),indent=2,sort_keys=True); open(p,"a").write("\n")' \
     "$fixture_target/agent-config.lock.json" "$fixture_target" \
-    .claude/agents/backend-dev.md .claude/agents/frontend-dev.md .claude/rules/backend-style.md
+    .claude/agents/security-reviewer.md .claude/agents/ui-designer.md .claude/rules/backend-style.md
   fixture_out=$(bash "$ROOT/setup.sh" --target "$fixture_target" --answers "$ROOT/examples/python-django/answers.env" 2>&1); fixture_rc=$?
   check "v0.8.3 @s28 fixture plan exits 1" "1" "$fixture_rc"
-  for path in .claude/agents/backend-dev.md .claude/agents/frontend-dev.md .claude/rules/backend-style.md; do
+  for path in .claude/agents/security-reviewer.md .claude/agents/ui-designer.md .claude/rules/backend-style.md; do
     grep_case "v0.8.3 @s28 fixture labels $path stale" <(printf '%s\n' "$fixture_out") "STALE-MANAGED +$path"
   done
   grep_case "v0.8.3 @s28 fixture labels regular CLAUDE conflict" <(printf '%s\n' "$fixture_out") 'SYMLINK-CONFLICT +\.claude/CLAUDE\.md'

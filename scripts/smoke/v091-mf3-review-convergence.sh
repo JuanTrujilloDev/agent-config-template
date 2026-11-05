@@ -22,12 +22,13 @@ cycle_case "cycle three rejected" 3 1
 cycle_case "boolean cycle rejected" true 1
 cycle_case "string cycle rejected" '"1"' 1
 
-for f in "$ROOT/core/.claude/agents/pmo.md" "$ROOT/plugin/agents/pmo.md"; do
+# v0.11 chunk 2: core pmo/orchestrator are gone; plugin copies stay until chunk 7.
+for f in "$ROOT/plugin/agents/pmo.md"; do
   grep_case "v0.9.1 @s17 $(basename "$f") initializes cycles" "$f" '"review_cycles": 0'
   grep_case "v0.9.1 @s17 $(basename "$f") old ledgers default zero" "$f" '[Aa]bsent.*review_cycles.*0|review_cycles.*absent.*0'
 done
 
-for f in "$ROOT/core/.claude/agents/orchestrator.md" "$ROOT/plugin/agents/orchestrator.md"; do
+for f in "$ROOT/plugin/agents/orchestrator.md"; do
   grep_case "v0.9.1 @s19 $(basename "$f") bounded-loop pointer" "$f" '[Bb]ounded review-convergence loop.*sdd-workflow|sdd-workflow.*[Bb]ounded review-convergence loop'
 done
 
@@ -46,5 +47,3 @@ for f in "$ROOT/docs/sdd-workflow.md" "$ROOT/plugin/skills/sdd-workflow/SKILL.md
   grep_case "v0.9.1 @s24 $label reset amendment" "$f" '[Rr]eset.*0.*reapproved contract amendment'
 done
 
-parity "v0.9.1 @s25 pmo cycle parity" 'review_cycles' "$ROOT/core/.claude/agents/pmo.md" "$ROOT/plugin/agents/pmo.md"
-parity "v0.9.1 @s25 orchestrator convergence parity" 'bounded review-convergence loop' "$ROOT/core/.claude/agents/orchestrator.md" "$ROOT/plugin/agents/orchestrator.md"
