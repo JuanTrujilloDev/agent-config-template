@@ -8,9 +8,7 @@ import sys
 
 ROOT = Path(__file__).resolve().parents[1]
 PAIRS = (
-    ("plugin/commands/feature.md", "hosts/codex/skills/feature/SKILL.md"),
     ("plugin/skills/port-config/SKILL.md", "hosts/codex/skills/port-config/SKILL.md"),
-    ("plugin/skills/sdd-workflow/SKILL.md", "hosts/codex/skills/sdd-workflow/SKILL.md"),
     ("plugin/commands/setup-companions.md", "hosts/codex/skills/setup-companions/SKILL.md"),
     ("core/.claude/rules/principles.md", "plugin/skills/principles/SKILL.md"),
 )

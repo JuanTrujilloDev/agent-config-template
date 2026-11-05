@@ -14,6 +14,11 @@ This is the **opt-in calibration step** for users who want more than the
 generic plugin defaults. The plugin layer stays active; `/setup-template` adds
 project-specific Claude, Cursor, Grok, or Codex files for the selected hosts.
 
+**Already rendered?** When the project has `agent-config.lock.json` and
+`answers.env`, use the `update-config` skill instead: it plans the upgrade,
+migrates old `docs/specs/` folders to `docs/epics/`, and applies only what you
+approve.
+
 ## What this command does
 
 The interview is **infer → show → ask once → record → render**. Facts are read from the project and never asked; only decisions reach the user, in one numbered round.
@@ -39,22 +44,21 @@ The interview is **infer → show → ask once → record → render**. Facts ar
    | `line_length` | 100 | default | template default |
    | `branch_prefix` | — | UNKNOWN | no ticket ids in `git branch -a` |
 
-   Personal prefs already present in `.claude/answers.local.env` appear tagged `recorded` and are not re-asked (the user edits that file to change them); `companions=not_now` is the exception — it is asked again on every run. A recorded comma list (e.g. `companions=graphify,ponytail`) is tagged `recorded` and not re-asked; tools omitted from that list were skipped by omission and are not re-recommended. Likewise, policy decisions already present in `answers.env` (`workflow_mode`, `TARGET_HOSTS`) appear tagged `recorded` (source `answers.env`) and are not re-asked — round items 1–2 are listed only when their value is absent.
+   Personal prefs already present in `.claude/answers.local.env` appear tagged `recorded` and are not re-asked (the user edits that file to change them); `companions=not_now` is the exception — it is asked again on every run. A recorded comma list (e.g. `companions=graphify,ponytail`) is tagged `recorded` and not re-asked; tools omitted from that list were skipped by omission and are not re-recommended. Likewise, policy decisions already present in `answers.env` (`TARGET_HOSTS`) appear tagged `recorded` (source `answers.env`) and are not re-asked — round item 1 is listed only when its value is absent. Keys v0.11 retired (`workflow_mode`, `use_gherkin`, `enforce_layer_split`) are dropped from the draft; the renderer warns once and ignores them if they remain.
 
 3. **ASK one frontier round.** Below the table, list **all** currently-answerable decision questions, numbered, each with a recommended answer. Facts (stack, dirs, commands, versions) are never in the round. The round contains:
 
-   1. `workflow_mode` — `SDD` or `SDD+TDD`. Recommended: `SDD` (`SDD+TDD` when the project already has a substantial test suite and CI running it).
-   2. Target hosts — multi-select `claude`, `cursor`, `codex` (`grok` = claude tree + AGENTS.md). Recommended: the inferred set from step 1; the user may add or drop any.
-   3. `autonomy_mode` — `gated` or `autonomous`. Recommended: `gated` (today's behavior: pause before each micro-commit; `autonomous` skips that pause — push/merge/publish/destructive confirms ALWAYS apply regardless of mode).
-   4. Companions — three groups, one answer. **Core quality:** graphify (knowledge graph behind `code-query`) + ponytail (runtime minimal-code enforcement). **Output:** the native `concise` output style is already on by default — nothing to install. **UI:** ui-ux-pro-max (design-system skill) — listed only when `has_ui` is truthy; omit the whole UI group when `has_ui` is falsy. Answer `[Yes / Not now / Never / <comma list>]`. Recommended: `Not now`. Detect installations for the active host: Cursor uses `.cursor/rules/` and `.cursor/skills/`; Claude uses `claude plugin list` and `.claude/skills/`. When every recommended tool is installed, skip this question **and step 8**, and leave any existing `companions` key untouched.
-   5. Remaining uncertain configuration — every LOW placeholder (recommended = the best guess, alternative named), every UNKNOWN (no recommendation — say which signal is missing), and any `default`-tagged item that changes what renders (`has_frontend`, `ticket_tracker`, `has_background_jobs`, `use_gherkin`, `enforce_mutation_testing`).
+   1. Target hosts — multi-select `claude`, `cursor`, `codex` (`grok` = claude tree + AGENTS.md). Recommended: the inferred set from step 1; the user may add or drop any.
+   2. `autonomy_mode` — `gated` or `autonomous`. Recommended: `gated` (today's behavior: pause before each micro-commit; `autonomous` skips that pause — push/merge/publish/destructive confirms ALWAYS apply regardless of mode).
+   3. Companions — three groups, one answer. **Core quality:** graphify (knowledge graph behind `code-query`) + ponytail (runtime minimal-code enforcement). **Output:** the native `concise` output style is already on by default — nothing to install. **UI:** ui-ux-pro-max (design-system skill) — listed only when `has_ui` is truthy; omit the whole UI group when `has_ui` is falsy. Answer `[Yes / Not now / Never / <comma list>]`. Recommended: `Not now`. Detect installations for the active host: Cursor uses `.cursor/rules/` and `.cursor/skills/`; Claude uses `claude plugin list` and `.claude/skills/`. When every recommended tool is installed, skip this question **and step 8**, and leave any existing `companions` key untouched.
+   4. Remaining uncertain configuration — every LOW placeholder (recommended = the best guess, alternative named), every UNKNOWN (no recommendation — say which signal is missing), and any `default`-tagged item that changes what renders (`has_frontend`, `ticket_tracker`, `has_background_jobs`, `enforce_mutation_testing`).
 
-   End with: *"Reply `all defaults` (or `go`) to accept every recommendation and render, or answer by number — `1: SDD+TDD, 4: Never`. Unanswered numbers take the recommendation."* That reply is the approval gate: it resolves the whole round and authorizes the render — **do not run `setup.sh` before it arrives.**
+   End with: *"Reply `all defaults` (or `go`) to accept every recommendation and render, or answer by number — `1: claude,cursor, 3: Never`. Unanswered numbers take the recommendation."* That reply is the approval gate: it resolves the whole round and authorizes the render — **do not run `setup.sh` before it arrives.**
 
-   A **second round happens only when an answer unlocks new `when:`-gated questions** (`ticket_tracker: Plane` → `mcp_plane_workspace`, `mcp_plane_host`; `has_frontend: yes` → `frontend_framework`, `frontend_dir`, `has_e2e`, `enforce_layer_split`). It lists only those, same format, and its reply is the approval — in that case the round-1 reply is not yet the approval; nothing renders until the final round's reply. UNKNOWN items still unanswered after the round stay blank with their `# TODO` line — say so in one line before rendering; never fill them with a guess.
+   A **second round happens only when an answer unlocks new `when:`-gated questions** (`ticket_tracker: Plane` → `mcp_plane_workspace`, `mcp_plane_host`; `has_frontend: yes` → `frontend_framework`, `frontend_dir`, `has_e2e`). It lists only those, same format, and its reply is the approval — in that case the round-1 reply is not yet the approval; nothing renders until the final round's reply. UNKNOWN items still unanswered after the round stay blank with their `# TODO` line — say so in one line before rendering; never fill them with a guess.
 
 4. **RECORD** the resolved answers in their scopes (table below):
-   - **`answers.env`** at the project root — one `KEY=VALUE` per applicable placeholder, including `workflow_mode=…` and `TARGET_HOSTS=<comma-separated list>` (the renderer defaults to `claude` when the line is absent; `setup.sh --host` overrides it). Project policy, committed.
+   - **`answers.env`** at the project root — one `KEY=VALUE` per applicable placeholder, including `TARGET_HOSTS=<comma-separated list>` (the renderer defaults to `claude` when the line is absent; `setup.sh --host` overrides it). Project policy, committed.
    - **`.claude/answers.local.env`** (`mkdir -p .claude`; create or update, preserving other keys) — `autonomy_mode=gated|autonomous` and `companions=yes|not_now|never|<comma list>` — `yes` = all recommended for this project; a comma list (e.g. `graphify,ponytail`) installs only those and the rest are skipped by omission and not re-recommended; `not_now` = asked again next run; `never` = suppress every mention. Personal, gitignored, read at session time by hooks and command instructions. **Never write these two keys to `answers.env`, and never pass this file to the renderer** — it is not a placeholder source.
 
 5. **RENDER.** The renderer is **non-destructive**: against a project that already has a Claude config it writes nothing and prints a per-file change plan until you pass an explicit mode.
@@ -103,8 +107,8 @@ Every config value lives in exactly one of three scopes:
 
 | Scope | File | Committed? | Holds |
 |---|---|---|---|
-| Project policy | `answers.env` | yes | `workflow_mode`, `TARGET_HOSTS`, micro-PR limits — everything in `template.config.yaml` |
-| Local prefs | `.claude/answers.local.env` | no (gitignored) | personal settings read at session time (`autonomy_mode`, `output_style` = `concise|balanced|detailed|terse`, default `concise`, `agent_style` = `terse|descriptive`, default `terse` — both not asked in the round, `companions`) — never rendered into files |
+| Project policy | `answers.env` | yes | `TARGET_HOSTS`, micro-PR limits — everything in `template.config.yaml` |
+| Local prefs | `.claude/answers.local.env` | no (gitignored) | personal settings read at session time (`autonomy_mode`, `output_style` = `concise|balanced|detailed|terse`, default `concise` — not asked in the round, `companions`) — never rendered into files |
 | Session keywords | — | never persisted | one-session overrides like "just go" / "gate me" |
 
 ## Hard rules
@@ -126,8 +130,8 @@ Every config value lives in exactly one of three scopes:
 Concrete rules:
 
 - **`mcp_plane_workspace` and `mcp_plane_host`** — only ask, only include in `answers.env`, only render related sections **if `ticket_tracker = Plane`**. For any other tracker, omit these lines entirely from the draft (don't include them as blank lines or commented placeholders). The renderer's mustache conditionals will skip the Plane-related blocks automatically because the synthetic flag `ticket_tracker_plane` won't be set.
-- **`frontend_framework` and `frontend_dir`** — only ask if `has_frontend = yes`. If the project is API-only, omit both lines from `answers.env`. The renderer drops files marked `<!-- requires: has_frontend -->` (e.g., `frontend-dev` agent, `frontend-style` rule).
-- **`has_e2e` and `enforce_layer_split`** — only ask if `has_frontend = yes`. Skip entirely for API-only projects.
+- **`frontend_framework` and `frontend_dir`** — only ask if `has_frontend = yes`. If the project is API-only, omit both lines from `answers.env`. The renderer drops files marked `<!-- requires: has_frontend -->` (e.g., the `frontend-style` skill).
+- **`has_e2e`** — only ask if `has_frontend = yes`. Skip entirely for API-only projects.
 
 The general rule: **if a `when:` clause isn't satisfied, the variable doesn't exist for this project.** Don't ask, don't write, don't display in the profile table. This keeps the conversation tight and the rendered output clean.
 
@@ -145,10 +149,11 @@ A calibrated host tree. Cursor adds `AGENTS.md`, `.cursor/`, and the shared
 - **`.claude/HELP.md`** — decision tree + worked examples customized for the stack.
 - **`.claude/settings.json`** — permissions tightened around the project's actual tools.
 - **`.claude/mcp.json.example`** — MCP server template.
-- **`.claude/rules/principles.md`**, **`backend-style.md`**, optional **`frontend-style.md`** — operating principles + style guides tailored to the stack.
-- **`.claude/agents/`** — the orchestration/review agents plus only the dev specialists your `project_type` needs (`backend-dev` for web/API, `mobile-dev`, `game-dev`, `desktop-dev`, or `core-dev`; `frontend-dev`/`ui-designer` when there's a UI; `mutation-tester` when enabled), with placeholders rendered to specifics.
-- **`.claude/commands/`** — the slash commands (`/spec`, `/feature`, `/fix`, `/verify`, `/audit`, `/commit`, `/pr`, `/design`, …), locally available (non-namespaced).
-- **`.claude/hooks/`** — branch discipline, agent gating, auto-format — with the project's actual `src_dir` / `default_branch` baked in (no env-var fallback needed).
+- **`.claude/rules/principles.md`** — the one always-loaded file: operating principles tailored to the stack.
+- **`.claude/skills/`** — `epic`, `slice`, `tests-first`, `implement`, `code-review`, `council` (opt-in), `update-config`, `code-query`, `patterns`, `backend-style` and, with a frontend, `frontend-style`; loaded on demand.
+- **`.claude/agents/`** — `security-reviewer`, plus `ui-designer` when there's a UI and `mutation-tester` when enabled. There is no coordinator or dev subagent: the slice loop runs in your thread.
+- **`.claude/commands/`** — `/fix`, `/verify`, `/audit`, `/commit`, `/pr`, `/integrate`, `/design` (with a UI), locally available (non-namespaced).
+- **`.claude/hooks/`** — branch discipline, the approved-tests lock, auto-format — with the project's actual `src_dir` / `default_branch` baked in (no env-var fallback needed).
 
 ## Relationship to the plugin
 
@@ -157,7 +162,7 @@ After `/setup-template`, both layers are active:
 | Layer | Source | Naming |
 |---|---|---|
 | Plugin commands/agents | active plugin root | Host-managed; setup includes `/setup-template` |
-| Project commands/agents | `./.claude/`, `./.cursor/`, or `./.agents/` | Calibrated (`/feature`, etc.) |
+| Project commands/agents | `./.claude/`, `./.cursor/`, or `./.agents/` | Calibrated (`/epic`, `/fix`, etc.) |
 
 The project-root versions take precedence when names collide. This is intentional — the project versions have the calibrated test commands, branch prefixes, and toggles baked in.
 

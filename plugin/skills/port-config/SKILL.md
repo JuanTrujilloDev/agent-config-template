@@ -28,14 +28,14 @@ From the docs, decide where each piece of this config lands on the target:
 | This config | Typical target equivalent |
 |---|---|
 | `principles` skill + CLAUDE.md rules | always-on rules file (AGENTS.md, GEMINI.md, .cursorrules, …) |
-| `/spec`, `/feature`, `/fix`, `/verify`, `/audit` | skills (SKILL.md) or native commands |
-| agents (`pmo`, `judge`, `security-reviewer`, dev specialists) | skills the agent role-plays — most hosts have no subagents |
+| `epic`, `slice`, `tests-first`, `implement`, `code-review` skills; `/fix`, `/verify`, `/audit` | skills (SKILL.md) or native commands |
+| agents (`security-reviewer`, `ui-designer`) and `code-review`'s two axes | skills the agent role-plays — most hosts have no subagents |
 | hooks (branch block, format-on-write) | usually **no equivalent** — port as written rules |
 
-Where the host has no subagents, add a role-adaptation note: the agent plays
-`pmo`/`judge`/`security-reviewer` itself, in sequence, switching hats
-explicitly — same artifacts under `docs/specs/<slug>/`, same human gates
-(contract approval; failing tests under TDD), same Definition of Done.
+Where the host has no subagents, add a role-adaptation note: the agent runs
+`code-review`'s Standards and Spec axes and the `security-reviewer` pass itself,
+in sequence, keeping each report separate — same files under `docs/epics/<ID>/`,
+same user gates (epic draft, slice brief, approved tests), same Definition of Done.
 
 ## 3. Generate
 

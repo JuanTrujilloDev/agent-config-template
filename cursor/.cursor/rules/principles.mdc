@@ -13,13 +13,14 @@ What it covers:
    (reuse > stdlib > native platform > installed deps > new code).
 3. **Surgical Changes** — touch only what the task requires.
 4. **Goal-Driven Execution** — write 2–4 verifiable success criteria first;
-   loop until they pass.
+   loop until they pass. Features run `/epic` → `/slice` → `tests-first` →
+   `implement` → `code-review` (skills under `.claude/skills/`); `/fix` for
+   small obvious changes. Approved tests (`## Approved tests` in the slice file)
+   are locked: never edit one to go green; stop and ask.
 - **Read Before You Write** — never edit code you haven't read; check callers first.
 - **Code Health** — DRY by the rule of three; small functions/files; comments explain *why*.
-- **Micro-PR Discipline** — ≤{{max_files_per_pr}} files, <{{max_loc_per_pr}} lines per PR.
-- **Definition of Done** — format → lint → unit tests → review, in order, before declaring done.
-- **Principles Double Gate** — before Gate 1 PMO records the deviation table;
-  judge rechecks the same table before approval.
+- **Micro-PR Discipline** — one slice per PR, one layer per slice; aim for 200–400 non-test lines; cap ≤{{max_files_per_pr}} files, <{{max_loc_per_pr}} lines.
+- **Definition of Done** — format → lint → tests → `code-review`, in order, before declaring done.
 - **Conciseness** — no filler, no recaps of visible output.
 - **Branch Discipline** — never code on `{{default_branch}}`; check out a typed branch first.
 - **Autonomy Mode / Output style** — Cursor runs no prompt hook, so at task

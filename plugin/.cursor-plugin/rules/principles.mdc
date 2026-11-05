@@ -1,15 +1,15 @@
 ---
-description: "Concise, spec-driven engineering rules with minimal-code defaults"
+description: "Concise epic → slice engineering rules with tests first and minimal-code defaults"
 alwaysApply: true
 ---
-Use the installed `principles`, `patterns`, and `sdd-workflow` skills as the
-full source of truth.
+Use the installed `principles` and `patterns` skills as the full source of truth.
 
 - State assumptions and 2–4 verifiable success criteria before non-trivial work.
 - Read the affected code and callers before editing.
 - Prefer reuse, standard library, and native features before new code or dependencies.
-- Use `/spec` then `/feature` for non-trivial work; use `/fix` for obvious small changes.
+- Features run `epic` → `slice` → `tests-first` → `implement` → `code-review`; use `/fix` for obvious small changes.
+- Never edit an approved test to go green; stop and ask.
 - Never work directly on a protected branch.
-- Keep changes surgical and PRs reviewable.
+- Keep changes surgical: one slice per PR, 200–400 non-test lines.
 - Finish with format, lint, tests, skeptical review, and relevant security review.
 - Default to concise output: code first, no filler or repeated recap.
