@@ -4,15 +4,10 @@ P_JUDGE="$ROOT/plugin/agents/judge.md"; P_VERIFY="$ROOT/plugin/commands/verify.m
 LEDGER='pattern / force / rejected alternative'
 REJECT='Strategy.*Repository.*Factory.*Singleton.*Service Locator'
 
-# @s18 — principles.md Design Patterns section: pointer + four hard rules + default-reject list (one line each)
-section "$PRIN" '^## Design Patterns' >"$WORK/prin_dp.md"
-grep_case "@s18 section exists" "$WORK/prin_dp.md" '^## Design Patterns'
-grep_case "@s18 points at rules/patterns.md" "$WORK/prin_dp.md" '\.claude/rules/patterns\.md'
-grep_case "@s18 rule: inspect first" "$WORK/prin_dp.md" '[Ii]nspect (existing|first)'
-grep_case "@s18 rule: name the force" "$WORK/prin_dp.md" '[Nn]ame the (present )?force'
-grep_case "@s18 rule: one-line why" "$WORK/prin_dp.md" '[Oo]ne-line why'
-grep_case "@s18 rule: refusal valid" "$WORK/prin_dp.md" '[Rr]efus(al|ing).*valid|no pattern — single call site'
-grep_case "@s18 default-reject list on one line" "$WORK/prin_dp.md" "$REJECT"
+# @s18 — principles.md Simplicity First: one-line pointer to rules/patterns.md, name the force or refuse (v0.11 chunk 1 dropped the Design Patterns section)
+grep_case "@s18 points at rules/patterns.md" "$PRIN" '\.claude/rules/patterns\.md'
+grep_case "@s18 rule: name the force" "$PRIN" '[Nn]ame the (present )?force'
+grep_case "@s18 rule: refusal valid" "$PRIN" 'force present today or refuse'
 # @s19 — pmo Design notes: ledger line + literal refusal; Gotchas keep cargo-culting
 section "$PMO" '^## Design notes' >"$WORK/pmo_dn.md"
 grep_case "@s19 ledger line in Design notes" "$WORK/pmo_dn.md" "$LEDGER"
@@ -31,8 +26,6 @@ grep_case "@s21 step 1 asks ledger" "$WORK/verify_1.md" 'ledger'
 grep_case "@s21 step 1 asks simplest default tried" "$WORK/verify_1.md" '[Ss]implest default.*\.claude/rules/patterns\.md|\.claude/rules/patterns\.md.*[Ss]implest default'
 # @s22 — plugin mirrors: same additions (grep-count parity against core source), skill-style refs
 parity "@s22 principles four rules: force" '[Nn]ame the (present )?force' "$ROOT/core/.claude/rules/principles.md" "$P_PRIN"
-parity "@s22 principles four rules: one-line why" '[Oo]ne-line why' "$ROOT/core/.claude/rules/principles.md" "$P_PRIN"
-parity "@s22 principles default-reject" "$REJECT" "$ROOT/core/.claude/rules/principles.md" "$P_PRIN"
 grep_case "@s22 principles skill-style ref" "$(section "$P_PRIN" '^## Design Patterns' >"$WORK/pprin_dp.md"; echo "$WORK/pprin_dp.md")" 'the `patterns` skill'
 parity "@s22 pmo ledger" "$LEDGER" "$ROOT/core/.claude/agents/pmo.md" "$P_PMO"
 parity "@s22 pmo refusal" 'no pattern — single call site' "$ROOT/core/.claude/agents/pmo.md" "$P_PMO"

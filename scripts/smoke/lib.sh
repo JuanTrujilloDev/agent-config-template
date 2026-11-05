@@ -5,11 +5,7 @@
 bash "$ROOT/setup.sh" --target "$WORK" --answers "$ROOT/examples/python-fastapi/answers.env" >/dev/null 2>&1 \
   || { echo "FAIL render examples/python-fastapi"; exit 1; }
 
-CORE_HOOK="$WORK/.claude/hooks/coding-reminder.sh"
-PLUGIN_HOOK="$ROOT/plugin/hooks/coding-reminder.sh"
-PREFS="$WORK/.claude/answers.local.env"
-CODING='{"prompt":"fix the login redirect"}'
-NONCODING='{"prompt":"what is a closure?"}'
+PLUGIN_HOOK="$ROOT/plugin/hooks/coding-reminder.sh"  # chunk 7 removes it
 
 PRIN="$WORK/.claude/rules/principles.md"
 FEAT="$WORK/.claude/commands/feature.md"
@@ -21,23 +17,6 @@ check() { # name expected actual
     echo "FAIL $1"; echo "  expected: $2"; echo "  actual:   $3"; FAIL=1; fi
 }
 
-# run_hook HOOK PROMPT_JSON — sets OUT (stdout), ERR (stderr), RC, LINE1.
-run_hook() {
-  OUT=$(printf '%s' "$2" | CLAUDE_PROJECT_DIR="$WORK" bash "$1" 2>"$WORK/err"); RC=$?
-  ERR=$(cat "$WORK/err"); LINE1=$(printf '%s\n' "$OUT" | head -1)
-}
-
-# hook_case NAME PROMPT_JSON EXPECTED_LINE1 [PREFS_CONTENT] — "-" = no prefs file.
-# Asserts core hook line 1 + exit 0 + silent stderr, then @s9 parity with plugin hook.
-hook_case() {
-  rm -f "$PREFS"; [ "${4:--}" != "-" ] && printf '%s\n' "$4" >"$PREFS"
-  run_hook "$CORE_HOOK" "$2"
-  check "$1 line1" "$3" "$LINE1"
-  check "$1 exit0+quiet" "0|" "$RC|$ERR"
-  core_line1=$LINE1; CORE_OUT=$OUT
-  run_hook "$PLUGIN_HOOK" "$2"
-  check "$1 @s9 plugin parity" "$core_line1" "$LINE1"
-}
 # grep_case NAME FILE PATTERN MIN — asserts `grep -cE PATTERN FILE` >= MIN (default 1).
 grep_case() {
   n=$(grep -cE -- "$3" "$2" 2>/dev/null || true)
