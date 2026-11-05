@@ -1,6 +1,6 @@
 # Frontend patterns — UI & state
 
-Read this only when `.claude/rules/patterns.md` routed a UI/state force here.
+Read this only when the `patterns` skill routed a UI/state force here.
 Every row's *simplest alternative* is tried before the pattern is named.
 
 | Force | Pattern | Simplest alternative |

@@ -13,13 +13,14 @@ for f in "$V091_VERIFY_SRC" "$V091_VERIFY_PLUGIN" "$VERIFY"; do
   grep_case "v0.9.1 @s5 $label includes untracked" "$f" 'git ls-files --others --exclude-standard'
   grep_case "v0.9.1 @s5 $label reads untracked content" "$f" '[Rr]ead every recorded untracked path'
   grep_case "v0.9.1 @s5 $label treats paths as data" "$f" '[Pp]aths.*as data|never.*(execute|interpolate).*path'
-  grep_case "v0.9.1 @s6 $label changed spec tier" "$f" '[Cc]hanged.*docs/specs/<slug>'
-  grep_case "v0.9.1 @s6 $label commit branch tier" "$f" '[Cc]ommit.*branch.*(reference|slug)'
-  grep_case "v0.9.1 @s6 $label active ledger tier" "$f" '[Ss]ingle active ledger'
-  before "v0.9.1 @s6 $label changed before commit" "$f" '[Cc]hanged.*docs/specs/<slug>' '[Cc]ommit.*branch.*(reference|slug)'
-  before "v0.9.1 @s6 $label commit before ledger" "$f" '[Cc]ommit.*branch.*(reference|slug)' '[Ss]ingle active ledger'
+  # v0.11: the tiers find a slice file instead of a spec ledger.
+  grep_case "v0.11 @s6 $label changed epic tier" "$f" '[Cc]hanged.*docs/epics/<ID>/'
+  grep_case "v0.11 @s6 $label branch-line tier" "$f" 'slice file whose `- Branch:` line'
+  grep_case "v0.11 @s6 $label commit branch tier" "$f" '[Cc]ommit or branch references'
+  before "v0.11 @s6 $label changed before branch line" "$f" '[Cc]hanged.*docs/epics/<ID>/' 'slice file whose `- Branch:` line'
+  before "v0.11 @s6 $label branch line before commit refs" "$f" 'slice file whose `- Branch:` line' '[Cc]ommit or branch references'
   grep_case "v0.9.1 @s6 $label reports ambiguity" "$f" '[Aa]mbigu'
-  grep_case "v0.9.1 @s7 $label honest fallback" "$f" '[Nn]o unique originating spec.*user request'
+  grep_case "v0.9.1 @s7 $label honest fallback" "$f" '[Nn]o unique originating slice.*user request'
 
   moving=$(grep -E 'git (diff|log)' "$f" 2>/dev/null | grep -vc 'VERIFY_BASE_SHA' || true)
   check "v0.9.1 @s1 $label no moving git diff/log" "0" "$moving"
@@ -27,4 +28,4 @@ done
 
 parity "v0.9.1 @s7 verify base parity" 'VERIFY_BASE_SHA' "$V091_VERIFY_SRC" "$V091_VERIFY_PLUGIN"
 parity "v0.9.1 @s7 verify empty parity" 'Nothing to verify\.' "$V091_VERIFY_SRC" "$V091_VERIFY_PLUGIN"
-parity "v0.9.1 @s7 verify discovery parity" '[Nn]o unique originating spec' "$V091_VERIFY_SRC" "$V091_VERIFY_PLUGIN"
+parity "v0.9.1 @s7 verify discovery parity" '[Nn]o unique originating slice' "$V091_VERIFY_SRC" "$V091_VERIFY_PLUGIN"

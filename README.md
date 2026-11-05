@@ -4,23 +4,24 @@
 
 # agent-config-template
 
-**A concise, spec-driven coding-agent workflow for Claude Code, Cursor, Grok, and Codex—adapted to your stack instead of copied by hand.**
+**A concise epic → story → slice coding-agent workflow for Claude Code, Cursor, Grok, and Codex—tests first, adapted to your stack instead of copied by hand.**
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](#license)
 [![GitHub Sponsors](https://img.shields.io/badge/Sponsor-GitHub-EA4AAA)](https://github.com/sponsors/JuanTrujilloDev)
 
 </div>
 
-It turns a task into an approved contract, PR-sized implementation slices, skeptical review, checks, and small commits. Project state lives on disk, so the workflow survives restarts across web, backend, mobile, Unity, desktop, CLI, and data projects.
+It turns a ticket or an ask into one approved epic of one-case stories, then ships it one layered slice at a time: tests first and locked, code to green, two-axis review, one small PR. Epics and slices live on disk (or on your tracker), so the workflow survives restarts across web, backend, mobile, Unity, desktop, CLI, and data projects.
 
-## v0.10.0
+## v0.11.0 — breaking
 
-- Opt-in model behavior evaluations for Claude, Codex, Cursor, and Grok.
-- UI projects get semantic `tokens.json`; `/design` emits one stack-native theme plus a `tokens.lock.json` hash record.
-- `/setup-companions plan|doctor|install|update|uninstall [list]` uses one pinned lock; every network or removal action remains confirmed.
-- Cursor tokenizes commit/push commands instead of blocking quoted mentions.
+- `/spec` and `/feature` are gone: `/epic` → `/slice` → `tests-first` → `implement` → `code-review` → `/pr`, all in your thread.
+- Nine agents are gone (`pmo`, `orchestrator`, `judge` and the six dev agents); `security-reviewer` and `ui-designer` stay.
+- Approved tests are locked by a hook and by `code-review`.
+- The always-loaded text drops from about 9.5k to about 3k tokens: one ≤80-line principles file, everything else is a skill loaded on demand.
+- `update-config` upgrades a rendered project and migrates old `docs/specs/` folders to `docs/epics/`.
 
-Upgrade path: `0.9.2 → 0.10.0` via the existing preview + merge flow.
+Upgrade path: `0.10.0 → 0.11.0` via `update-config`; see the [upgrade guide](docs/upgrade-guide.md).
 
 ## Install
 
@@ -65,47 +66,35 @@ codex plugin add agent-config-template@juantrujillodev
 Start with:
 
 ```text
-/spec add CSV export to the holdings list
-/feature add CSV export to the holdings list
+/epic add CSV export to the holdings list
+/slice EXPORT 1
 ```
 
-`/spec` converses and writes the contract, then stops for approval. `/feature`
-implements one ready mini-feature at a time. Use `/fix` for a small change with
-an obvious cause.
+`/epic` drafts the whole epic once and stops for your approval; `/slice` briefs
+one layer of one capability group. Use `/fix` for a small change with an obvious
+cause.
 
 ## Workflow
 
 <!-- workflow-diagram -->
 
 ```text
-task
-  └─ pmo: spec + contract + mini-features
-       └─ GATE 1: approve contract
-            └─ tests first when TDD is active
-                 └─ implement → verify → judge → security when relevant
-                      └─ optional manual check → micro-commit → next slice
+ticket or ask
+  └─ /epic: capability groups, one-case stories, AC, Given/When/Then TS, layered slices
+       └─ you approve by number (tracker cards, or docs/epics/<ID>/ with source=local)
+            └─ /slice <ID> <n>: one layer (db → be → fe) of one group → you say yes
+                 └─ tests-first: all the slice's tests, red → you approve → locked
+                      └─ implement → code-review (Standards + Spec, one fix round)
+                           └─ /pr, stacked on the previous layer's branch → next slice
 ```
 
-The v0.9 contract grammar is explicit:
+- One case per story: one When per test scenario, literal values; `TSn` tests `Sn`, tests are named `test_S<n>_<case>`.
+- Approved tests are listed under `## Approved tests` in the slice file; a hook blocks edits to them and `code-review` fails on any diff to them.
+- One slice per PR, one layer per slice, 200–400 non-test lines.
+- `validate-epics.py` checks the grammar and warns on size; CI runs it here.
+- `council` is an opt-in, single-round review by three providers.
 
-- `spec.md` separates numbered `FR-###` requirements from measurable `SC-###`
-  success criteria; every Given/When/Then scenario traces to both.
-- `NEEDS CLARIFICATION: <question>` blocks Gate 1 until resolved.
-- `features.json` declares `schema_version: 2`, dependencies, limits, status,
-  and human verification for every mini-feature.
-- Post-approval changes append `*(Amended at <ISO date/time> — <reason>)*`,
-  reset affected work, and require a newer Gate 1 approval.
-- PMO and judge check the same `Principles deviation table` before planning and
-  before approval.
-- `/verify` pins one base SHA and refuses empty review scopes.
-- Judge separates `Spec fidelity` from `Standards & health`; preferences do not
-  become blockers.
-- Review gets at most two fix/re-review cycles before a human resolves the
-  recorded disagreement.
-- TDD names public seams, derives expectations independently, mocks only
-  external boundaries, and completes one vertical red/green slice at a time.
-
-Full rules: [SDD workflow](docs/sdd-workflow.md).
+Full rules: [epic → story → slice](docs/epic-story-slice.md).
 
 ## Commands
 
@@ -113,24 +102,26 @@ Full rules: [SDD workflow](docs/sdd-workflow.md).
 
 | Command | Purpose |
 |---|---|
-| `/spec` | Converse → spec → traced contract → mini-features |
-| `/feature` | Run the approved SDD/TDD flow one slice at a time |
+| `/epic <ID or ask>` | Draft the epic once; `/epic render <ID>` writes the repo copy from tracker cards |
+| `/slice <ID> <n>` | Brief the next slice: stories, seams, fixtures, tests |
+| `tests-first`, `implement`, `code-review` | Tests red and locked, code to green, two-axis review |
 | `/fix` | Fast path for a small change with an obvious cause |
 | `/verify` | Re-read the request, diff, and checks skeptically |
 | `/audit` | Adversarial code-quality and security review |
 | `/design` | UI wireframe and component contract before code |
 | `/integrate <tool>` | Research and connect the user's chosen MCP/tool |
 | `/setup-companions <action> [list]` | Plan, inspect, install, update, or remove optional helpers |
+| `update-config` | Upgrade a rendered project; migrate old `docs/specs/` |
 | `/commit`, `/pr` | Commit or open a PR behind confirmation gates |
 
 ## What gets installed
 
-- Stack-matched dev agents plus `pmo`, `orchestrator`, `judge`, and security review.
-- Always-loaded principles, backend/frontend style rules, and the restrained `patterns` guide.
-- Branch protection, targeted formatting hooks, and host-native skills.
+- `security-reviewer`, plus `ui-designer` for UI projects; no coordinator or dev subagents.
+- One always-loaded principles file; the slice-loop skills, backend/frontend style skills, `code-query` and the restrained `patterns` guide load on demand.
+- Branch protection, the approved-tests lock, targeted formatting hooks, and host-native skills.
 - `docs/design-system/MASTER.md` plus machine-readable `tokens.json` for UI brand colors, typography, spacing, radius, motion, and accessibility.
 - `docs/CONTEXT.md`, created lazily when the project needs a shared glossary.
-- Versioned specs and progress under `docs/specs/<slug>/`.
+- Epics and slices under `docs/epics/<ID>/`.
 
 See [what each file does](docs/what-each-file-does.md).
 
@@ -145,7 +136,7 @@ For CI or offline rendering, use the repository CLI with `answers.env`:
 ./setup.sh --target . --answers ./answers.env --host cursor --merge
 ```
 
-The preview is read-only. `--merge` keeps custom files and union-merges settings; `--overwrite-files <paths>` replaces only selected stale managed files. The template supports `SDD` or `SDD+TDD`, project type, language/framework, commands, directories, branch policy, PR limits, Gherkin, layer split, mutation testing, background jobs, and UI toggles.
+The preview is read-only. `--merge` keeps custom files and union-merges settings; `--overwrite-files <paths>` replaces only selected stale managed files. The template supports project type, language/framework, commands, directories, branch policy, ticket tracker, PR limits, mutation testing, background jobs, and UI toggles.
 
 Successful renders maintain `agent-config.lock.json` with exact managed-file baselines. Preview distinguishes `STALE-MANAGED`, `CUSTOMIZED-MANAGED`, or `LEGACY`, plus retired `OBSOLETE` or `CUSTOMIZED-OBSOLETE` files. After review, `--merge --prune` deletes only unchanged `OBSOLETE` files; user edits stay. Fully quoted `answers.env` values are accepted, host names are case-insensitive, and an existing `.claude/answers.local.env` is automatically added to `.gitignore` after a successful write.
 
@@ -161,12 +152,10 @@ gitignored `.claude/answers.local.env`:
 ```dotenv
 autonomy_mode=gated
 output_style=concise
-agent_style=terse
 companions=not_now
 ```
 
-`output_style` controls human-facing detail; `agent_style` keeps internal agent
-reports compact. At task start, choose autonomous execution or review gates.
+`output_style` controls human-facing detail. At task start, choose autonomous execution or review gates.
 Push, merge, publish, and destructive actions still require explicit approval.
 
 ## Optional companions
@@ -186,7 +175,7 @@ python3 scripts/evals/run.py run --host cursor --case pattern-restraint
 python3 scripts/evals/run.py run --host cursor --case pattern-restraint --run
 ```
 
-The `/spec` → `/feature` workspace case additionally needs `--allow-writes` and
+The `/epic` → `implement` workspace case additionally needs `--allow-writes` and
 runs in a disposable rendered project. See [evaluation details](scripts/evals/README.md).
 
 ## Examples
@@ -200,13 +189,14 @@ runs in a disposable rendered project. See [evaluation details](scripts/evals/RE
 
 ## Upgrade
 
-Keep `answers.env`, pull the desired release, preview, then use `--merge`.
+Keep `answers.env`, pull the desired release, then run `update-config` (or preview and `--merge` by hand).
 Never mix a template upgrade into a feature commit. See the
 [upgrade guide](docs/upgrade-guide.md).
 
 ## Reference
 
-- [SDD workflow](docs/sdd-workflow.md)
+- [Epic → story → slice](docs/epic-story-slice.md)
+- [v0.11 design](docs/design/epic-story-slice.md)
 - [Existing projects](docs/guides/existing-projects.md)
 - [Host installs](docs/install/)
 - [File map](docs/what-each-file-does.md)
@@ -218,7 +208,7 @@ The operating principles build on [forrestchang/andrej-karpathy-skills](https://
 
 [GitHub Spec Kit](https://github.com/github/spec-kit) is MIT-licensed inspiration for separating specification, planning, tasks, and convergence. No artifacts were copied; this project is not affiliated with or endorsed by GitHub.
 
-[Matt Pocock's MIT-licensed skills](https://github.com/mattpocock/skills) inspired the fixed-point review and TDD seam/expectation rules. All wording and artifacts here are original to this project; this project is not affiliated with Matt Pocock.
+The `epic`, `slice`, `tests-first`, `implement` and `code-review` skills are adapted from [Matt Pocock's MIT-licensed skills](https://github.com/mattpocock/skills) (`to-spec`, `to-tickets`, `tdd`, `implement`, `code-review`); `tests-first/tests.md` and `mocking.md` are copied verbatim, with the MIT notice beside them. `council` is adapted from [tstack](https://github.com/t3dotgg/tstack) (MIT). This project is not affiliated with either author.
 
 ## Support
 

@@ -1,6 +1,6 @@
 # Backend patterns — API & persistence
 
-Read this only when `.claude/rules/patterns.md` routed a backend force here.
+Read this only when the `patterns` skill routed a backend force here.
 Every row's *simplest alternative* is tried before the pattern is named.
 
 | Force | Pattern | Simplest alternative |

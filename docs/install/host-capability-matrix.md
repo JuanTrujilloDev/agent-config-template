@@ -15,11 +15,12 @@ what is a gap — documented, not faked.
 | MCP | native | native (Codex's own config) | generated (`.cursor/mcp.json`) | native | gap |
 | Skills discovery | native | generated⁵ | native (incl. `.claude/skills/`) | native | gap |
 | Commands / skills invocation | native (slash commands) | generated (skills by name) | generated⁶ | native | gap |
-| Autonomy / output banner | native (prompt hook) | generated (instruction fallback) | generated (always-on rule) | native (prompt hook) | gap |
+| Autonomy / output banner | native (principles rule) | generated (instruction fallback) | generated (always-on rule) | native (principles rule) | gap |
+| Approved-tests lock | native (pre-edit hook + `code-review`) | partial (`code-review` check only) | partial (`code-review` check only) | native (pre-edit hook + `code-review`) | gap |
 | Brand MASTER.md | generated | generated (lazy via `/design`; values in `tokens.json`) | generated | generated | gap |
 
-1. Codex plays every role itself in sequence; subagent-spawning workflow skills carry a role-adaptation note explaining the hat switches.
-2. Cursor reads `.claude/agents/` natively but ignores the `tools:` frontmatter — treat `judge`, `security-reviewer`, and `ui-designer` as `readonly: true` ([details](cursor.md)).
+1. Codex runs every step in the thread; the slice-loop skills carry a note on running `code-review`'s two axes in sequence.
+2. Cursor reads `.claude/agents/` natively but ignores the `tools:` frontmatter — treat `security-reviewer` and `ui-designer` as `readonly: true` ([details](cursor.md)).
 3. `.cursor/hooks.json` + adapters over the same guard/format logic, registered on Cursor's native events (`beforeShellExecution`, `afterFileEdit`).
 4. No pre-edit gate exists on Cursor: the guard tokenizes common command forms
    and denies actual `git commit`/`git push` on protected branches. Malformed or

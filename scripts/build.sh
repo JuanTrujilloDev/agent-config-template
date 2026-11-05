@@ -10,15 +10,16 @@
 #   plugin/setup.sh             <- setup.sh
 #   plugin/template.config.yaml <- template.config.yaml
 #   plugin/examples/            <- examples/
+#   plugin/skills/<s>/          <- core/.claude/skills/<s>/ for every skill with no {{placeholder}}
 #   codex/skills/               <- plugin/skills/ + plugin/commands/ + hosts/codex/
-#                                  (+ patterns/references/ <- core/.claude/patterns/;
-#                                   setup-companions/companions.lock.json)
-#   cursor/                     <- core/ + hosts/cursor/ (incl. .claude/patterns/, docs/)
+#                                  (+ setup-companions/companions.lock.json)
+#   cursor/                     <- core/ + hosts/cursor/ (incl. .claude/skills/, docs/)
 #   plugin/cursor/              <- cursor/        (so plugin/setup.sh --host cursor|grok works)
 #   plugin/codex/skills/        <- codex/skills/  (so plugin/setup.sh --host codex works)
 #
-# The plugin's own agents/, commands/, hooks/, and skills/ are hand-authored,
-# stack-agnostic variants — not mirrors of core/, and not touched by this build.
+# The plugin's own agents/, commands/, hooks/, and the skills that core/ does not
+# ship placeholder-free (principles, the two style skills, lavish, port-config,
+# orchestrator-init) are hand-authored, stack-agnostic variants, not touched here.
 # codex/assets/, codex/.codex-plugin/plugin.json, and
 # .agents/plugins/marketplace.json are hand-authored — not touched either.
 #
@@ -30,8 +31,9 @@ cd "$ROOT"
 python3 scripts/check-override-headings.py
 
 # Codex derivation (rules from the former hand-sync note, now code):
-# - plugin/skills/<s>/SKILL.md      -> codex skill, adding `name:` frontmatter;
-#   supporting files in the skill folder (templates, scripts) are copied as is.
+# - plugin/skills/<s>/SKILL.md      -> codex skill, adding `name:` frontmatter when
+#   absent; supporting files in the skill folder (templates, scripts, references)
+#   are copied as is. Skills named in CODEX_NOTE_COMMANDS get the note too.
 # - plugin/commands/<c>.md          -> codex skill, frontmatter reduced to
 #   `name` + quoted `description` (no argument-hint); subagent-spawning
 #   workflow commands get the role-adaptation note (Codex has no subagents).
@@ -41,7 +43,7 @@ python3 scripts/check-override-headings.py
 #   codex-specific content deltas (setup-companions, sdd-workflow, feature,
 #   port-config).
 CODEX_NOTE="hosts/codex/note-role-adaptation.md"
-CODEX_NOTE_COMMANDS=" spec feature fix audit design "
+CODEX_NOTE_COMMANDS=" epic slice implement code-review fix audit design "
 
 build_codex_skills() {
   local out="$1" name desc
@@ -50,8 +52,14 @@ build_codex_skills() {
   for d in plugin/skills/*/; do
     name="$(basename "$d")"
     cp -R "${d%/}" "$out/$name"
-    awk -v n="$name" 'NR==1{print; print "name: " n; next} {print}' \
-      "$d/SKILL.md" > "$out/$name/SKILL.md"
+    {
+      if grep -q '^name: ' "$d/SKILL.md"; then cat "$d/SKILL.md"
+      else awk -v n="$name" 'NR==1{print; print "name: " n; next} {print}' "$d/SKILL.md"; fi
+    } | if [ "${CODEX_NOTE_COMMANDS#* $name }" != "$CODEX_NOTE_COMMANDS" ]; then
+      awk -v notefile="$CODEX_NOTE" '{ print } !done && /^# / { print ""
+        while ((getline l < notefile) > 0) print l
+        print ""; done=1 }'
+    else cat; fi > "$out/$name/SKILL.md"
   done
   for c in plugin/commands/*.md; do
     name="$(basename "$c" .md)"
@@ -65,7 +73,7 @@ build_codex_skills() {
       if [ "${CODEX_NOTE_COMMANDS#* $name }" != "$CODEX_NOTE_COMMANDS" ]; then
         awk '/^---$/{seen++; if(seen<=2) next} seen>=2{print}' "$c" | awk -v notefile="$CODEX_NOTE" '
           { print }
-          !done && /^# \// { print ""
+          !done && /^# / { print ""
                              while ((getline l < notefile) > 0) print l
                              print ""; done=1 }'
       else
@@ -79,18 +87,24 @@ build_codex_skills() {
     cp "$o/SKILL.md" "$out/$name/SKILL.md"
   done
   cp plugin/companions.lock.json "$out/setup-companions/companions.lock.json"
-  # Domain references ride along with the patterns skill (D5).
-  cp -R core/.claude/patterns "$out/patterns/references"
+}
+
+# Core skills without a {{placeholder}} in any file are host-neutral: plugin/skills/<s>
+# is a byte copy. The rest (the style skills) render per project and keep their
+# hand-authored generic plugin copies.
+generic_skills() {
+  for d in core/.claude/skills/*/; do
+    grep -rq '{{' "$d" || basename "$d"
+  done
 }
 
 # Cursor derivation (D3 — self-contained, no Claude hooks surface):
 # - hosts/cursor/AGENTS.md and principles.mdc are hand-authored sources.
-# - backend/frontend-style .mdc = frontmatter (description + globs from
-#   {{src_dir}}/{{frontend_dir}}) prepended to the core/.claude/rules/* body;
-#   a file-level <!-- requires: --> directive stays on line 1 so setup.sh
-#   still drops the file when the var is falsy.
+# - .cursor/rules/ holds principles.mdc only; style, code-query and patterns are
+#   skills under .claude/skills/, copied from core/.claude/skills/ (a file-level
+#   <!-- requires: --> directive stays on line 1 so setup.sh still drops it).
 # - .cursor/mcp.json derived from core/.claude/mcp.json.example (comment reworded).
-# - .claude/agents/, .claude/rules/ and docs/ are byte copies from core/ so the
+# - .claude/agents/, .claude/rules/, .claude/skills/ and docs/ are byte copies from core/ so the
 #   rendered target is self-contained (Cursor reads them natively).
 # - .cursor/hooks.json + .cursor/hooks/ come from hosts/cursor/ — two
 #   hand-authored adapters (branch-guard on beforeShellExecution, format-on-edit
@@ -105,34 +119,17 @@ build_codex_skills() {
 # - No .claude/settings.json is emitted: a cursor render never contains a
 #   Claude hook registration (double-fire prevented structurally).
 
-mdc_rule() { # src.md dst.mdc description globs
-  src="$1"; dst="$2"
-  {
-    body_from=1
-    if head -n 1 "$src" | grep -q '^<!-- requires:'; then
-      head -n 1 "$src"
-      body_from=2
-    fi
-    printf -- '---\ndescription: "%s"\nglobs: "%s"\n---\n' "$3" "$4"
-    tail -n "+$body_from" "$src"
-  } > "$dst"
-}
-
 build_cursor_tree() {
   local out="$1" name desc
   rm -rf "$out"
   mkdir -p "$out/.cursor/rules" "$out/.claude"
   cp hosts/cursor/AGENTS.md "$out/AGENTS.md"
   cp hosts/cursor/principles.mdc "$out/.cursor/rules/principles.mdc"
-  mdc_rule core/.claude/rules/backend-style.md "$out/.cursor/rules/backend-style.mdc" \
-    "Backend code style — auto-attached for {{src_dir}}" "{{src_dir}}/**"
-  mdc_rule core/.claude/rules/frontend-style.md "$out/.cursor/rules/frontend-style.mdc" \
-    "Frontend code style — auto-attached for {{frontend_dir}}" "{{frontend_dir}}**"
   sed 's|^  "//": .*|  "//": "Cursor MCP config (generated from core/.claude/mcp.json.example) — fill in real values after render.",|' \
     core/.claude/mcp.json.example > "$out/.cursor/mcp.json"
   cp -R core/.claude/agents "$out/.claude/agents"
   cp -R core/.claude/rules "$out/.claude/rules"
-  cp -R core/.claude/patterns "$out/.claude/patterns"
+  cp -R core/.claude/skills "$out/.claude/skills"
   cp -R core/docs "$out/docs"
   mkdir -p "$out/.cursor/hooks"
   cp hosts/cursor/hooks.json "$out/.cursor/hooks.json"
@@ -159,6 +156,9 @@ if [ "${1:-}" = "--check" ]; then
   diff -q setup.sh plugin/setup.sh >/dev/null 2>&1 || { echo "DRIFT: plugin/setup.sh != setup.sh"; drift=1; }
   diff -q template.config.yaml plugin/template.config.yaml >/dev/null 2>&1 || { echo "DRIFT: plugin/template.config.yaml != template.config.yaml"; drift=1; }
   diff -r examples plugin/examples >/dev/null 2>&1 || { echo "DRIFT: plugin/examples != examples/"; drift=1; }
+  for s in $(generic_skills); do
+    diff -r "core/.claude/skills/$s" "plugin/skills/$s" >/dev/null 2>&1 || { echo "DRIFT: plugin/skills/$s != core/.claude/skills/$s"; drift=1; }
+  done
   tmp="$(mktemp -d)"
   trap 'rm -rf "$tmp"' EXIT
   build_codex_skills "$tmp/skills"
@@ -180,10 +180,14 @@ cp -R core plugin/template
 cp -R examples plugin/examples
 cp setup.sh plugin/setup.sh
 cp template.config.yaml plugin/template.config.yaml
+for s in $(generic_skills); do
+  rm -rf "plugin/skills/$s"
+  cp -R "core/.claude/skills/$s" "plugin/skills/$s"
+done
 build_codex_skills codex/skills
 build_cursor_tree cursor
 cp -R cursor plugin/cursor
 mkdir -p plugin/codex
 cp -R codex/skills plugin/codex/skills
 
-echo "Built: plugin/template + plugin/setup.sh + plugin/template.config.yaml from core/, codex/skills from plugin/ + hosts/codex/ (+ patterns/references), cursor/ from core/ + hosts/cursor/ (+ .claude/patterns), plugin/{cursor,codex/skills} bundles."
+echo "Built: plugin/template + plugin/setup.sh + plugin/template.config.yaml from core/, plugin/skills/{$(generic_skills | paste -sd, -)} from core/.claude/skills/, codex/skills from plugin/ + hosts/codex/, cursor/ from core/ + hosts/cursor/, plugin/{cursor,codex/skills} bundles."

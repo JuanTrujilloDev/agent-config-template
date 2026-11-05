@@ -16,13 +16,12 @@
 #
 # Config scopes — every config value lives in exactly one of three places:
 #   1. Project policy — `answers.env`, COMMITTED to git. Team-shared decisions
-#      that must reproduce the same render for everyone: workflow_mode,
+#      that must reproduce the same render for everyone:
 #      TARGET_HOSTS, micro-PR limits, and every placeholder in this file.
 #   2. Local prefs — `.claude/answers.local.env`, GITIGNORED. Personal
 #      settings read at session/task time, never rendered into files:
-#      autonomy_mode, output_style (concise|balanced|detailed|terse), agent_style
-#      (terse|descriptive; subagent return messages only) — defaults concise /
-#      terse, neither asked by setup — and companions.
+#      autonomy_mode, output_style (concise|balanced|detailed|terse; default
+#      concise, not asked by setup) and companions.
 #   3. Session keywords — "just go", "gate me", "stop before commit".
 #      One-session overrides; never persisted to any file.
 
@@ -53,26 +52,17 @@ variables:
     # `grok` is an alias for the claude tree + AGENTS.md. Unsupported hosts
     # (opencode, gemini, windsurf, ...) are rejected — use the port-config skill.
 
-  # --- Workflow ---
-  - name: workflow_mode
-    prompt: "Workflow mode — SDD (spec-driven; TDD opt-in per mini-feature) or SDD+TDD (TDD + Gate 2 on by default per mini-feature, skippable per feature)"
-    choices: [SDD, SDD+TDD]
-    default: SDD
-    # Project policy — recorded in the committed answers.env. Absent key = SDD
-    # (back-compat: every existing answers.env keeps today's behavior).
-    # setup.sh synthesizes workflow_tdd=yes when the value is SDD+TDD, which
-    # drives the {{#workflow_tdd}} sections in feature.md / orchestrator.md.
-
   # --- Tech stack ---
   - name: project_type
     prompt: "Project type"
     choices: [web-app, api-service, mobile-app, desktop-app, game, library-cli, data-ml, other]
     default: web-app
-    # Drives which dev agents render and how design artifacts are framed.
+    # Drives which pattern references and design artifacts apply.
     # Synthetic flags derived by setup.sh: is_web (web-app|api-service),
     # is_mobile, is_desktop, is_game, is_generic (library-cli|data-ml|other),
-    # has_ui (frontend or any UI-bearing type), has_database (database != none),
-    # and primary_dev_agent (backend-dev|mobile-dev|desktop-dev|game-dev|core-dev).
+    # has_ui (frontend or any UI-bearing type), has_database (database != none).
+    # Retired in v0.11 (setup.sh warns once and ignores them): workflow_mode,
+    # use_gherkin, enforce_layer_split.
 
   - name: language
     prompt: "Primary language"
@@ -183,17 +173,6 @@ variables:
     choices: [yes, no]
     default: yes
     when: has_frontend == yes
-
-  - name: enforce_layer_split
-    prompt: "Enforce strict BE/FE PR split (separate PRs for each layer)?"
-    choices: [yes, no]
-    default: no
-    when: has_frontend == yes
-
-  - name: use_gherkin
-    prompt: "Write acceptance contracts as real Gherkin .feature files (needs a runner like behave/cucumber)?"
-    choices: [yes, no]
-    default: no
 
   - name: enforce_mutation_testing
     prompt: "Enable mutation testing as a per-feature close gate (compute-heavy; ships tools/mutate.py + mutation-tester agent)?"

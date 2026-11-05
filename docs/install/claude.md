@@ -13,10 +13,11 @@ Inside Claude Code:
 
 ## What you get
 
-- **Agents:** `orchestrator` (runs the SDD flow, never edits code), `pmo` (spec + Given/When/Then contract + mini-features), a per-stack dev library (`backend-dev`/`frontend-dev` for web, `mobile-dev`, `game-dev`, `desktop-dev`, `core-dev`), `ui-designer`, `judge` (reviews code + tests; adversarial mode on large diffs), `security-reviewer` (OWASP audit), plus `mutation-tester` when enabled.
-- **Commands:** `/spec`, `/feature`, `/fix`, `/verify`, `/audit`, `/commit`, `/pr`, `/design`, `/setup-template`, `/setup-companions` (optional: installs graphify + ponytail, gated on your confirmation).
-- **Skills:** `principles` (incl. the leverage ladder), `sdd-workflow`, `code-query` (graph-first codebase querying), `backend-style`, `frontend-style`, `port-config` (generate this config for another agent host).
-- **Hooks:** protected-branch hard block, advisory agent guidance, targeted format-on-write.
+- **Agents:** `ui-designer`, `security-reviewer` (OWASP audit), plus `mutation-tester` when enabled. No coordinator or dev subagents.
+- **Slice loop (skills):** `epic`, `slice`, `tests-first`, `implement`, `code-review`, `council` (opt-in).
+- **Commands:** `/fix`, `/verify`, `/audit`, `/commit`, `/pr`, `/design`, `/integrate`, `/setup-template`, `/setup-companions` (optional: installs graphify + ponytail, gated on your confirmation).
+- **Other skills:** `principles` (incl. the leverage ladder), `update-config`, `code-query` (graph-first codebase querying), `patterns`, `backend-style`, `frontend-style`, `port-config` (generate this config for another agent host).
+- **Hooks:** protected-branch hard block, approved-tests lock, targeted format-on-write.
 
 The hooks read env vars with sensible defaults — override per project:
 
@@ -43,4 +44,4 @@ Renders a `.claude/` tree + `CLAUDE.md` tuned to your stack. **Non-destructive**
 
 ## Use it
 
-`/spec <task>` → approve the contract → `/feature <task>` (one mini-feature at a time, optional TDD) → `/verify` before done. Small scoped fix: `/fix`. See [the workflow](../sdd-workflow.md).
+`/epic <task>` → approve the draft → `/slice <ID> <n>` → `tests-first` (approve the tests) → `implement` → `code-review` → `/pr`. Small scoped fix: `/fix`. See [the workflow](../epic-story-slice.md).

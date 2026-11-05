@@ -2,6 +2,53 @@
 
 How to pull updates from the template into a project that's already configured.
 
+## Upgrading from v0.10.0 to v0.11.0 — breaking
+
+v0.11.0 replaces the spec-driven flow with **epic → story → slice**
+(design: `docs/design/epic-story-slice.md`; how it runs: `docs/epic-story-slice.md`).
+Scripts or habits that call the old names break:
+
+| Removed | Use instead |
+| --- | --- |
+| `/spec` | `/epic <ticket or ask>`, then `/slice <ID> <n>` |
+| `/feature` | `tests-first` → `implement` → `code-review` → `/pr`, in your thread |
+| agents `pmo`, `orchestrator`, `judge`, `backend-dev`, `frontend-dev`, `core-dev`, `desktop-dev`, `mobile-dev`, `game-dev` | the skills above; `code-review` replaces `judge` |
+| `coding-reminder.sh` (`UserPromptSubmit` hook) | nothing: principles are one ≤80-line always-loaded file |
+| `.claude/rules/{backend-style,frontend-style,code-query,patterns}.md`, `.claude/patterns/` | skills under `.claude/skills/` (loaded on demand) |
+| `docs/specs/<slug>/` (spec, contract, `features.json`) | `docs/epics/<ID>/epic.md` + `slices/<n>.md`; old folders go to `docs/epics/archive/` |
+| `scripts/validate-specs.py`, `scripts/migrate-specs.py` | `.claude/skills/epic/validate-epics.py`, `.claude/skills/update-config/migrate.py` |
+| answers keys `workflow_mode`, `use_gherkin`, `enforce_layer_split` | none: tests always come first, slices are always layered, Gherkin tags are gone. `setup.sh` warns once and ignores them |
+| `agent_style` local preference | none: subagent report formats are gone |
+
+New: approved tests are locked. After you approve a slice's tests,
+`tests-first` lists them under `## Approved tests` in the slice file;
+`agent-enforcement.sh` blocks edits to them on that slice's branch
+(`AGENT_CONFIG_UNLOCK_TESTS=1` lifts it) and `code-review` fails on any diff to
+them. `/pr` targets the previous layer's branch while it is open. `council` is an
+opt-in single-round review by three providers. The optional `orchestrator-init`
+skill (scaffolds an orchestrator folder) also ships in this release.
+
+**How to upgrade.** Run the `update-config` skill in the project (from the
+plugin, or `<template>/core/.claude/skills/update-config/`). It previews the
+re-render, lists `OBSOLETE` files (the dropped agents, commands, hook and rules)
+for `--prune`, plans the `docs/specs/` migration, and applies only what you
+approve by number. By hand:
+
+```bash
+~/code/agent-config-template/setup.sh --target . --answers ./answers.env                 # plan
+~/code/agent-config-template/setup.sh --target . --answers ./answers.env --merge \
+  --overwrite-files <STALE-MANAGED paths> --prune                                        # apply
+python3 .claude/skills/update-config/migrate.py           # plan the docs/specs/ migration
+python3 .claude/skills/update-config/migrate.py --apply   # archive done specs, convert open ones
+python3 .claude/skills/epic/validate-epics.py docs/epics
+```
+
+`--merge` adds hooks but never removes them, so delete the `UserPromptSubmit`
+entry for `coding-reminder.sh` from `.claude/settings.json` by hand. Delete the
+three retired keys from `answers.env`. Edited copies of dropped files are
+`CUSTOMIZED-OBSOLETE` and stay until you remove them.
+
+
 ## The model
 
 As of **v0.4.0**, `setup.sh` is **non-destructive**. Run against a project that
@@ -33,7 +80,7 @@ git add answers.env   # the source of truth — re-renders the same config later
 
 ```bash
 # 1. Pull the latest template (or check out a tag for stability)
-cd ~/code/agent-config-template && git pull origin main   # or: git checkout v0.10.0
+cd ~/code/agent-config-template && git pull origin main   # or: git checkout v0.11.0
 
 # 2. Preview what would change in your project
 cd ~/code/my-project
@@ -43,7 +90,7 @@ cd ~/code/my-project
 ~/code/agent-config-template/setup.sh --target . --answers ./answers.env --merge
 
 # 4. Commit
-git add .claude/ CLAUDE.md docs/ agent-config.lock.json && git commit -m "chore: upgrade agent-config-template to v0.10.0"
+git add .claude/ CLAUDE.md docs/ agent-config.lock.json && git commit -m "chore: upgrade agent-config-template to v0.11.0"
 ```
 
 A template upgrade (`setup.sh --merge`) is its own `chore:` commit — never mixed into a feature PR.
@@ -57,10 +104,6 @@ diff -r .claude "$TMP/.claude"
 ```
 
 ---
-
-## Unreleased
-
-- New optional `orchestrator-init` skill and `/orchestrator-init` command: scaffolds an orchestrator folder and prints two T3 schedule prompts to create by hand; nothing changes for projects that do not run it.
 
 ## Upgrading from v0.9.2 to v0.10.0 (ecosystem)
 

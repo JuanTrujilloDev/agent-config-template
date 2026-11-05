@@ -71,7 +71,7 @@
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-TEMPLATE_VERSION="0.9.2"
+TEMPLATE_VERSION="0.11.0"
 # Canonical source is core/ at the repo root; the bundled plugin copy ships as
 # template/. The same script works in both locations by auto-detecting.
 if [ -d "$SCRIPT_DIR/core" ]; then
@@ -268,29 +268,24 @@ flag_map = {
 if tt in flag_map:
     ANS[flag_map[tt]] = "yes"
 
-# 2a. Synthesize workflow_tdd=yes when workflow_mode is SDD+TDD (absent = SDD).
-if ANS.get("workflow_mode", "").strip() == "SDD+TDD":
-    ANS["workflow_tdd"] = "yes"
+# 2a. v0.11 retired these keys: tests always come first, slices are always layered,
+#     Gherkin is gone. Old answers files still render; warn once and ignore them.
+RETIRED = [k for k in ("workflow_mode", "use_gherkin", "enforce_layer_split") if k in ANS]
+if RETIRED:
+    print(f"  ⚠ answers keys {', '.join(RETIRED)} are retired in v0.11 and ignored; delete them from the answers file.")
+    for k in RETIRED:
+        del ANS[k]
 
-# 2b. Synthesize project-type flags + the primary dev agent for this stack.
-#     {{primary_dev_agent}} lets every reference to "the implementer" render
-#     to the right specialist; {{#is_*}} sections gate type-specific files.
+# 2b. Synthesize project-type flags; {{#is_*}} sections gate type-specific text.
 pt = (ANS.get("project_type") or "web-app").strip().lower()
 PT_FLAGS = {
-    "web-app":     ("is_web",     "backend-dev"),
-    "api-service": ("is_web",     "backend-dev"),
-    "mobile-app":  ("is_mobile",  "mobile-dev"),
-    "desktop-app": ("is_desktop", "desktop-dev"),
-    "game":        ("is_game",    "game-dev"),
-    "library-cli": ("is_generic", "core-dev"),
-    "data-ml":     ("is_generic", "core-dev"),
-    "other":       ("is_generic", "core-dev"),
+    "web-app": "is_web", "api-service": "is_web", "mobile-app": "is_mobile",
+    "desktop-app": "is_desktop", "game": "is_game",
 }
-flag, dev = PT_FLAGS.get(pt, ("is_generic", "core-dev"))
+flag = PT_FLAGS.get(pt, "is_generic")
 ANS.setdefault("project_type", pt)
 ANS[flag] = "yes"
-ANS["primary_dev_agent"] = dev
-# UI-bearing projects get ui-designer; web frontends additionally get frontend-dev.
+# UI-bearing projects get ui-designer.
 if ANS.get("has_frontend", "").strip().lower() in ("yes", "true") or flag in ("is_mobile", "is_desktop", "is_game"):
     ANS["has_ui"] = "yes"
 # Persistence-aware sections (style guide DB rules etc.).
@@ -301,7 +296,7 @@ if "has_background_jobs" not in ANS and "has_celery" in ANS:
     ANS["has_background_jobs"] = ANS["has_celery"]
 
 # 3. Normalize yes/no booleans — anything blank/no/false → empty (= falsy).
-for k in ("has_frontend", "has_background_jobs", "has_e2e", "enforce_layer_split", "use_gherkin", "enforce_mutation_testing", "has_ui", "has_database"):
+for k in ("has_frontend", "has_background_jobs", "has_e2e", "enforce_mutation_testing", "has_ui", "has_database"):
     v = ANS.get(k, "").strip().lower()
     if v in ("", "no", "false"):
         ANS[k] = ""

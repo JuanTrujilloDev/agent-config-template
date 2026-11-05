@@ -198,8 +198,8 @@ do
     "$WORK/v092-mf4-upgrade.md" "$V092_MF4_TERM"
 done
 
-check "v0.9.2 @s33 spec ledger validates" "0" \
-  "$(cd "$ROOT" && python3 scripts/validate-specs.py docs/specs/upgrade-fidelity/features.json >/dev/null 2>&1; echo $?)"
+check "v0.11 @s33 epics validate" "0" \
+  "$(cd "$ROOT" && python3 core/.claude/skills/epic/validate-epics.py docs/epics >/dev/null 2>&1; echo $?)"
 check "v0.9.2 @s33 build check passes" "0" \
   "$(cd "$ROOT" && bash scripts/build.sh --check >/dev/null 2>&1; echo $?)"
 V092_MF4_PACKAGING=$(cd "$ROOT" && python3 scripts/validate-packaging.py 2>&1)

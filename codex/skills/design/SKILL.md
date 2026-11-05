@@ -5,12 +5,11 @@ description: "Design workflow for a new UI feature — ui-designer wireframes an
 
 # /design
 
-> **On Codex (no subagents):** you play every role yourself, switching hats
-> explicitly and in sequence — `pmo` (spec/contract), the dev specialist
-> (implement), `judge` (review), `security-reviewer` (when auth/permissions/
-> data are touched). Same artifacts under `docs/specs/<slug>/`, same human
-> gates (contract approval; failing tests under TDD), same Definition of Done.
-> Announce each hat switch in one line.
+> **On Codex (no subagents):** run every step in this thread, in sequence.
+> `code-review` runs its Standards axis, then its Spec axis, and reports them
+> separately; `security-reviewer` becomes a read-only pass you announce in one
+> line. Same files under `docs/epics/<ID>/`, same user gates (epic draft, slice
+> brief, approved tests), same Definition of Done.
 
 
 Start the design workflow for a new UI feature.
@@ -23,13 +22,11 @@ Start the design workflow for a new UI feature.
 
 ## Workflow
 
-Read `agent_style` from `.claude/answers.local.env` once before spawning (absent, empty, or unrecognized = `terse`). Add `agent_style: <terse|descriptive> — return per "Report format" in the principles skill` to every subagent prompt this command spawns. Persisted artifacts stay prose.
-
 1. **Gather requirements**
-  - What is the feature?
-  - Who is the user?
-  - What problem does it solve?
-  - Constraints?
+   - What is the feature?
+   - Who is the user?
+   - What problem does it solve?
+   - Constraints?
 
 2. **Load the brand system**
    - Read `docs/design-system/MASTER.md`, its machine-readable value source `docs/design-system/tokens.json`, and `docs/design-system/pages/<page>.md` if the page has an override. Every spec cites semantic tokens.
@@ -45,6 +42,6 @@ Read `agent_style` from `.claude/answers.local.env` once before spawning (absent
 
 4. **Spawn `ui-designer`** to produce wireframes + component specs
 
-5. **Pause for user approval** before handoff to `frontend-dev`
+5. **Pause for user approval** before implementation
 
-6. After approval, route to `frontend-dev` for implementation
+6. After approval, implement in this thread with `implement`, using the specs as the slice's expected behaviour

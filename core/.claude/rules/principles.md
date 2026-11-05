@@ -11,11 +11,11 @@ Restate the goal in one sentence and list 2–4 verifiable success criteria. Sta
 Write the minimum code for the stated problem: nothing speculative, no option without a caller, three similar lines before a premature abstraction. Before writing, stop at the first rung that holds:
 
 1. Does it need to exist at all?
-2. Is it already in this codebase? (`.claude/rules/code-query.md`)
+2. Is it already in this codebase? (`code-query` skill)
 3. Standard library, then a native platform feature, then an installed dependency.
 4. Only then, the minimum new code.
 
-Before adding a pattern or abstraction, name the force present today or refuse (`.claude/rules/patterns.md`). Security, validation, error handling and accessibility are never rungs to skip.
+Before adding a pattern or abstraction, name the force present today or refuse (`patterns` skill). Security, validation, error handling and accessibility are never rungs to skip.
 
 ## 3. Surgical Changes
 

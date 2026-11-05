@@ -8,7 +8,7 @@ mkdir -p "$EVAL_TMP/bin"
 python3 "$EVAL_RUN" validate --catalog "$EVAL_CATALOG" >"$EVAL_TMP/validate.out" 2>"$EVAL_TMP/validate.err"
 check "v0.10.0 @s1 catalog validates" "0" "$?"
 check "v0.10.0 @s1 six cases listed" "6" "$(python3 "$EVAL_RUN" list --catalog "$EVAL_CATALOG" | wc -l | tr -d ' ')"
-for id in pattern-restraint pattern-force pattern-stuffing fix-needs-repro terse-review spec-feature-workflow; do
+for id in pattern-restraint pattern-force pattern-stuffing fix-needs-repro two-axis-review epic-slice-workflow; do
   grep_case "v0.10.0 @s1 catalog has $id" "$EVAL_CATALOG" "\"id\": *\"$id\""
 done
 
@@ -22,9 +22,9 @@ case "${FAKE_MODE:-ok}" in
   malformed) echo 'not json'; exit 0 ;;
   timeout) sleep 2; exit 0 ;;
 esac
-mkdir -p docs/specs/eval-smoke
-printf 'spec\n' >docs/specs/eval-smoke/spec.md
-printf 'contract\n' >docs/specs/eval-smoke/contract.md
+mkdir -p docs/epics/EVAL/slices
+printf -- '- **S1** story\n' >docs/epics/EVAL/epic.md
+printf -- '- Layer: be\n' >docs/epics/EVAL/slices/1.md
 printf 'feature\n' >eval-smoke.txt
 if [ "${1:-}" = "exec" ]; then
   printf '%s\n' '{"type":"item.completed","item":{"type":"agent_message","text":"no pattern — single call site"}}'
@@ -74,10 +74,10 @@ grep_case "v0.10.0 @s7 result records pass" "$EVAL_TMP/claude.json" '"status": "
 check "v0.10.0 @s8 secret omitted" "0" "$(grep -rl 'do-not-record-this' "$EVAL_TMP"/*.json 2>/dev/null | wc -l | tr -d ' ')"
 
 # @s5/@s6 — write cases need both gates and always use disposable cwd.
-eval_env python3 "$EVAL_RUN" run --host claude --case spec-feature-workflow --run \
+eval_env python3 "$EVAL_RUN" run --host claude --case epic-slice-workflow --run \
   --catalog "$EVAL_CATALOG" --results "$EVAL_TMP/refused.json" >/dev/null 2>&1
 check "v0.10.0 @s6 write case refuses one gate" "2" "$?"
-eval_env python3 "$EVAL_RUN" run --host claude --case spec-feature-workflow --run --allow-writes \
+eval_env python3 "$EVAL_RUN" run --host claude --case epic-slice-workflow --run --allow-writes \
   --catalog "$EVAL_CATALOG" --results "$EVAL_TMP/write.json" >/dev/null
 check "v0.10.0 @s6 disposable write run passes" "0" "$?"
 check "v0.10.0 @s6 source repo never host cwd" "0" "$(grep -cFx "$ROOT" "$EVAL_TMP/cwds" || true)"

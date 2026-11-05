@@ -9,12 +9,9 @@ Full text: `.claude/rules/principles.md` (always loaded via `.cursor/rules/princ
 1. **Think Before Coding** — state assumptions; ask if ambiguous.
 2. **Simplicity First (YAGNI)** — minimum code; reuse > stdlib > native > installed deps > new code.
 3. **Surgical Changes** — touch only what the task requires.
-4. **Goal-Driven Execution** — write 2–4 verifiable success criteria first; loop until they pass.
-{{#enforce_layer_split}}
-5. **Backend / Frontend Split** — two PRs per feature: BE ships first, FE ships after.
-{{/enforce_layer_split}}
-- **Micro-PR Discipline** — ≤{{max_files_per_pr}} files changed, <{{max_loc_per_pr}} lines changed per PR.
-- **Definition of Done** — Format → Lint → Unit tests → review before declaring done.
+4. **Goal-Driven Execution** — write 2–4 verifiable success criteria first; loop until they pass. Approved tests are locked: never edit one to go green; stop and ask.
+- **Micro-PR Discipline** — one slice per PR, one layer per slice (db → be → fe); aim for 200–400 non-test lines; cap ≤{{max_files_per_pr}} files, <{{max_loc_per_pr}} lines.
+- **Definition of Done** — Format → Lint → Tests → `code-review` before declaring done.
 - **Branch Discipline** — never code on `{{default_branch}}`; check out a typed branch first.
 
 Before any coding task: restate the goal in one sentence + list 2–4 verifiable success criteria.
@@ -40,20 +37,14 @@ Never code on `{{default_branch}}`.
 {{#branch_prefix}}
 | Type | Pattern | Example |
 |---|---|---|
-| Feature (tracked) | `feature/{{branch_prefix}}-<#>-<kebab-name>` | `feature/{{branch_prefix}}-87-csv-export` |
-{{#enforce_layer_split}}
-| Feature split BE/FE | append `-be` / `-fe` | `feature/{{branch_prefix}}-87-csv-export-be` |
-{{/enforce_layer_split}}
+| Slice | `feature/{{branch_prefix}}-<#>-<group>-<layer>` | `feature/{{branch_prefix}}-87-export-be` |
 | Fix (tracked) | `fix/{{branch_prefix}}-<#>-<kebab-name>` | `fix/{{branch_prefix}}-104-login-redirect` |
 | Fix (untracked) | `fix/<kebab-name>` | `fix/login-redirect` |
 {{/branch_prefix}}
 {{^branch_prefix}}
 | Type | Pattern | Example |
 |---|---|---|
-| Feature | `feature/<kebab-name>` | `feature/csv-export` |
-{{#enforce_layer_split}}
-| Feature split BE/FE | append `-be` / `-fe` | `feature/csv-export-be` |
-{{/enforce_layer_split}}
+| Slice | `feature/<ID>-<group>-<layer>` | `feature/EXPORT-csv-be` |
 | Fix | `fix/<kebab-name>` | `fix/login-redirect` |
 {{/branch_prefix}}
 | Hotfix (urgent prod) | `hotfix/<kebab-name>` | `hotfix/login-500` |
@@ -72,22 +63,17 @@ Commits are conventional: `type(scope): description` — feat, fix, refactor, te
 {{lint_cmd}}
 ```
 
-## Agents (`.claude/agents/`)
+## Workflow
 
-Prefer the appropriate agent role for non-trivial work (>50 lines changed or more than one new def/class):
+`/epic` → `/slice` → `tests-first` → `implement` → `code-review` → `/pr`, all in this thread (skills under `.claude/skills/`). Epics and slices live in `docs/epics/<ID>/`. A small change with an obvious cause uses `/fix`.
+
+## Agents (`.claude/agents/`)
 
 | Trigger | Agent | Scope |
 |---|---|---|
-| Spec a feature (idea/SOW → contract + mini-features) | `pmo` | `docs/specs/<slug>/` |
-| Run the full spec-driven flow for a feature | `orchestrator` | coordinates; never edits code |
-| Implementation ticket | `{{primary_dev_agent}}` | Code in `{{src_dir}}` |
-{{#has_frontend}}
-| Frontend ticket | `frontend-dev` | UI code in `{{frontend_dir}}` |
-{{/has_frontend}}
 {{#has_ui}}
 | New UI/UX | `ui-designer` (before UI implementation) | wireframes/mockups (read-only) |
 {{/has_ui}}
-| Review before commit/PR | `judge` | code + tests vs contract, micro-PR limits, principles |
 | Security audit | `security-reviewer` | mandatory for auth/permissions/data |
 
 ## Visual review (lavish)
@@ -97,7 +83,7 @@ For a plan, comparison, diagram, table, or report the user asked to mark up, use
 ## Detail
 
 - Project skills: `.claude/skills/` — Cursor reads these rendered, stack-dependent skills natively
-- Style rules: `.claude/rules/backend-style.md`{{#has_frontend}}, `.claude/rules/frontend-style.md`{{/has_frontend}} (auto-attached via `.cursor/rules/*.mdc`)
-- Structural code questions (what depends on what): `.claude/rules/code-query.md` — graph first, grep second
+- Style skills: `.claude/skills/backend-style/`{{#has_frontend}}, `.claude/skills/frontend-style/`{{/has_frontend}} (loaded per slice layer)
+- Structural code questions (what depends on what): the `code-query` skill (`.claude/skills/code-query/`) — graph first, grep second
 - Full principles: `.claude/rules/principles.md`
 - Never commit `.env` files; validate input at every boundary

@@ -17,8 +17,6 @@ Start the design workflow for a new UI feature.
 
 ## Workflow
 
-Read `agent_style` from `.claude/answers.local.env` once before spawning (absent, empty, or unrecognized = `terse`). Add `agent_style: <terse|descriptive> — return per "Report format" in .claude/rules/principles.md` to every subagent prompt this command spawns. Persisted artifacts stay prose.
-
 1. **Gather requirements**
    - What is the feature?
    - Who is the user?
@@ -39,6 +37,6 @@ Read `agent_style` from `.claude/answers.local.env` once before spawning (absent
 
 4. **Spawn `ui-designer`** to produce wireframes + component specs
 
-5. **Pause for user approval** before handoff to the implementing dev agent
+5. **Pause for user approval** before implementation
 
-6. After approval, route to {{#has_frontend}}`frontend-dev`{{/has_frontend}}{{^has_frontend}}`{{primary_dev_agent}}`{{/has_frontend}} for implementation
+6. After approval, implement in this thread with `implement`, using the specs as the slice's expected behaviour

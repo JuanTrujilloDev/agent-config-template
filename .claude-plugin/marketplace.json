@@ -10,7 +10,7 @@
       "name": "agent-config-template",
       "source": "./plugin",
       "description": "A concise, spec-driven coding-agent workflow for Claude Code, Cursor, Grok, and Codex—adapted to your stack instead of copied by hand.",
-      "version": "0.10.0",
+      "version": "0.11.0",
       "homepage": "https://github.com/JuanTrujilloDev/agent-config-template",
       "license": "MIT",
       "keywords": [

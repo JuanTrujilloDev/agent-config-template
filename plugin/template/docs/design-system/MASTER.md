@@ -154,7 +154,7 @@ Layout:
 
 ## Anti-patterns
 
-Any of these in a diff is a review finding (judge cites `file:line`):
+Any of these in a diff is a review finding (`code-review` cites `file:line`):
 
 - Hardcoded colors, spacing, radii, shadows, or font sizes not traceable to a token in this file (`#1a1a1a`, `margin: 13px`, `rounded-[5px]`, `text-[15px]`).
 - Off-palette values "just this once" — add the token here or use an existing one.

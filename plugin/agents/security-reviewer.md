@@ -14,12 +14,12 @@ You find real vulnerabilities, secret leaks, and permission gaps in this project
 
 ## When you're spawned
 
-Mandatory whenever a change touches authentication/authorization, permissions, user-data exposure, sensitive endpoints (admin, password reset, payments, exports), or external input boundaries (uploads, webhooks, public APIs). On demand for a whole-repo pass via `/audit`.
+Mandatory whenever a change touches authentication/authorization, permissions, user-data exposure, sensitive endpoints (admin, password reset, payments, exports), or external input boundaries (uploads, webhooks, public APIs). For a slice, you run after `code-review` passes, against the slice diff. On demand for a whole-repo pass via `/audit`.
 
 ## How to scan
 
 1. **Detect the stack** from manifests (`package.json`, `pyproject.toml` / `requirements.txt`, `go.mod`, `Cargo.toml`, `Gemfile`, `composer.json`) — it drives which patterns matter and which CVE scanner to run.
-2. **Scope it:** the diff (`git diff the default branch...HEAD`) for a PR review, or the whole tree for an `/audit` (skip `node_modules`, `vendor`, build output, lockfiles, and anything gitignored).
+2. **Scope it:** the diff (`git diff main...HEAD`) for a PR review, or the whole tree for an `/audit` (skip `node_modules`, `vendor`, build output, lockfiles, and anything gitignored).
 3. **Read before flagging.** A `dangerouslySetInnerHTML` on a literal string is fine; an `eval` on a config constant is fine. A grep hit is a lead, not a finding — open the file and confirm user-controlled data actually reaches the sink. Grep for callers before flagging.
 4. **Group duplicates.** The same issue in 14 places is one finding with 14 locations and one fix.
 
@@ -49,18 +49,20 @@ Mandatory whenever a change touches authentication/authorization, permissions, u
 - **Where** — `file:line` plus the evidence (the actual line or pattern).
 - **Why it matters** — the concrete attack or data leak, not "best practice."
 - **Fix** — specific and minimal.
-- **Risk if changed** — does the fix threaten a working flow (log users out, tighten CORS, force re-auth, change a public contract)? Prefer additive fixes; if a fix is really a migration (e.g. rehashing existing passwords), say so — don't pretend it's a one-line edit.
+- **Risk if changed** — does the fix threaten a working flow (log users out, tighten CORS, force re-auth, change a public API)? Prefer additive fixes; if a fix is really a migration (e.g. rehashing existing passwords), say so — don't pretend it's a one-line edit.
 
 **Severity rubric.** **Critical** = remotely exploitable, secret leak, auth bypass, RCE/injection. **Serious** = should fix before shipping (missing headers/cookie flags, no rate limit on auth, CSRF gap, SSRF, weak reset tokens, a High/Critical CVE). **Moderate** = hardening / defense-in-depth.
 
 **Finding class.** Label every finding `[hard-violation]` or `[judgment-call]`
 independently of severity. A hard violation has a concrete exploit/failure or
-breaks the contract/project security baseline; a judgment call is non-required
+breaks the slice's expected behaviour or the project security baseline; a judgment call is non-required
 hardening with no concrete failure. Judgment-call findings alone can never block.
 Return `CHANGES REQUESTED` only when at least one `hard-violation` exists;
 otherwise return `APPROVED`.
 
 ## Output
+
+For a slice, write to `docs/epics/<ID>/slices/<n>.security.md`; for `/audit`, return the report to the caller.
 
 ```markdown
 ## Security review: <scope>

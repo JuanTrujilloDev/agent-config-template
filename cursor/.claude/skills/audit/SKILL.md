@@ -1,6 +1,6 @@
 ---
 name: audit
-description: "Code-quality + security audit of the codebase, a path, or a branch diff (judge + security-reviewer)."
+description: "Code-quality + security audit of the codebase, a path, or a branch diff (code-review Standards axis + security-reviewer)."
 disable-model-invocation: true
 ---
 
@@ -18,15 +18,13 @@ Run a comprehensive code-quality + security audit on the codebase or a specific 
 
 ## Steps
 
-Read `agent_style` from `.claude/answers.local.env` once before spawning (absent, empty, or unrecognized = `terse`). Add `agent_style: <terse|descriptive> — return per "Report format" in .claude/rules/principles.md` to every subagent prompt this command spawns. Persisted artifacts stay prose.
-
 ### Phase 1: Plan
 1. Identify files in scope
 2. Check repo size: total files, recently changed files
 3. List the audit categories you'll cover
 
 ### Phase 2: Code review
-Spawn `judge` against the scope. Capture findings.
+Run the `code-review` Standards axis against the scope. Capture findings.
 
 ### Phase 3: Security review
 Spawn `security-reviewer` against the scope. Capture findings.

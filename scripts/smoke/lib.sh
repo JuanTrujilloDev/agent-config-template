@@ -5,12 +5,8 @@
 bash "$ROOT/setup.sh" --target "$WORK" --answers "$ROOT/examples/python-fastapi/answers.env" >/dev/null 2>&1 \
   || { echo "FAIL render examples/python-fastapi"; exit 1; }
 
-PLUGIN_HOOK="$ROOT/plugin/hooks/coding-reminder.sh"  # chunk 7 removes it
-
 PRIN="$WORK/.claude/rules/principles.md"
-FEAT="$WORK/.claude/commands/feature.md"
-ORCH="$WORK/.claude/agents/orchestrator.md"
-PMO="$WORK/.claude/agents/pmo.md"; JUDGE="$WORK/.claude/agents/judge.md"; VERIFY="$WORK/.claude/commands/verify.md"
+VERIFY="$WORK/.claude/commands/verify.md"
 
 check() { # name expected actual
   if [ "$2" = "$3" ]; then echo "PASS $1"; else
@@ -57,4 +53,4 @@ before() {
 
 # Shared across mini-feature files (hoisted per mf5 judge)
 PH='\{\{[#^/]?[a-z_]+\}\}'  # placeholder-shaped only; `style={{...}}` in the inline-styles gotcha is legit JSX
-P_PRIN="$ROOT/plugin/skills/principles/SKILL.md"; P_PMO="$ROOT/plugin/agents/pmo.md"
+P_PRIN="$ROOT/plugin/skills/principles/SKILL.md"

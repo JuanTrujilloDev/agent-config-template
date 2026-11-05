@@ -4,7 +4,7 @@ A reference for everything in `core/` (the canonical source; `template/` before 
 
 ## `CLAUDE.md` (project root)
 
-Loaded by Claude Code on every session start. The "always-in-context" overview of the project: principles, tech stack, branch rules, agent map. Keep it short — anything detailed belongs in a file under `.claude/rules/` or `.claude/agents/` that Claude can pull when relevant.
+Loaded by Claude Code on every session start. The "always-in-context" overview of the project: principles, tech stack, branch rules, agent map. Keep it short — anything detailed belongs in a skill under `.claude/skills/` that Claude loads when relevant.
 
 ## `.claude/HELP.md`
 
@@ -16,14 +16,15 @@ Project-level Claude Code settings. Three things:
 - **`permissions.allow`** — tools Claude can use without asking (e.g. `Bash(pytest:*)`).
 - **`permissions.deny`** — tools blocked outright (e.g. `Bash(rm -rf:*)`, `Edit(.env*)`).
 - **`permissions.ask`** — tools that prompt for confirmation each call (e.g. `Bash(git commit:*)`).
-- **`hooks`** — registers the three shell hooks for `PreToolUse`, `PostToolUse`, and `UserPromptSubmit`.
+- **`hooks`** — registers the two shell hooks for `PreToolUse` and `PostToolUse`.
+- Allows `Read(docs/epics/**)` and `Write(docs/epics/**)` for epic and slice files.
 
 `.claude/settings.local.json` is per-user / per-machine overrides. **Gitignore it.**
 
 ## `.claude/answers.local.env`
 
 Gitignored personal preferences read at session time: `autonomy_mode`,
-`output_style`, `agent_style`, and companion choices. It is never a renderer
+`output_style`, and companion choices. It is never a renderer
 input; shared project policy stays in committed `answers.env`.
 
 ## `.claude/mcp.json.example`
@@ -32,32 +33,35 @@ Template for MCP server config. Copy to `.claude/mcp.json` and fill in real valu
 
 ## `.claude/rules/principles.md`
 
-Always loaded. The non-negotiable operating principles:
-1. Think Before Coding
-2. Simplicity First (YAGNI)
-3. Surgical Changes
-4. Goal-Driven Execution
-5. (optional) Backend / Frontend Split
-6. Micro-PR Discipline
-7. Definition of Done
-8. Conciseness
-9. Branch Discipline
+The only always-loaded rule (≤80 lines): Think Before Coding, Simplicity First
+(with the leverage ladder), Surgical Changes, Goal-Driven Execution (approved
+tests locked), Read Before You Write, Code Health, Commits, Micro-PR Discipline,
+Definition of Done, Conciseness, Autonomy Mode, Branch Discipline. If you change
+one, change every reference to it in `CLAUDE.md`, `HELP.md` and the skills.
 
-If you change one principle, change every reference to it in `CLAUDE.md`, `HELP.md`, and the agent files. Numbering matters.
+## `.claude/skills/<name>/SKILL.md`
 
-## `.claude/rules/backend-style.md`
+Loaded on demand, never on every turn.
 
-Auto-loaded for files matching the backend glob (configured by Claude Code based on path). Covers: imports, line length, function size, validation boundaries, error handling, testing conventions, query optimization. Keep it short and pattern-focused — the agents enforce it during code review.
+| Skill | Role |
+|---|---|
+| `epic` (+ `validate-epics.py`) | `/epic`: draft the epic once; `render <ID>` writes the repo copy from tracker cards; validator for `docs/epics/` |
+| `slice` | `/slice`: brief one layer of one capability group |
+| `tests-first` (+ `tests.md`, `mocking.md`) | All the slice's tests, red run, user approval, `## Approved tests` |
+| `implement` | Code to green in the thread; never edits approved tests |
+| `code-review` | Standards and Spec axes against a fixed point; fails on approved-test diffs; one fix round |
+| `council` | Opt-in single-round review by three providers |
+| `update-config` (+ `migrate.py`) | Upgrade a rendered project; migrate `docs/specs/` to `docs/epics/` |
+| `backend-style`, `frontend-style` *(UI projects)* | Stack style, loaded by `implement` and `code-review` per slice layer |
+| `code-query` | Graph first, grep second, for structural questions |
+| `patterns` (+ `references/*.md`) | Name the present force or refuse; six domain references |
 
-## `.claude/rules/frontend-style.md` *(optional)*
+## `docs/epics/<ID>/`
 
-Skipped for API-only projects. Same shape as backend-style but for components, state management, accessibility, event handling.
-
-## `.claude/rules/patterns.md` + `.claude/patterns/*.md`
-
-The compact rule requires a present force before choosing a design pattern and
-points to six on-demand domain references. It works with `code-query.md`: inspect
-the project first, then use the simplest existing shape.
+`epic.md` (≤120 lines) and `slices/<n>.md` (≤60 lines). The first line says
+where the truth lives: `source=<tracker>` (rendered from cards), `source=local`
+or `source=migrated`. `archive/<slug>/` holds pre-v0.11 `docs/specs/` folders.
+See `docs/epic-story-slice.md`.
 
 ## `.claude/agents/*.md`
 
@@ -65,15 +69,11 @@ Sub-agent definitions. Each has frontmatter (`name`, `description`) and a body t
 
 | Agent | Role | Read-only? |
 |---|---|---|
-| `orchestrator` | Coordinates the SDD flow, guards the gates, launches specialists | Yes (never edits code) |
-| `pmo` | Conversed spec + Given/When/Then contract + mini-features | No (writes spec docs) |
-| `backend-dev` / `frontend-dev` | Web implementation (web projects) | No (writes code) |
-| `mobile-dev` / `game-dev` / `desktop-dev` / `core-dev` | Per-stack implementers — only the one matching `project_type` renders | No (writes code) |
-| `ui-designer` | Wireframes + specs | Yes |
-| `judge` | Pre-merge review of code + tests vs the contract | Yes |
-| `security-reviewer` | Auth/permissions/data audit | Yes |
-| `mutation-tester` | Validates the tests bite (opt-in, `enforce_mutation_testing`) | Yes |
+| `ui-designer` | Wireframes + specs (UI projects) | Yes |
+| `security-reviewer` | Auth/permissions/data audit; writes `docs/epics/<ID>/slices/<n>.security.md` | Yes |
+| `mutation-tester` | Checks the slice's approved tests bite (opt-in, `enforce_mutation_testing`) | Yes |
 
+There is no coordinator or dev subagent: the slice loop runs in the thread.
 
 Read-only agents never edit code — they report findings to the implementing agent.
 
@@ -83,15 +83,15 @@ Slash command definitions. Each file becomes `/<filename>` in Claude Code.
 
 | Command | What it does |
 |---|---|
-| `/spec` | Idea/SOW → conversed spec + Given/When/Then contract + mini-features via `pmo` |
-| `/feature` | Full spec-driven flow via `orchestrator`: contract → optional TDD → implement → `judge` → micro-commit |
-| `/fix` | Small, scoped change: skips brief/plan + formal Design First, keeps the full Definition of Done |
-| `/verify` | Implementer's skeptical self-review of its own diff before judge/commit (run it, don't just claim it) |
+| `/fix` | Small, scoped change: no epic, keeps the full Definition of Done |
+| `/verify` | Implementer's skeptical self-review of its own diff before `code-review`/commit |
 | `/integrate <tool>` | Research and connect an official MCP/tool after an explicit confirmation |
-| `/audit` | Code + security review via `judge` + `security-reviewer` |
+| `/audit` | Code + security review via the `code-review` Standards axis + `security-reviewer` |
 | `/commit` | Conventional commit, with confirmation gate |
-| `/pr` | Push + open PR, with confirmation gate |
-| `/design` | Wireframe + spec via `ui-designer` (folds into `/feature` for UI work) |
+| `/pr` | Push + open PR (stacked on the previous layer's branch), with confirmation gate |
+| `/design` | Wireframe + spec via `ui-designer` before UI code |
+
+`/epic` and `/slice` are skills (above), invoked the same way.
 
 Commands pause at approval gates. Never silently proceed past a brief, plan, or PR creation.
 
@@ -103,7 +103,7 @@ live under `docs/design-system/pages/` only when needed.
 
 ## `docs/CONTEXT.md` *(created lazily)*
 
-The pmo-created glossary for project-specific terms. It is not rendered by
+The glossary for project-specific terms, read by `/epic` and `tests-first`. It is not rendered by
 setup and appears only after the workflow coins or disambiguates a term.
 
 ## `.claude/hooks/*.sh`
@@ -112,9 +112,11 @@ Shell scripts that fire on Claude Code events. Each reads the event's JSON paylo
 
 ### `agent-enforcement.sh` (PreToolUse: Edit | Write)
 
-Runs **before** every Edit or Write. Two checks, deliberately with different teeth:
-1. **Branch discipline (hard block)** — blocks any edit to the source directory while on a *protected* branch. Protected = the default branch plus anything in `CLAUDE_CONFIG_PROTECTED_BRANCHES` (comma-separated; defaults to the default branch + `master`). Forces you to check out a typed branch first. Exit code 2 → Claude Code feeds the message back to the model so it self-corrects.
-2. **Agent guidance (advisory)** — for edits to the source directory that exceed 50 added lines or introduce more than one new `def`/`class`/`export class`, it prints a reminder to prefer the right agent, then **exits 0 (does not block)**. Trivial edits (≤50 lines AND ≤1 new def/class) pass silently. The old `CLAUDE_AGENT_ACTIVE` gate was removed — nothing in the runtime ever set it, so it blocked normal editing instead of guiding it.
+Runs **before** every Edit or Write. Two hard blocks (exit 2 → Claude Code feeds the message back so the model self-corrects):
+1. **Branch discipline** — blocks edits to the source directory while on a *protected* branch: the default branch plus anything in `AGENT_CONFIG_PROTECTED_BRANCHES` (legacy `CLAUDE_CONFIG_PROTECTED_BRANCHES`).
+2. **Approved-tests lock** — blocks edits to the paths under `## Approved tests` in the slice file whose `- Branch:` line names the current branch. `AGENT_CONFIG_UNLOCK_TESTS=1` lifts it.
+
+Anything it cannot parse passes: a guardrail, not a security boundary.
 
 ### `auto-format.sh` (PostToolUse: Edit | Write)
 
@@ -126,16 +128,17 @@ Runs **after** every Edit or Write. Policy: only *targeted* lint autofixers run 
 
 Issues a tool can't auto-fix are surfaced to stderr (no longer silently swallowed), but the hook never blocks (exit 0).
 
-### `coding-reminder.sh` (UserPromptSubmit)
-
-Runs on **every** user prompt. If the prompt looks coding-related (matches keywords like `implement`, `fix`, `refactor`, file extensions, slash commands), it injects a short reminder of the operating principles into Claude's context for that turn. Non-coding prompts (`what is`, `explain`, `summarize`) are skipped.
-
-The trigger regex is conservative — it errs toward injecting (better to remind too often than miss a real coding task).
-
-## `.claude/agents/` vs `.claude/rules/` — when to add what
+## Where to add what
 
 | Need | Where |
 |---|---|
+| A rule every coding turn needs | `rules/principles.md` (keep it ≤80 lines) |
+| A procedure or reference loaded when relevant | `skills/<name>/SKILL.md` |
+| A read-only role with its own context window | `agents/` |
+| A user-triggered shortcut | `commands/` |
+| A check that should run before/after every Edit | `hooks/` |
+
+---|---|
 | A repeatable workflow with multiple steps | `agents/` |
 | A coding pattern that should be auto-loaded for a file glob | `rules/` |
 | A user-triggered shortcut | `commands/` |
@@ -147,7 +150,8 @@ The trigger regex is conservative — it errs toward injecting (better to remind
 
 - `hosts/` contains hand-authored host adapters and overrides used as build inputs.
 - `cursor/` and `codex/` are generated packaging trees; never edit them directly.
-- `scripts/smoke/` contains the shared harness plus one focused file per mini-feature.
+- `scripts/smoke/` contains the shared harness plus one focused file per release item (`v011-<n>-*.sh` for v0.11).
+- `docs/epics/EXAMPLE/` is the grammar fixture `validate-epics.py` must pass clean.
 - `setup.sh --merge --overwrite-files a,b` replaces only the named managed files;
   the plan prints the safe candidate list first.
 
@@ -162,23 +166,23 @@ shared `plugin/` bundle, so users install from Customize and run
 
 ### `plugin/.claude-plugin/plugin.json`
 
-The plugin manifest — name, description, version, author, license. Claude Code reads this when listing/installing plugins. The `name` field also acts as the namespace for slash commands (`/agent-config-template:feature`, `/agent-config-template:plan`, etc.).
+The plugin manifest — name, description, version, author, license. Claude Code reads this when listing/installing plugins. The `name` field also acts as the namespace for slash commands (`/agent-config-template:epic`, `/agent-config-template:fix`, etc.).
 
 ### `plugin/agents/`
 
-The same agents as the template (incl. the new `orchestrator`, `pmo`, `judge`), with stack-agnostic phrasing ("your project's test command" instead of `pytest`). Path references to `.claude/rules/` are replaced with `the principles skill` / `the backend-style skill` references, since the plugin ships those as skills, not as auto-loaded rules.
+`security-reviewer` and `ui-designer`, with stack-agnostic phrasing ("your project's test command" instead of `pytest`); references to `.claude/rules/principles.md` become `the principles skill`.
 
 ### `plugin/commands/`
 
-The slash commands (incl. `/spec`, `/fix`). Available as `/agent-config-template:<name>` once installed.
+`/fix`, `/verify`, `/audit`, `/pr`, `/design`, `/commit`, `/integrate`, plus the plugin-only `/setup-template`, `/setup-companions` and `/orchestrator-init`. Available as `/agent-config-template:<name>` once installed.
 
 ### `plugin/skills/`
 
-The principles, style guides, and the `sdd-workflow` overview shipped as skills (the new convention per the Claude Code plugin docs). Each has YAML frontmatter with a `description` so Claude knows when to invoke them.
+Every placeholder-free skill in `core/.claude/skills/` (`epic`, `slice`, `tests-first`, `implement`, `code-review`, `council`, `update-config`, `code-query`, `patterns`) is a byte copy made by `scripts/build.sh`; `build.sh --check` fails on drift. `principles`, `backend-style`, `frontend-style`, `port-config`, `lavish` and `orchestrator-init` are hand-authored generic versions.
 
 ### `plugin/hooks/hooks.json` + `plugin/hooks/*.sh`
 
-The same three hooks (agent-enforcement, auto-format, coding-reminder) but wired through `hooks.json` (the plugin format) instead of the project's `settings.json`. The `agent-enforcement.sh` script reads env vars (`CLAUDE_CONFIG_SRC_DIR`, `CLAUDE_CONFIG_FRONTEND_DIR`, `AGENT_CONFIG_PROTECTED_BRANCHES`, with legacy `CLAUDE_CONFIG_PROTECTED_BRANCHES` fallback) with sensible defaults — users override per-project via direnv or shell rc.
+The two hooks (agent-enforcement with the branch block and approved-tests lock, auto-format) wired through `hooks.json` (the plugin format) instead of the project's `settings.json`. `agent-enforcement.sh` reads env vars (`CLAUDE_CONFIG_SRC_DIR`, `CLAUDE_CONFIG_FRONTEND_DIR`, `AGENT_CONFIG_PROTECTED_BRANCHES`, with legacy `CLAUDE_CONFIG_PROTECTED_BRANCHES` fallback) with sensible defaults.
 
 ### `.claude-plugin/marketplace.json`
 
@@ -195,4 +199,4 @@ The repo-as-marketplace listing. Lets users do `/plugin marketplace add JuanTruj
 | **Style guides** | Stack-agnostic skills | Tailored prose |
 | **Best for** | Quick adoption across many repos | One repo where you want full precision |
 
-You can use both — the plugin gives every project a baseline of agents/commands/principles; the template promotes a specific project to "fully calibrated" status.
+You can use both — the plugin gives every project a baseline of skills/commands/principles; the template promotes a specific project to "fully calibrated" status.

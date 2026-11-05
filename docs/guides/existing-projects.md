@@ -56,11 +56,13 @@ the preview, then run:
 Prune deletes only unchanged managed files with recorded baselines.
 `CUSTOMIZED-OBSOLETE`, legacy, unrecorded, user-owned, and unsafe paths remain.
 
-## 6. Start one contract
+## 6. Start one epic
 
-Run `/spec <feature>`. Review `spec.md`, `contract.md`, and `features.json`.
-Gate 1 stays closed until you approve the contract and all
-`NEEDS CLARIFICATION:` markers are resolved. Then run `/feature <feature>`.
+Run `/epic <ticket or feature>`. Review the draft: capability groups, one-case
+stories, acceptance criteria, test scenarios, layered slices. Gate 1 is your
+approval by number; nothing is written before it. Then run `/slice <ID> 1`,
+`tests-first`, `implement` and `code-review`, one slice per PR. Old
+`docs/specs/` folders migrate with `update-config`.
 
 ## 7. Run checks and inspect
 

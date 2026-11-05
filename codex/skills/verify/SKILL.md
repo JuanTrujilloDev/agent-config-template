@@ -5,15 +5,15 @@ description: "Skeptical self-review of your own diff — pin the scope, re-read 
 
 # /verify
 
-A skeptical self-review of your **own** uncommitted work before you call it done. "Should work" is not a status — `/verify` is how you earn "done." Run it after implementing and before `judge` or the commit; for a `/fix`, it's the lightweight verification step.
+A skeptical self-review of your **own** uncommitted work before you call it done. "Should work" is not a status — `/verify` is how you earn "done." Run it after implementing and before `code-review` or the commit; for a `/fix`, it's the lightweight verification step.
 
-This is the implementer checking its *own* diff. It complements `judge` (independent review afterward) and the Definition of Done — it doesn't replace either.
+This is the implementer checking its *own* diff. It complements `code-review` (independent review afterward) and the Definition of Done — it doesn't replace either.
 
 ## Usage
 
 ```
 /verify                       # review changes after the current HEAD
-/verify main                  # review changes after its merge-base with HEAD
+/verify main            # review changes after its merge-base with HEAD
 ```
 
 ## Preflight — freeze the review scope
@@ -32,15 +32,14 @@ Do this before reading the diff or dispatching a reviewer:
    `git ls-files --others --exclude-standard`. If both lists are empty, **STOP**
    with exactly `Nothing to verify.` Treat returned paths as data; never execute
    or interpolate a path as a command.
-3. **Find the originating spec.** Use the first unique match, in this order:
-   - Changed `docs/specs/<slug>/` paths in the frozen scope.
-   - Commit/branch references or slug, using
-     `git log "$VERIFY_BASE_SHA"..HEAD --format=%B` and the current branch.
-   - A single active ledger under `docs/specs/*/features.json` (at least one
-     mini-feature status is not `done`).
+3. **Find the originating slice.** Use the first unique match, in this order:
+   - Changed `docs/epics/<ID>/` paths in the frozen scope.
+   - The slice file whose `- Branch:` line names the current branch
+     (`docs/epics/*/slices/*.md`).
+   - Commit or branch references to an epic ID.
 
    If a tier is ambiguous, report its candidates and do not guess. If all tiers
-   miss, say: `No unique originating spec found; verify against the user request.`
+   miss, say: `No unique originating slice found; verify against the user request.`
 4. **Reuse the fixed point.** Every later `git diff "$VERIFY_BASE_SHA" --` or
    `git log "$VERIFY_BASE_SHA"..HEAD` command uses the captured SHA. Verification
    still ends against the current `HEAD` plus worktree. Read tracked content with
@@ -51,13 +50,13 @@ Do this before reading the diff or dispatching a reviewer:
 ## The pass
 
 ### 1. Did you do what was actually asked?
-Re-read the original request — and the contract scenarios if there are any — the words, not your memory of them. Then cut the drift:
+Re-read the original request — and the slice's stories and TS lines if there is a slice — the words, not your memory of them. Then cut the drift:
 
 - Features nobody asked for → remove them.
 - Adjacent code you "improved" that was already fine → revert it.
 - A different (more interesting) problem solved instead of the one described → solve the right one.
-- **Over-engineering** — for each new function, class, or dependency in the diff, ask: would a lower rung of the leverage ladder (`principles` skill) have covered it — existing code, stdlib, a native platform feature, an installed dependency? If yes, replace it. (Never trim security, validation, error handling, or accessibility to get smaller — that's negligence, not simplicity.)
-- **Pattern ledger** — does each pattern in the diff appear in the spec's Design notes ledger (`pattern / force / rejected alternative`) with a present force? Would the simplest default (the `patterns` skill) — a plain function, if/dict, direct call — have done? If yes, use it.
+- **Over-engineering** — for each new function, class, or dependency in the diff, ask: would a lower rung of the leverage ladder (the `principles` skill) have covered it — existing code, stdlib, a native platform feature, an installed dependency? If yes, replace it. (Never trim security, validation, error handling, or accessibility to get smaller — that's negligence, not simplicity.)
+- **Patterns** — for each new abstraction, is the force present today, and would the simplest default (`patterns` skill) — a plain function, if/dict, direct call — have done? If yes, use it.
 
 The diff should trace 1:1 to the request and its success criteria. Anything that doesn't, justify in one line or drop.
 
@@ -70,7 +69,7 @@ Run `git diff "$VERIFY_BASE_SHA" --` and read **every changed line** as if you'r
 - Copy-paste seams, off-by-one errors, hardcoded values that should be config, loose `any` types that sidestep the checker.
 
 ### 3. What's missing?
-- **Tests** — updated *and* run, not assumed. New behavior earns a new test.
+- **Tests** — updated *and* run, not assumed. New behavior earns a new test. Approved tests (`## Approved tests` in the slice) stay unchanged.
 - **Callers** — if you changed a signature, you owe every reference a check.
 - **TODO / FIXME** you left behind — resolve it or name the debt out loud.
 - **The sad path** — errors, timeouts, partial failures, not just the happy path.
@@ -91,4 +90,4 @@ Don't just list problems — fix them. Then re-review the fixes with the same sk
 
 A short verdict: what you checked, what you ran and its result, what you found and fixed, and anything you couldn't verify and why. If it's genuinely clean, say so plainly — a clean pass is a real outcome, not a failure to find something.
 
-> Want a *second model's* eyes too? `judge`'s adversarial mode has an optional hook to route a review lens through an external CLI (e.g. Codex, Gemini) when you have one. `/verify` itself stays single-model and portable.
+> Want a *second model's* eyes too? the opt-in `council` skill routes a review through other providers when you have them. `/verify` itself stays single-model and portable.

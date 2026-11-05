@@ -1,7 +1,7 @@
 {
   "name": "agent-config-template",
-  "description": "Spec-driven Claude Code config for any stack (web, mobile, games, desktop, CLIs): orchestrated SDD/TDD workflow, pmo + judge + security + per-stack dev agents, 12 slash commands, advisory hooks (hard branch block), 9 skills incl. code-query (graph-first codebase querying), port-config for other hosts, lavish (pinned local visual review), and orchestrator-init (optional orchestrator scaffold).",
-  "version": "0.10.0",
+  "description": "Epic → story → slice workflow for any stack (web, mobile, games, desktop, CLIs): /epic drafts one-case stories and layered slices, tests-first writes and locks the slice's tests, implement runs in your thread, code-review checks Standards and Spec. Branch and approved-tests hooks, security-reviewer + ui-designer agents, code-query (graph-first), patterns, update-config, port-config, lavish and orchestrator-init skills.",
+  "version": "0.11.0",
   "author": {
     "name": "Juan Trujillo",
     "url": "https://juantrujillo.dev"

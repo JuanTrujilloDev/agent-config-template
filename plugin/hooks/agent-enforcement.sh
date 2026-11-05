@@ -1,62 +1,35 @@
 #!/bin/bash
-# PreToolUse hook for Claude Code (Edit | Write).
-#
-# Two checks, deliberately with different teeth:
-#  - Branch discipline (HARD BLOCK): never edit code under $CLAUDE_CONFIG_SRC_DIR
-#    while on a protected branch. Protected = $AGENT_CONFIG_PROTECTED_BRANCHES
-#    (or legacy $CLAUDE_CONFIG_PROTECTED_BRANCHES), default "main,master".
-#  - Agent guidance (ADVISORY): non-trivial edits print a reminder to prefer the
-#    right agent, but do NOT block. Discipline is on you, not the hook.
-#
-# Override per-project via environment variables (e.g. in .envrc with direnv,
-# or your shell rc):
-#   export CLAUDE_CONFIG_SRC_DIR=apps                  # default: src
-#   export CLAUDE_CONFIG_FRONTEND_DIR=apps/frontend    # default: (none)
-#   export AGENT_CONFIG_PROTECTED_BRANCHES="main,qa,prod"   # default: main,master
-#
-# Trivial edits (≤50 lines AND ≤1 new def/class) pass silently.
+# PreToolUse hook for Claude Code (Edit | Write), plugin variant of
+# core/.claude/hooks/agent-enforcement.sh. Two hard blocks (exit 2):
+#  - Branch discipline: no edits to code under $CLAUDE_CONFIG_SRC_DIR (default src) or
+#    $CLAUDE_CONFIG_FRONTEND_DIR while on a protected branch. Protected =
+#    $AGENT_CONFIG_PROTECTED_BRANCHES (or legacy $CLAUDE_CONFIG_PROTECTED_BRANCHES), default "main,master".
+#  - Approved-tests lock: no edits to the paths listed under `## Approved tests` in the slice
+#    file (docs/epics/<ID>/slices/<n>.md) whose `- Branch:` line names the current branch.
+#    Override: AGENT_CONFIG_UNLOCK_TESTS=1 in the environment Claude Code runs in.
+# Anything it cannot parse passes: a guardrail, not a security boundary.
 
 set -uo pipefail
 
-INPUT=$(cat)
-export HOOK_INPUT="$INPUT"
+HOOK_INPUT=$(cat)
+export HOOK_INPUT
 
-SUMMARY=$(python3 -c '
-import json, os, sys
+FILE_PATH=$(python3 -c '
+import json, os
 try:
-    data = json.loads(os.environ.get("HOOK_INPUT", ""))
+    ti = json.loads(os.environ.get("HOOK_INPUT", "")).get("tool_input") or {}
+    print(ti.get("file_path") or ti.get("notebook_path") or "")
 except Exception:
-    sys.exit(0)
-ti = data.get("tool_input", {}) or {}
-fp = (ti.get("file_path") or "").replace("\t", " ")
-ns = ti.get("new_string") or ti.get("content") or ""
-line_count = ns.count("\n") + (1 if ns and not ns.endswith("\n") else 0)
-def_count = 0
-for line in ns.splitlines():
-    s = line.lstrip()
-    if (
-        s.startswith("def ")
-        or s.startswith("class ")
-        or s.startswith("export class ")
-        or s.startswith("export function ")
-        or s.startswith("function ")
-    ):
-        def_count += 1
-print(f"{fp}\t{line_count}\t{def_count}")
-')
+    pass
+' 2>/dev/null)
+[ -n "$FILE_PATH" ] || exit 0
 
-if [ -z "$SUMMARY" ]; then exit 0; fi
-
-FILE_PATH=$(printf '%s' "$SUMMARY" | awk -F'\t' '{print $1}')
-LINE_COUNT=$(printf '%s' "$SUMMARY" | awk -F'\t' '{print $2}')
-DEF_COUNT=$(printf '%s' "$SUMMARY" | awk -F'\t' '{print $3}')
-
-if [ -z "$FILE_PATH" ]; then exit 0; fi
-
-# Defaults; override via environment variables.
-SRC_DIR="${CLAUDE_CONFIG_SRC_DIR:-src}"
-FRONTEND_DIR="${CLAUDE_CONFIG_FRONTEND_DIR:-}"
-PROTECTED="${AGENT_CONFIG_PROTECTED_BRANCHES:-${CLAUDE_CONFIG_PROTECTED_BRANCHES:-main,master}}"
+PROJECT_DIR="${CLAUDE_PROJECT_DIR:-}"
+CURRENT_BRANCH=""
+if [ -n "$PROJECT_DIR" ] && { [ -d "$PROJECT_DIR/.git" ] || [ -f "$PROJECT_DIR/.git" ]; }; then
+    CURRENT_BRANCH=$(git -C "$PROJECT_DIR" rev-parse --abbrev-ref HEAD 2>/dev/null || echo "")
+fi
+[ -n "$CURRENT_BRANCH" ] || exit 0
 
 # Membership test for a comma/space-separated list (bash 3.2 safe).
 branch_in_list() {
@@ -67,65 +40,55 @@ branch_in_list() {
     return 1
 }
 
-# --- Branch Discipline (HARD BLOCK) ---
-PROJECT_DIR="${CLAUDE_PROJECT_DIR:-}"
-if [ -n "$PROJECT_DIR" ] && { [ -d "$PROJECT_DIR/.git" ] || [ -f "$PROJECT_DIR/.git" ]; }; then
-    CURRENT_BRANCH=$(git -C "$PROJECT_DIR" rev-parse --abbrev-ref HEAD 2>/dev/null || echo "")
-    if [ -n "$CURRENT_BRANCH" ] && branch_in_list "$CURRENT_BRANCH" "$PROTECTED"; then
-        IN_SCOPE=0
-        case "$FILE_PATH" in
-            *"/$SRC_DIR/"*|*"/$SRC_DIR"|*"$SRC_DIR/"*) IN_SCOPE=1 ;;
-        esac
-        if [ -n "$FRONTEND_DIR" ]; then
-            case "$FILE_PATH" in
-                *"$FRONTEND_DIR"*) IN_SCOPE=1 ;;
-            esac
-        fi
-        if [ "$IN_SCOPE" = "1" ]; then
-            cat >&2 <<MSG
+# --- Branch Discipline ---
+SRC_DIR="${CLAUDE_CONFIG_SRC_DIR:-src}"
+FRONTEND_DIR="${CLAUDE_CONFIG_FRONTEND_DIR:-}"
+PROTECTED="${AGENT_CONFIG_PROTECTED_BRANCHES:-${CLAUDE_CONFIG_PROTECTED_BRANCHES:-main,master}}"
+if branch_in_list "$CURRENT_BRANCH" "$PROTECTED"; then
+    IN_SCOPE=0
+    case "$FILE_PATH" in
+        *"/$SRC_DIR/"*|*"/$SRC_DIR"|"$SRC_DIR/"*) IN_SCOPE=1 ;;
+    esac
+    if [ -n "$FRONTEND_DIR" ]; then
+        case "$FILE_PATH" in *"$FRONTEND_DIR"*) IN_SCOPE=1 ;; esac
+    fi
+    if [ "$IN_SCOPE" = "1" ]; then
+        cat >&2 <<MSG
 [agent-enforcement] BLOCKED: '$CURRENT_BRANCH' is a protected branch — no direct edits.
 Check out a typed branch first:
-  git checkout -b feature/<slug>
+  git checkout -b feature/<ID>-<group>-<layer>
   git checkout -b fix/<slug>
   git checkout -b hotfix/<slug>
   git checkout -b refactor/<slug>
   git checkout -b chore/<slug>
 Protected branches: $PROTECTED  (override with AGENT_CONFIG_PROTECTED_BRANCHES; legacy: CLAUDE_CONFIG_PROTECTED_BRANCHES)
 MSG
-            exit 2
-        fi
+        exit 2
     fi
 fi
 
-# --- Agent Guidance (ADVISORY — never blocks) ---
-SCOPE=""
-if [ -n "$FRONTEND_DIR" ]; then
-    case "$FILE_PATH" in
-        *"$FRONTEND_DIR"*) SCOPE="frontend" ;;
-    esac
-fi
-if [ -z "$SCOPE" ]; then
-    case "$FILE_PATH" in
-        *"/$SRC_DIR/"*|*"/$SRC_DIR"|*"$SRC_DIR/"*) SCOPE="backend" ;;
-        *) exit 0 ;;
-    esac
-fi
-
-# Trivial edit (≤50 lines AND ≤1 new def/class)? Pass silently.
-if [ "${LINE_COUNT:-0}" -le 50 ] && [ "${DEF_COUNT:-0}" -le 1 ]; then exit 0; fi
-
-case "$SCOPE" in
-    backend) AGENT="backend-dev" ;;
-    frontend) AGENT="frontend-dev" ;;
-esac
-
-cat >&2 <<MSG
-[agent-enforcement] ADVISORY: sizable edit to ${SCOPE} source.
-  file:          ${FILE_PATH}
-  added lines:   ${LINE_COUNT}  (advisory threshold: 50)
-  new def/class: ${DEF_COUNT}   (advisory threshold: 1)
-
-For non-trivial work, prefer the \`${AGENT}\` agent. This is guidance, not a
-block — proceed if you've already scoped the change.
+# --- Approved-tests lock ---
+[ "${AGENT_CONFIG_UNLOCK_TESTS:-}" = 1 ] && exit 0
+LOCKED_BY=$(python3 -c '
+import glob, os, re, sys
+root, branch, target = sys.argv[1:]
+target = os.path.abspath(os.path.join(root, target))
+for slice_file in sorted(glob.glob(os.path.join(root, "docs/epics/*/slices/*.md"))):
+    text = open(slice_file, encoding="utf-8", errors="replace").read()
+    if not re.search(r"^- Branch: `" + re.escape(branch) + "`", text, re.M):
+        continue
+    section = re.search(r"^## Approved tests\n(.*?)(?=^## |\Z)", text, re.M | re.S)
+    for path in re.findall(r"^- `([^`]+)`", section.group(1) if section else "", re.M):
+        if os.path.abspath(os.path.join(root, path)) == target:
+            print(os.path.relpath(slice_file, root))
+            sys.exit(0)
+' "$PROJECT_DIR" "$CURRENT_BRANCH" "$FILE_PATH" 2>/dev/null)
+if [ -n "$LOCKED_BY" ]; then
+    cat >&2 <<MSG
+[agent-enforcement] BLOCKED: $FILE_PATH is an approved test ($LOCKED_BY, branch '$CURRENT_BRANCH').
+Make the code pass the test; do not change the test. If the test itself is wrong, stop and ask
+the user. Once they agree, they restart with AGENT_CONFIG_UNLOCK_TESTS=1 and re-approve the tests.
 MSG
+    exit 2
+fi
 exit 0

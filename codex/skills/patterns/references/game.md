@@ -1,6 +1,6 @@
 # Game patterns — Unity-style component engines
 
-Read this only when `.claude/rules/patterns.md` routed a gameplay/engine force
+Read this only when the `patterns` skill routed a gameplay/engine force
 here. Every row's *simplest alternative* is tried before the pattern is named.
 
 | Force | Pattern | Simplest alternative |

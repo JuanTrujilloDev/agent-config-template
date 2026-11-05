@@ -25,17 +25,18 @@ Then, optionally, install the companion tools (one confirmation, skips what's al
 
 After install you immediately get:
 
-- **11 agents** (`/agents` to list): `orchestrator`, `pmo`, `judge`, `security-reviewer`, `ui-designer`, plus a dev library Claude picks from per project type — `backend-dev` (web/API), `frontend-dev` (web UI), `mobile-dev`, `game-dev`, `desktop-dev`, `core-dev` (library/CLI/data). Each with an embedded "Gotchas" section.
-- **12 slash commands** namespaced under `/agent-config-template:*` — `spec`, `feature`, `fix`, `integrate`, `verify`, `audit`, `commit`, `pr`, `design`, **`setup-template`**, **`setup-companions plan|doctor|install|update|uninstall [list]`** (optional graphify + ponytail, and ui-ux-pro-max when `has_ui`), `orchestrator-init` (optional).
-- **9 skills**: `principles` (incl. the leverage ladder — reuse > stdlib > native > installed deps > new code), `sdd-workflow`, `code-query` (graph-first codebase querying — uses a knowledge graph like [graphify](https://github.com/Graphify-Labs/graphify) when available, deterministic repo map otherwise), `patterns` (design-pattern restraint — name the force, try the simplest default, keep a `pattern / force / rejected alternative` ledger; six domain references), `backend-style`, `frontend-style`, `port-config` (generate this config for another agent host from its current docs), `lavish` (pinned local HTML visual review; not product UI), `orchestrator-init` (optional: scaffolds an orchestrator folder and prints two T3 schedule prompts to create by hand).
-- **3 hooks**: branch discipline (hard block on protected branches), agent guidance (advisory — guides, doesn't block), targeted auto-format on Edit/Write.
+- **The slice loop as skills**, namespaced under `/agent-config-template:*`: `epic` (draft an epic once: capability groups, one-case stories, AC, Given/When/Then test scenarios, layered slices; tracker or `docs/epics/<ID>/`), `slice` (brief one layer of one capability group), `tests-first` (all the slice's tests, red, then your yes; approved tests are locked), `implement` (code to green in your thread), `code-review` (Standards and Spec axes, one fix round), `council` (opt-in, single round, three providers).
+- **More skills**: `principles` (incl. the leverage ladder — reuse > stdlib > native > installed deps > new code), `update-config` (upgrade a rendered project and migrate old `docs/specs/`), `code-query` (graph-first codebase querying — uses a knowledge graph like [graphify](https://github.com/Graphify-Labs/graphify) when available, deterministic repo map otherwise), `patterns` (design-pattern restraint — name the force, try the simplest default; six domain references), `backend-style`, `frontend-style`, `port-config` (generate this config for another agent host from its current docs), `lavish` (pinned local HTML visual review; not product UI), `orchestrator-init` (optional: scaffolds an orchestrator folder and prints two T3 schedule prompts to create by hand).
+- **2 agents** (`/agents` to list): `security-reviewer`, `ui-designer`. There is no coordinator or dev subagent.
+- **10 slash commands** — `fix`, `integrate`, `verify`, `audit`, `commit`, `pr`, `design`, **`setup-template`**, **`setup-companions plan|doctor|install|update|uninstall [list]`** (optional graphify + ponytail, and ui-ux-pro-max when `has_ui`), `orchestrator-init` (optional).
+- **2 hooks**: branch discipline plus the approved-tests lock (hard blocks; `AGENT_CONFIG_UNLOCK_TESTS=1` lifts the lock), targeted auto-format on Edit/Write.
 
 The hooks read environment variables with sensible defaults. Override per-project via `.envrc` (direnv) or your shell rc:
 
 ```bash
 export CLAUDE_CONFIG_SRC_DIR=apps                       # default: src
 export CLAUDE_CONFIG_FRONTEND_DIR=apps/frontend         # default: (none)
-export CLAUDE_CONFIG_PROTECTED_BRANCHES="main,qa,prod"  # default: main,master
+export AGENT_CONFIG_PROTECTED_BRANCHES="main,qa,prod"   # default: main,master
 ```
 
 ### Companion tools (optional, auto-detected)
@@ -46,15 +47,15 @@ here depends on them. Use
 the pinned metadata comes from `companions.lock.json`, and every mutation has a
 per-tool confirmation gate.
 
-- **[graphify](https://github.com/Graphify-Labs/graphify)** — codebase knowledge graph. The pinned install is `uv tool install graphifyy==0.9.38 && graphify install`. The `code-query` skill prefers the graph (`/graphify query|path|explain`) for structural questions during `/spec`, `/feature`, and `/fix`; without it, the skill falls back to a deterministic repo map.
-- **[ponytail](https://github.com/dietrichgebert/ponytail)** — runtime minimal-code enforcement (`/plugin marketplace add DietrichGebert/ponytail`, then `/plugin install ponytail@ponytail`). It enforces at generation time what this config's **leverage ladder** (`principles` skill) bakes into `/spec` Design notes and the `/verify` over-engineering check — the ladder keeps behavior consistent on hosts where ponytail isn't installed. To have ponytail's ruleset reach this plugin's dev subagents too, widen its matcher: `export PONYTAIL_SUBAGENT_MATCHER="dev|explore|general"`.
-- **[ui-ux-pro-max](https://github.com/nextlevelbuilder/ui-ux-pro-max-skill)** (MIT) — design-system skill for `ui-designer` / `frontend-dev`; recommended only when `has_ui` is truthy. Install with `npm install -g ui-ux-pro-max-cli@2.15.0`, then `uipro init --ai claude` (writes `.claude/skills/ui-ux-pro-max/`).
+- **[graphify](https://github.com/Graphify-Labs/graphify)** — codebase knowledge graph. The pinned install is `uv tool install graphifyy==0.9.38 && graphify install`. The `code-query` skill prefers the graph (`/graphify query|path|explain`) for structural questions during `epic`, `slice`, `implement` and `/fix`; without it, the skill falls back to a deterministic repo map.
+- **[ponytail](https://github.com/dietrichgebert/ponytail)** — runtime minimal-code enforcement (`/plugin marketplace add DietrichGebert/ponytail`, then `/plugin install ponytail@ponytail`). It enforces at generation time what this config's **leverage ladder** (`principles` skill) bakes into the slice brief and the `/verify` over-engineering check — the ladder keeps behavior consistent on hosts where ponytail isn't installed.
+- **[ui-ux-pro-max](https://github.com/nextlevelbuilder/ui-ux-pro-max-skill)** (MIT) — design-system skill for `ui-designer` and `fe` slices; recommended only when `has_ui` is truthy. Install with `npm install -g ui-ux-pro-max-cli@2.15.0`, then `uipro init --ai claude` (writes `.claude/skills/ui-ux-pro-max/`).
 
 `/setup-template` records the choice in `.claude/answers.local.env` as `companions=yes|not_now|never|<comma list>` — a list such as `graphify,ponytail` installs only those, and the omitted tools are not re-recommended.
 
 ### 2. Plugin + `/setup-template` (fully calibrated)
 
-When you want a specific project to have a `.claude/` tree calibrated to its exact stack — your test command, your branch prefix, your layer-split toggle — run the bundled command from inside the project:
+When you want a specific project to have a `.claude/` tree calibrated to its exact stack — your test command, your branch prefix, your tracker — run the bundled command from inside the project:
 
 ```
 /agent-config-template:setup-template
@@ -69,7 +70,7 @@ Claude will:
 5. Keep `.claude/settings.local.json`, `.claude/mcp.json`, and `.claude/answers.local.env` gitignored; never gitignore `answers.env`.
 6. Route an accepted companion recommendation (`yes` or a comma list) through the separately confirmed `/setup-companions` flow, then remind you to restart Claude Code.
 
-After this, both layers are active in that project — the plugin commands stay namespaced (`/agent-config-template:feature`), and the project-root commands are unnamespaced (`/feature`). The project-root versions take precedence when names collide because they have your specifics baked in.
+After this, both layers are active in that project — the plugin commands stay namespaced (`/agent-config-template:epic`), and the project-root commands are unnamespaced (`/epic`). The project-root versions take precedence when names collide because they have your specifics baked in.
 
 ## When to use which
 
@@ -78,7 +79,6 @@ After this, both layers are active in that project — the plugin commands stay 
 | **Setup time**                 | Instant after install                           | ~1 minute per project                                   |
 | **Project specifics**          | Generic defaults via env vars                   | Baked in — your test command, branch prefix, toggles    |
 | **Style guides**               | Stack-agnostic skills                           | Tailored prose                                          |
-| **Layer-split (BE/FE PR rule)**| Off                                             | Toggleable per project                                  |
 | **Best for**                   | Quick adoption across many repos                | Flagship projects where you want full precision         |
 
 ## Updating
@@ -87,7 +87,7 @@ After this, both layers are active in that project — the plugin commands stay 
 /plugin update agent-config-template@juantrujillodev
 ```
 
-If you previously ran `/setup-template` in a project, the rendered `.claude/` tree is independent — re-run `/setup-template` after upgrading if you want the latest patterns there too.
+If you previously ran `/setup-template` in a project, the rendered `.claude/` tree is independent — run the `update-config` skill in that project to plan and apply the upgrade (it never overwrites files you edited).
 
 ## License
 

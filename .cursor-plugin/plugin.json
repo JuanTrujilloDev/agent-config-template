@@ -1,15 +1,22 @@
 {
   "name": "agent-config-template",
   "displayName": "Agent Config Template",
-  "version": "0.10.0",
-  "description": "A concise, project-adaptive SDD/TDD workflow with skeptical review and minimal-code guidance.",
+  "version": "0.11.0",
+  "description": "A concise epic → slice workflow with tests first, locked approved tests, two-axis review and minimal-code guidance.",
   "author": {
     "name": "Juan Trujillo"
   },
   "homepage": "https://github.com/JuanTrujilloDev/agent-config-template",
   "repository": "https://github.com/JuanTrujilloDev/agent-config-template",
   "license": "MIT",
-  "keywords": ["cursor", "agents", "sdd", "tdd", "code-review", "workflow"],
+  "keywords": [
+    "cursor",
+    "agents",
+    "sdd",
+    "tdd",
+    "code-review",
+    "workflow"
+  ],
   "logo": "docs/logo.png",
   "rules": "plugin/.cursor-plugin/rules",
   "agents": "plugin/agents",

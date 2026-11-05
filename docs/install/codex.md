@@ -12,17 +12,20 @@ Restart Codex (or start a new thread) to load it.
 
 ## What you get
 
-- **15 skills**, invoked by name or auto-triggered: the workflows (`spec`,
-  `feature`, `fix`, `verify`, `audit`, `commit`, `pr`, `design`,
-  `setup-companions`) plus the knowledge skills (`principles` incl. the
-  leverage ladder, `sdd-workflow`, `code-query`, `backend-style`,
+- **Skills**, invoked by name or auto-triggered: the slice loop (`epic`,
+  `slice`, `tests-first`, `implement`, `code-review`, `council`), the workflows
+  (`fix`, `verify`, `audit`, `commit`, `pr`, `design`, `integrate`,
+  `setup-companions`, `update-config`) plus the knowledge skills (`principles`
+  incl. the leverage ladder, `code-query`, `patterns`, `backend-style`,
   `frontend-style`, `port-config`).
 
 ## What's different from the Claude Code plugin
 
-- **No subagents.** Codex plays every role itself — pmo, dev specialist,
-  judge, security-reviewer — in sequence, announcing each hat switch. Same
-  spec artifacts under `docs/specs/<slug>/`, same human gates.
+- **No subagents.** Codex runs `code-review`'s Standards and Spec axes and the
+  `security-reviewer` pass itself, in sequence, keeping each report separate.
+  Same files under `docs/epics/<ID>/`, same user gates.
+- **No approved-tests hook.** The lock is the `implement` instruction plus the
+  `code-review` check that fails on any diff to approved tests.
 - **No hook enforcement.** The protected-branch hard block doesn't exist on
   Codex; Branch Discipline is a written rule in `principles`. For always-on
   weight, add one line to your project's `AGENTS.md`:

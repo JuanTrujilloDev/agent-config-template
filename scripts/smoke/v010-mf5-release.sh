@@ -1,13 +1,16 @@
 # v0.10.0 MF5 release-0-10-0 (@s29..@s33).
-V010_VERSION=0.10.0
+V010_VERSION=$(python3 -c 'import json,sys; print(json.load(open(sys.argv[1]))["version"])' "$ROOT/plugin/.claude-plugin/plugin.json")
 
 # @s29 — four active manifests move together.
 for manifest in plugin/.claude-plugin/plugin.json .claude-plugin/marketplace.json .cursor-plugin/plugin.json codex/.codex-plugin/plugin.json; do
-  grep_case "v0.10.0 @s29 $manifest version" "$ROOT/$manifest" '"version": *"0\.10\.0"'
+  # v0.11: the four manifests still move together, now at the current release.
+  grep_case "v0.10.0 @s29 $manifest version" "$ROOT/$manifest" "\"version\": *\"$V010_VERSION\""
+
 done
 
 # @s30 — public and upgrade docs cover each shipped boundary.
-for doc in "$ROOT/README.md" "$ROOT/docs/upgrade-guide.md"; do
+# v0.11: the README now leads with the v0.11 notes; the upgrade guide keeps the v0.10 section.
+for doc in "$ROOT/docs/upgrade-guide.md"; do
   for term in 'scripts/evals/run\.py' '--run' '--allow-writes' 'tokens\.json' 'tokens\.lock\.json' 'plan\|doctor\|install\|update\|uninstall' '[Tt]okeniz' '0\.9\.2.*0\.10\.0|0\.10\.0.*0\.9\.2'; do
     grep_case "v0.10.0 @s30 $(basename "$doc") explains $term" "$doc" "$term"
   done
@@ -15,11 +18,11 @@ done
 grep_case "v0.10.0 @s30 plugin README lifecycle" "$ROOT/plugin/README.md" 'plan\|doctor\|install\|update\|uninstall'
 
 # @s31 — static release gates.
-check "v0.10.0 @s31 spec ledgers validate" "0" "$(cd "$ROOT" && python3 scripts/validate-specs.py >/dev/null 2>&1; echo $?)"
+check "v0.11 @s31 epics validate" "0" "$(cd "$ROOT" && python3 core/.claude/skills/epic/validate-epics.py docs/epics >/dev/null 2>&1; echo $?)"
 check "v0.10.0 @s31 build check" "0" "$(cd "$ROOT" && bash scripts/build.sh --check >/dev/null 2>&1; echo $?)"
 PACKAGING=$(cd "$ROOT" && python3 scripts/validate-packaging.py 2>&1); PACKAGING_RC=$?
 check "v0.10.0 @s31 packaging validates" "0" "$PACKAGING_RC"
-grep_case "v0.10.0 @s31 packaging reports version" <(printf '%s\n' "$PACKAGING") 'packaging valid @ v0\.10\.0'
+grep_case "v0.10.0 @s31 packaging reports version" <(printf '%s\n' "$PACKAGING") "packaging valid @ v$V010_VERSION"
 check "v0.10.0 @s31 shell syntax" "0" "$(bash -n "$ROOT/setup.sh" "$ROOT/plugin/setup.sh" "$ROOT/hosts/cursor/hooks/branch-guard.sh" "$ROOT/plugin/.cursor-plugin/hooks/branch-guard.sh"; echo $?)"
 check "v0.10.0 @s31 JSON manifests" "0" "$(python3 -c 'import json,sys; [json.load(open(p)) for p in sys.argv[1:]]' "$ROOT/plugin/.claude-plugin/plugin.json" "$ROOT/.claude-plugin/marketplace.json" "$ROOT/.cursor-plugin/plugin.json" "$ROOT/codex/.codex-plugin/plugin.json" "$ROOT/plugin/companions.lock.json"; echo $?)"
 
@@ -60,4 +63,4 @@ FAKE_HOST="$WORK/v010-paid-host"
 printf '#!/bin/sh\ntouch "%s"\n' "$WORK/v010-paid-called" >"$FAKE_HOST"; chmod +x "$FAKE_HOST"
 EVAL_CLAUDE_BIN="$FAKE_HOST" python3 "$ROOT/scripts/evals/run.py" validate >/dev/null
 check "v0.10.0 @s33 catalog validation calls no host" "absent" "$([ -e "$WORK/v010-paid-called" ] && echo present || echo absent)"
-check "v0.10.0 @s33 all mini-features done" "5" "$(python3 -c 'import json,sys; print(sum(x["status"]=="done" for x in json.load(open(sys.argv[1]))["mini_features"]))' "$ROOT/docs/specs/ecosystem/features.json")"
+check "v0.10.0 @s33 all mini-features done" "5" "$(python3 -c 'import json,sys; print(sum(x["status"]=="done" for x in json.load(open(sys.argv[1]))["mini_features"]))' "$ROOT/docs/epics/archive/ecosystem/features.json")"

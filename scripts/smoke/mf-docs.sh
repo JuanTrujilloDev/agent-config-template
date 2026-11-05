@@ -5,11 +5,11 @@ MATRIX="$ROOT/docs/install/host-capability-matrix.md"
 CURSOR_DOC="$ROOT/docs/install/cursor.md"
 CURSOR_AGENTS="$ROOT/hosts/cursor/AGENTS.md"
 
-for term in 'hosts/' 'cursor/' 'codex/' 'scripts/smoke/' 'docs/design-system/' 'docs/CONTEXT\.md' '\.claude/answers\.local\.env' '/integrate' 'patterns\.md' '--overwrite-files'; do
+for term in 'hosts/' 'cursor/' 'codex/' 'scripts/smoke/' 'docs/design-system/' 'docs/CONTEXT\.md' '\.claude/answers\.local\.env' '/integrate' 'skills/<name>' 'docs/epics/' '--overwrite-files'; do
   grep_case "v0.8.3 @s10 file map names $term" "$MAP" "$term"
 done
 
-for term in 'MASTER\.md' 'CONTEXT\.md' 'output_style' 'agent_style' '--overwrite-files'; do
+for term in 'MASTER\.md' 'CONTEXT\.md' 'output_style' 'docs/epics/' '--overwrite-files'; do
   grep_case "v0.8.3 @s11 README names $term" "$README" "$term"
 done
 check "v0.8.3 @s11 README does not require companions" "0" "$(grep -ciE 'companions?.*(required|mandatory)|(required|mandatory).*companions?' "$README"; true)"

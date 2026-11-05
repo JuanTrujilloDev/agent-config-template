@@ -1,8 +1,8 @@
 #!/bin/bash
-# Smoke harness for docs/specs/adaptive-skills/contract.md **(smoke)** scenarios.
-# Thin runner: renders examples/python-fastapi into mktemp -d (scripts/smoke/lib.sh),
-# then sources scripts/smoke/mf*.sh in mini-feature run order. Bash 3.2 + python3
-# stdlib only. Extend by adding `hook_case` / `check` / `grep_case` lines to an mf file.
+# Smoke harness. Thin runner: renders examples/python-fastapi into mktemp -d
+# (scripts/smoke/lib.sh), then sources each scripts/smoke/*.sh case file in release order.
+# Bash 3.2 + python3 stdlib only. Extend by adding `check` / `grep_case` lines to a case
+# file; each v0.11 item has its own scripts/smoke/v011-<n>-*.sh.
 set -uo pipefail
 
 ROOT=$(cd "$(dirname "$0")/.." && pwd)
@@ -11,7 +11,7 @@ trap 'rm -rf "$WORK"' EXIT
 FAIL=0
 
 . "$ROOT/scripts/smoke/lib.sh"
-for mf in mf1-output-style v083-mf1-bugs mf-docs v083-mf3-instructions v083-mf4-hygiene mf8-agent-style mf2-patterns mf3-ledger mf4-brand mf5-vocabulary mf6-companions mf7-merge v083-mf5-release v090-mf1-contract-grammar v090-mf2-mini-feature-grammar v090-mf3-schema-migration v090-mf4-contract-amendments v090-mf5-principles-gates v090-mf6-release v091-mf1-verify-preflight v091-mf2-two-axis-verdicts v091-mf3-review-convergence v091-mf4-tdd-guardrails v091-mf5-release v092-mf1-managed-state v092-mf2-override-drift v092-mf3-prune v092-mf4-parser-release v010-mf1-model-evals v010-mf2-brand-tokens v010-mf3-companions v010-mf4-branch-tokenizer v010-mf5-release orchestrator-init v011-1-principles-hooks; do
+for mf in mf1-output-style v083-mf1-bugs mf-docs v083-mf3-instructions v083-mf4-hygiene mf4-brand mf6-companions mf7-merge v083-mf5-release v090-mf6-release v091-mf1-verify-preflight v092-mf1-managed-state v092-mf2-override-drift v092-mf3-prune v092-mf4-parser-release v010-mf1-model-evals v010-mf2-brand-tokens v010-mf3-companions v010-mf4-branch-tokenizer v010-mf5-release orchestrator-init v011-1-principles-hooks v011-2-drop-agents v011-3-epic-slice v011-4-slice-loop v011-5-skills-mirror v011-6-update-config v011-7-plugin-hosts v011-8-release; do
   . "$ROOT/scripts/smoke/$mf.sh"
 done
 

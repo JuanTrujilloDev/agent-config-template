@@ -156,7 +156,8 @@ def walk_components(base, kind, require=None, allow_requires=False, need_disable
                     data = parse_frontmatter(
                         f, rel, require=require or ("description",),
                         allow_requires_directive=allow_requires) or {}
-                    if need_disable and str(data.get("disable-model-invocation")).lower() != "true":
+                    needs = need_disable is True or (need_disable and sk in need_disable)
+                    if needs and str(data.get("disable-model-invocation")).lower() != "true":
                         err(f"{rel}: missing 'disable-model-invocation: true' in frontmatter")
     else:  # agents / commands: flat .md files
         for fn in sorted(os.listdir(d)):
@@ -173,6 +174,7 @@ walk_components("plugin/commands", "commands")
 for rel in ("plugin/commands/setup-template.md", "plugin/commands/setup-companions.md"):
     parse_frontmatter(os.path.join(REPO, rel), rel, require=("name", "description"))
 walk_components("core/.claude/agents", "agents")
+walk_components("core/.claude/skills", "skills", require=("name", "description"), allow_requires=True)
 walk_components("core/.claude/commands", "commands")
 
 cursor_rule_dir = os.path.join(REPO, "plugin/.cursor-plugin/rules")
@@ -241,8 +243,10 @@ check_mustache_json("cursor/.cursor/mcp.json")  # all conditionals falsy
 check_mustache_json("cursor/.cursor/mcp.json", truthy={"has_e2e", "ticket_tracker_plane"})
 check_mustache_json("cursor/.cursor/mcp.json", truthy={"has_e2e"})  # default config: e2e without an MCP tracker
 
+# Skills converted from core commands are user-invoked; core skills keep their own frontmatter.
+core_commands = {fn[:-3] for fn in os.listdir(os.path.join(REPO, "core/.claude/commands")) if fn.endswith(".md")}
 walk_components("cursor/.claude/skills", "skills",
-                require=("name", "description"), allow_requires=True, need_disable=True)
+                require=("name", "description"), allow_requires=True, need_disable=core_commands)
 
 # --- Codex tree ---
 walk_components("codex/skills", "skills", require=("name", "description"))
