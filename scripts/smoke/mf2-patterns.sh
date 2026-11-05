@@ -65,8 +65,8 @@ if [ -f "$SKILL" ]; then
   mv "$WORK/skill.bak" "$SKILL"
   check "@s15 seeded invalid YAML fails" "1" "$rc"
 else check "@s15 seeded invalid YAML fails" "1" "skill missing"; fi
-# @s16 — READMEs count eight skills and name patterns
-grep_case "@s16 plugin README eight skills" "$ROOT/plugin/README.md" '\*\*8 skills\*\*|[Ee]ight skills'
+# @s16 — READMEs count nine skills and name patterns
+grep_case "@s16 plugin README nine skills" "$ROOT/plugin/README.md" '\*\*9 skills\*\*|[Nn]ine skills'
 grep_case "@s16 plugin README names patterns" "$ROOT/plugin/README.md" '`patterns`'
 grep_case "@s16 README names patterns" "$ROOT/README.md" '`patterns`'
 # lean always-loaded surface: CLAUDE.md + principles.md reference patterns.md at most once each

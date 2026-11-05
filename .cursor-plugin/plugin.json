@@ -16,7 +16,8 @@
   "skills": "plugin/skills",
   "commands": [
     "plugin/commands/setup-template.md",
-    "plugin/commands/setup-companions.md"
+    "plugin/commands/setup-companions.md",
+    "plugin/commands/orchestrator-init.md"
   ],
   "hooks": "plugin/.cursor-plugin/hooks.json"
 }

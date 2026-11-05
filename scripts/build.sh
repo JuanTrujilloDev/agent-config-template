@@ -30,10 +30,12 @@ cd "$ROOT"
 python3 scripts/check-override-headings.py
 
 # Codex derivation (rules from the former hand-sync note, now code):
-# - plugin/skills/<s>/SKILL.md      -> codex skill, adding `name:` frontmatter.
+# - plugin/skills/<s>/SKILL.md      -> codex skill, adding `name:` frontmatter;
+#   supporting files in the skill folder (templates, scripts) are copied as is.
 # - plugin/commands/<c>.md          -> codex skill, frontmatter reduced to
 #   `name` + quoted `description` (no argument-hint); subagent-spawning
 #   workflow commands get the role-adaptation note (Codex has no subagents).
+#   A command with the same name as a skill is skipped: the skill covers it.
 # - setup-template is not ported (renders a .claude/ tree — Claude-only).
 # - hosts/codex/skills/<s>/SKILL.md are whole-file overrides for the
 #   codex-specific content deltas (setup-companions, sdd-workflow, feature,
@@ -47,13 +49,14 @@ build_codex_skills() {
   mkdir -p "$out"
   for d in plugin/skills/*/; do
     name="$(basename "$d")"
-    mkdir -p "$out/$name"
+    cp -R "${d%/}" "$out/$name"
     awk -v n="$name" 'NR==1{print; print "name: " n; next} {print}' \
       "$d/SKILL.md" > "$out/$name/SKILL.md"
   done
   for c in plugin/commands/*.md; do
     name="$(basename "$c" .md)"
     [ "$name" = "setup-template" ] && continue
+    [ -d "plugin/skills/$name" ] && continue
     desc="$(sed -n 's/^description: //p' "$c" | head -1)"
     desc="${desc#\"}"; desc="${desc%\"}"
     mkdir -p "$out/$name"
