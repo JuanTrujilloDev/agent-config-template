@@ -1,3 +1,4 @@
+<!-- archived from docs/specs/adaptive-skills/ by migrate.py; source=migrated; never rendered -->
 # Adaptive Skills (v0.8.2) — Spec
 
 2026-09-02 | branch: feature/v0.8.2-adaptive-skills | stacked on v0.8.1 (setup-evolution) | mode: SDD+TDD, gated

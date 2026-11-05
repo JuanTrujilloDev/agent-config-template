@@ -1,3 +1,4 @@
+<!-- archived from docs/specs/sdd-grammar/ by migrate.py; source=migrated; never rendered -->
 # SDD Grammar (v0.9.0) — Spec
 
 2026-09-02 | branch: feature/v0.9.0-sdd-grammar | based on v0.8.3 | mode: SDD+TDD, gated

@@ -1,3 +1,4 @@
+<!-- archived from docs/specs/review-debt/ by migrate.py; source=migrated; never rendered -->
 # Review Debt (v0.8.3) — Spec
 
 2026-09-02 | branch: feature/v0.8.3-review-debt | based on v0.8.2 | mode: SDD+TDD, gated

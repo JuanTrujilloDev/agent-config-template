@@ -1,3 +1,4 @@
+<!-- archived from docs/specs/setup-evolution/ by migrate.py; source=migrated; never rendered -->
 # Setup Evolution (v0.8.x) — Spec
 
 2026-09-01 | branch: feature/setup-evolution | stacked on v0.8.0 (cursor-grok-portability)

@@ -1,3 +1,4 @@
+<!-- archived from docs/specs/review-consolidation/ by migrate.py; source=migrated; never rendered -->
 # Review Consolidation (v0.9.1) — Spec
 
 2026-09-02 | branch: feature/v0.9.1-review-convergence | based on v0.9.0 | mode: SDD+TDD, gated

@@ -1,3 +1,4 @@
+<!-- archived from docs/specs/cursor-grok-portability/ by migrate.py; source=migrated; never rendered -->
 # Cursor/Grok Portability Foundation (v0.8.0) — Spec
 
 2026-09-01 | branch: feature/cursor-grok-portability

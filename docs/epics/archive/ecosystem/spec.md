@@ -1,3 +1,4 @@
+<!-- archived from docs/specs/ecosystem/ by migrate.py; source=migrated; never rendered -->
 # Ecosystem (v0.10.0) — Spec
 
 2026-09-02 | branch: feature/v0.10.0-ecosystem | based on v0.9.2 | mode: SDD+TDD, gated

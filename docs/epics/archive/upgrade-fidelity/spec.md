@@ -1,3 +1,4 @@
+<!-- archived from docs/specs/upgrade-fidelity/ by migrate.py; source=migrated; never rendered -->
 # Upgrade Fidelity (v0.9.2) — Spec
 
 2026-09-02 | branch: feature/v0.9.2-upgrade-fidelity | based on v0.9.1 | mode: SDD+TDD, gated
