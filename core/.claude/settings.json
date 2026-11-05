@@ -29,6 +29,7 @@
       "Bash({{build_cmd}})",
       "Read({{src_dir}}/**)",
       "Read(docs/**)",
+      "Read(docs/epics/**)",
       "Read({{tests_glob}}**)",
       "Read(README.md)",
       "Read(CLAUDE.md)",
@@ -36,7 +37,8 @@
       "Edit({{src_dir}}/**)",
       "Edit({{tests_glob}}**)",
       "Edit(docs/**)",
-      "Write(docs/**)"
+      "Write(docs/**)",
+      "Write(docs/epics/**)"
     ],
     "deny": [
       "Read(.env)",
@@ -99,17 +101,6 @@
             "type": "command",
             "command": "\"$CLAUDE_PROJECT_DIR/.claude/hooks/auto-format.sh\"",
             "timeout": 30
-          }
-        ]
-      }
-    ],
-    "UserPromptSubmit": [
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "\"$CLAUDE_PROJECT_DIR/.claude/hooks/coding-reminder.sh\"",
-            "timeout": 5
           }
         ]
       }
