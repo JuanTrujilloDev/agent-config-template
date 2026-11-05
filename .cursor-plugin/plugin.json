@@ -1,7 +1,7 @@
 {
   "name": "agent-config-template",
   "displayName": "Agent Config Template",
-  "version": "0.11.0",
+  "version": "0.11.1",
   "description": "A concise epic → slice workflow with tests first, locked approved tests, two-axis review and minimal-code guidance.",
   "author": {
     "name": "Juan Trujillo"

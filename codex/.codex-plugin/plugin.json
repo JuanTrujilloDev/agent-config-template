@@ -1,6 +1,6 @@
 {
   "name": "agent-config-template",
-  "version": "0.11.0",
+  "version": "0.11.1",
   "description": "Epic → story → slice config for any stack: epic, slice, tests-first, implement, code-review, plus fix, integrate, verify, audit, commit, pr, design; operating principles incl. the leverage ladder, graph-first code-query, style guides. Ported from the Claude Code plugin; review axes run in sequence (no subagents).",
   "skills": "./skills/",
   "author": {

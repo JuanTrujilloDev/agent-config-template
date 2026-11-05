@@ -13,6 +13,10 @@
 
 It turns a ticket or an ask into one approved epic of one-case stories, then ships it one layered slice at a time: tests first and locked, code to green, two-axis review, one small PR. Epics and slices live on disk (or on your tracker), so the workflow survives restarts across web, backend, mobile, Unity, desktop, CLI, and data projects.
 
+## v0.11.1 — fixes
+
+Patch release from the v0.11.0 review: slice reports no longer fail `validate-epics.py`, `--merge --prune` drops the stale v0.10 prompt hook from `settings.json`, `code-review` treats the slice's `## Approved tests` as append-only, `migrate.py` reads the older `@sN` grammar, and the test lock resolves symlinks and case. See the [upgrade guide](docs/upgrade-guide.md).
+
 ## v0.11.0 — breaking
 
 - `/spec` and `/feature` are gone: `/epic` → `/slice` → `tests-first` → `implement` → `code-review` → `/pr`, all in your thread.
@@ -21,7 +25,7 @@ It turns a ticket or an ask into one approved epic of one-case stories, then shi
 - The always-loaded text drops from about 9.5k to about 3k tokens: one ≤80-line principles file, everything else is a skill loaded on demand.
 - `update-config` upgrades a rendered project and migrates old `docs/specs/` folders to `docs/epics/`.
 
-Upgrade path: `0.10.0 → 0.11.0` via `update-config`; see the [upgrade guide](docs/upgrade-guide.md).
+Upgrade path: `0.10.0 → 0.11.1` via `update-config`; see the [upgrade guide](docs/upgrade-guide.md).
 
 ## Install
 
