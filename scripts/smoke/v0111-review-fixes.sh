@@ -93,4 +93,24 @@ check "v0.11.1 F6 old-grammar epic has no tags left" "0" "$(grep -cE '\*\*\(|\[F
 check "v0.11.1 F6 old-grammar slices cover stories" "0" "$(grep -c '^- Stories covered: —$' "$F_M"/docs/epics/adaptive-skills/slices/*.md | grep -vc ':0$')"
 grep_case "v0.11.1 F7 rerun skips the migrated slug" <(python3 "$F_MIG" --root "$F_M" adaptive-skills 2>&1) '^adaptive-skills +- +skip \(migrated\)'
 
+# 5. Hook: lock compares realpath (+ casefold on macOS); PreToolUse also routes MultiEdit and NotebookEdit.
+for f in "$ROOT/core/.claude/settings.json" "$ROOT/plugin/hooks/hooks.json"; do
+  grep_case "v0.11.1 F9 PreToolUse matcher covers MultiEdit and NotebookEdit in ${f#$ROOT/}" "$f" '"matcher": "Edit\|Write\|MultiEdit\|NotebookEdit"'
+done
+F_R="$WORK/f-hook"; mkdir -p "$F_R/docs/epics/X/slices" "$F_R/tests"; : >"$F_R/tests/test_a.py"; : >"$F_R/tests/nb.ipynb"
+git -C "$F_R" init -q -b feature/X-a-be && git -C "$F_R" -c user.email=s@x -c user.name=s commit -q --allow-empty -m init
+printf -- '- Branch: `feature/X-a-be`\n\n## Approved tests\nCommit: `abc1234`\n- `tests/test_a.py`\n- `tests/nb.ipynb`\n' >"$F_R/docs/epics/X/slices/1.md"
+printf -- '- Branch: `feature/X-a-be`\n\n## Approved tests\n- `src/app.py`\n' >"$F_R/docs/epics/X/slices/1.security.md"
+ln -s "$F_R" "$WORK/f-hook-alias"
+F_HR() { printf '{"tool_name":"%s","tool_input":{"%s":"%s"}}' "$2" "$3" "$4" | CLAUDE_PROJECT_DIR="$F_R" bash "$1" >/dev/null 2>&1; echo $?; }
+for h in "$WORK/.claude/hooks/agent-enforcement.sh" "$ROOT/plugin/hooks/agent-enforcement.sh"; do
+  n=${h#$WORK/}; n=${n#$ROOT/}
+  check "v0.11.1 F8 $n locks a symlinked spelling" "2" "$(F_HR "$h" Edit file_path "$WORK/f-hook-alias/tests/test_a.py")"
+  check "v0.11.1 F9 $n locks a notebook via NotebookEdit" "2" "$(F_HR "$h" NotebookEdit notebook_path "$F_R/tests/nb.ipynb")"
+  check "v0.11.1 F1 $n ignores paths in slice reports" "0" "$(F_HR "$h" Edit file_path "$F_R/src/app.py")"
+  if [ "$(uname)" = Darwin ]; then
+    check "v0.11.1 F8 $n locks a case-variant spelling on macOS" "2" "$(F_HR "$h" Edit file_path "$F_R/TESTS/test_a.py")"
+  fi
+done
+
 [ -n "${V0111_ALONE:-}" ] && exit $FAIL

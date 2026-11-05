@@ -110,7 +110,7 @@ setup and appears only after the workflow coins or disambiguates a term.
 
 Shell scripts that fire on Claude Code events. Each reads the event's JSON payload from stdin.
 
-### `agent-enforcement.sh` (PreToolUse: Edit | Write)
+### `agent-enforcement.sh` (PreToolUse: Edit | Write | MultiEdit | NotebookEdit)
 
 Runs **before** every Edit or Write. Two hard blocks (exit 2 → Claude Code feeds the message back so the model self-corrects):
 1. **Branch discipline** — blocks edits to the source directory while on a *protected* branch: the default branch plus anything in `AGENT_CONFIG_PROTECTED_BRANCHES` (legacy `CLAUDE_CONFIG_PROTECTED_BRANCHES`).

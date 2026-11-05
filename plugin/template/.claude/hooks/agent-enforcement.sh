@@ -1,5 +1,5 @@
 #!/bin/bash
-# PreToolUse hook for Claude Code (Edit | Write). Two hard blocks (exit 2):
+# PreToolUse hook for Claude Code (Edit | Write | MultiEdit | NotebookEdit). Two hard blocks (exit 2):
 #  - Branch discipline: no edits to code under {{src_dir}} while on a protected branch.
 #    Protected = $AGENT_CONFIG_PROTECTED_BRANCHES (or legacy $CLAUDE_CONFIG_PROTECTED_BRANCHES),
 #    default "{{default_branch}},master". Example: export AGENT_CONFIG_PROTECTED_BRANCHES="{{default_branch}},qa,prod"
@@ -65,14 +65,19 @@ fi
 LOCKED_BY=$(python3 -c '
 import glob, os, re, sys
 root, branch, target = sys.argv[1:]
-target = os.path.abspath(os.path.join(root, target))
+def key(p):  # one spelling per file: symlinks resolved; case folded where the filesystem ignores it
+    p = os.path.normcase(os.path.realpath(os.path.join(root, p)))
+    return p.casefold() if sys.platform == "darwin" else p
+target = key(target)
 for slice_file in sorted(glob.glob(os.path.join(root, "docs/epics/*/slices/*.md"))):
+    if not re.fullmatch(r"\d+\.md", os.path.basename(slice_file)):
+        continue  # <n>.security.md, <n>.mutation.md are reports, not slices
     text = open(slice_file, encoding="utf-8", errors="replace").read()
     if not re.search(r"^- Branch: `" + re.escape(branch) + "`", text, re.M):
         continue
     section = re.search(r"^## Approved tests\n(.*?)(?=^## |\Z)", text, re.M | re.S)
     for path in re.findall(r"^- `([^`]+)`", section.group(1) if section else "", re.M):
-        if os.path.abspath(os.path.join(root, path)) == target:
+        if key(path) == target:
             print(os.path.relpath(slice_file, root))
             sys.exit(0)
 ' "$PROJECT_DIR" "$CURRENT_BRANCH" "$FILE_PATH" 2>/dev/null)
