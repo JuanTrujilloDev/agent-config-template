@@ -2,6 +2,17 @@
 
 How to pull updates from the template into a project that's already configured.
 
+## Upgrading from v0.11.0 to v0.11.1
+
+Patch release; no new steps beyond re-running `update-config` (or `setup.sh --merge`). Fixes from the v0.11.0 review:
+
+- `validate-epics.py` checks only `slices/<n>.md` (security and mutation reports beside them no longer fail it), warns on an epic with no stories, and exits 2 on a mistyped path.
+- `setup.sh --merge --prune` drops `settings.json` hook entries that run a file it pruned (v0.10's `coding-reminder.sh`). `update-config` lists that cleanup and a `CLAUDE.md` reconcile step.
+- `code-review` fails when a line under the slice's `## Approved tests` or its `- Branch:` line is removed or changed; `tests-first` locks every file in the tests commit, fixtures included.
+- `migrate.py` reads the older `- @sN **(tag)**` scenario grammar, renders open specs in plan mode, reports render errors as `ERROR` rows, and writes each epic atomically.
+- The approved-tests lock compares resolved paths (case-insensitive on macOS), and its `PreToolUse` matcher is `Edit|Write|MultiEdit|NotebookEdit`.
+- `/epic` asks before creating tracker cards; no is the default.
+
 ## Upgrading from v0.10.0 to v0.11.0 — breaking
 
 v0.11.0 replaces the spec-driven flow with **epic → story → slice**
@@ -43,9 +54,13 @@ python3 .claude/skills/update-config/migrate.py --apply   # archive done specs, 
 python3 .claude/skills/epic/validate-epics.py docs/epics
 ```
 
-`--merge` adds hooks but never removes them, so delete the `UserPromptSubmit`
-entry for `coding-reminder.sh` from `.claude/settings.json` by hand. Delete the
-three retired keys from `answers.env`. Edited copies of dropped files are
+`--merge --prune` (v0.11.1+) also drops the `UserPromptSubmit` entry for the
+pruned `coding-reminder.sh` from `.claude/settings.json`; without `--prune`,
+delete that entry by hand. v0.11 rewrote the Workflow, Agents and Commands
+sections of `CLAUDE.md`, which `--merge` never touches (`CUSTOMIZED`): diff it
+against a fresh render and fold those sections in, since it is always loaded and
+the old one names the dropped agents and commands. Delete the three retired keys
+from `answers.env`. Edited copies of dropped files are
 `CUSTOMIZED-OBSOLETE` and stay until you remove them.
 
 
@@ -80,7 +95,7 @@ git add answers.env   # the source of truth — re-renders the same config later
 
 ```bash
 # 1. Pull the latest template (or check out a tag for stability)
-cd ~/code/agent-config-template && git pull origin main   # or: git checkout v0.11.0
+cd ~/code/agent-config-template && git pull origin main   # or: git checkout v0.11.1
 
 # 2. Preview what would change in your project
 cd ~/code/my-project
@@ -90,7 +105,7 @@ cd ~/code/my-project
 ~/code/agent-config-template/setup.sh --target . --answers ./answers.env --merge
 
 # 4. Commit
-git add .claude/ CLAUDE.md docs/ agent-config.lock.json && git commit -m "chore: upgrade agent-config-template to v0.11.0"
+git add .claude/ CLAUDE.md docs/ agent-config.lock.json && git commit -m "chore: upgrade agent-config-template to v0.11.1"
 ```
 
 A template upgrade (`setup.sh --merge`) is its own `chore:` commit — never mixed into a feature PR.

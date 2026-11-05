@@ -27,6 +27,7 @@ With an existing config and no mode this writes nothing and prints one line per 
 | --- | --- | --- |
 | `STALE-MANAGED` | template file you never edited | overwrite |
 | `CUSTOMIZED-MANAGED` | template file you edited | keep; never touched by this skill |
+| `CUSTOMIZED` | yours by design (`CLAUDE.md`, `docs/CONTEXT.md`, `docs/design-system/`) | keep; reconcile by hand |
 | `LEGACY` | no baseline to compare | ask |
 | `OBSOLETE` | file the template no longer ships, unedited | prune |
 | `CUSTOMIZED-OBSOLETE` | dropped file you edited | keep; never touched by this skill |
@@ -43,7 +44,12 @@ It prints one row per slug: `done` specs are archived verbatim to `docs/epics/ar
 
 ## 4. Confirm
 
-One numbered list: config paths to overwrite, obsolete paths to prune, LEGACY paths to decide, specs to migrate. The user answers by number (`approve 1-4, 7`); anything unanswered is skipped. Never overwrite silently. `CUSTOMIZED-*` paths are never offered; mention them so the user can reconcile by hand.
+One numbered list: config paths to overwrite, obsolete paths to prune, LEGACY paths to decide, specs to migrate, and these manual steps:
+
+- **`UserPromptSubmit` cleanup**: `--prune` drops the settings hook entry of every file it prunes (v0.10's `coding-reminder.sh`). Without `--prune`, or when `coding-reminder.sh` is `CUSTOMIZED-OBSOLETE`, offer to delete that entry from `.claude/settings.json` by hand.
+- **`CUSTOMIZED CLAUDE.md` reconcile**: v0.11 rewrote the Workflow, Agents and Commands sections of `CLAUDE.md`; diff it against a fresh render (`setup.sh --target <tmp> --answers answers.env`) and fold those sections in. It is always loaded, so a stale copy points at dropped agents and commands.
+
+The user answers by number (`approve 1-4, 7`); anything unanswered is skipped. Never overwrite silently. `CUSTOMIZED` and `CUSTOMIZED-*` paths are never offered for overwrite; list them so the user can reconcile by hand.
 
 ## 5. Apply
 
@@ -55,7 +61,7 @@ python3 .claude/skills/update-config/migrate.py --apply <approved slugs>
 python3 .claude/skills/epic/validate-epics.py docs/epics
 ```
 
-`--prune` only when the user approved pruning; it removes unchanged `OBSOLETE` files and their lock entries. `--merge` deep-merges `.claude/settings.json` and refreshes the lock for the files it wrote. Paste each command's output. A second run of `migrate.py` must report every slug as `skip (migrated)`.
+`--prune` only when the user approved pruning; it removes unchanged `OBSOLETE` files, their lock entries and any `settings.json` hook that runs them. Then do the approved manual steps (hook entry, `CLAUDE.md`). `--merge` deep-merges `.claude/settings.json` and refreshes the lock for the files it wrote. Paste each command's output. A second run of `migrate.py` must report every slug as `skip (migrated)`.
 
 ## 6. Commit
 

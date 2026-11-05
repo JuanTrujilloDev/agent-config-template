@@ -79,7 +79,7 @@ Branches stack per capability group: `feature/<ID>-<group>-db` → `-be` → `-f
 
 ### Hooks (`.claude/hooks/`)
 
-- **PreToolUse** on `Edit|Write` → `agent-enforcement.sh`: blocks edits under `{{src_dir}}` on a protected branch (`{{default_branch}}` or `$AGENT_CONFIG_PROTECTED_BRANCHES`), and blocks edits to the current slice's approved tests (override `AGENT_CONFIG_UNLOCK_TESTS=1`).
+- **PreToolUse** on `Edit|Write|MultiEdit|NotebookEdit` → `agent-enforcement.sh`: blocks edits under `{{src_dir}}` on a protected branch (`{{default_branch}}` or `$AGENT_CONFIG_PROTECTED_BRANCHES`), and blocks edits to the current slice's approved tests (override `AGENT_CONFIG_UNLOCK_TESTS=1`).
 - **PostToolUse** on `Edit|Write` → `auto-format.sh`: targeted lint autofixes on the changed file; whole-file formatting runs in the Definition of Done.
 
 ### MCP Servers
