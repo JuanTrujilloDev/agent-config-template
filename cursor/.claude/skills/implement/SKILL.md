@@ -11,6 +11,7 @@ Input: the slice file `docs/epics/<ID>/slices/<n>.md` (the current branch's slic
 
 1. **Load context.** Read the slice file, its stories and TS lines in `epic.md`, and every approved test file. Load the style skill for the layer: `backend-style` for `db` and `be`, `frontend-style` for `fe`.
 2. **Check the branch** against the slice's `- Branch:` line.
+   **UI code:** before writing it, read `docs/design-system/MASTER.md` (and `docs/design-system/pages/<page>.md` when the page has one; it wins where it deviates) and its value source `docs/design-system/tokens.json`. Cite tokens, never raw values: no hardcoded color, spacing, radius or font size. If MASTER.md is missing, stop and ask for `/design`.
 3. **Read before you write.** For each file you will change, read it end to end and check its callers (`code-query` skill: graph first, grep second).
 4. **Implement to green.** Minimum code for the approved tests and the slice's Expected behaviour; follow the slice's pattern decision (`patterns` skill). Run the single test file often, typecheck when the project has one.
 5. **Never edit an approved test.** If one looks wrong or cannot pass without changing it, stop and ask; do not work around it (no skips, no xfail, no weakened fixture). The hook blocks the edit anyway.

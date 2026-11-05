@@ -21,6 +21,7 @@ Use the argument when given. Otherwise: the stacked base from the slice's `- Bra
 
 - **Spec**: the slice file `docs/epics/<ID>/slices/<n>.md` for the current branch (its `- Branch:` line), plus the slice's stories, AC and TS lines in `docs/epics/<ID>/epic.md`. No slice file (a `/fix`, a refactor): the user's request or the issue they name; if there is none, skip the Spec axis and say "no spec available".
 - **Standards**: `.claude/rules/principles.md`, the layer style skill (`backend-style` for db/be, `frontend-style` for fe, both when the diff spans both), the `patterns` skill, plus `CONTRIBUTING.md` or `CODING_STANDARDS.md` when present, plus the smell baseline below.
+- **Design system** (UI diffs only): `docs/design-system/MASTER.md` (or a `pages/<page>.md` override), `docs/design-system/tokens.json` and `tokens.lock.json`. A hardcoded color, spacing, radius or font value not traceable to the token source is a finding, cited `file:line`. A missing theme target, a stale `source_sha256` / `target_sha256`, a raw brand value or an undocumented page-level token fork is a Blocker.
 
 ### Smell baseline (Fowler, *Refactoring* ch. 3)
 

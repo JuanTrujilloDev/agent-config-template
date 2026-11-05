@@ -45,7 +45,7 @@ recommended merge path after reviewing the plan.
 ## Agents: `tools:` is ignored
 
 Cursor ignores the `tools:` frontmatter that restricts Claude Code agents.
-Treat the read-only agents — `judge`, `security-reviewer`, `ui-designer` — as
+Treat the read-only agents — `security-reviewer`, `ui-designer` — as
 `readonly: true`: add that key to their frontmatter in your render if you want
 Cursor to enforce it; otherwise it's on you (and the agent's own instructions)
 to keep them from editing.

@@ -1,8 +1,8 @@
 # Flutter mobile app preset
 
-`project_type=mobile-app` renders the `mobile-dev` agent (offline/lifecycle/platform
-gotchas) plus `ui-designer`; the web-only pieces (`backend-dev`, `frontend-dev`,
-layer split, Playwright) are dropped automatically.
+`project_type=mobile-app` renders `ui-designer`, the design system and the mobile
+pattern references (offline, lifecycle, platform bridges); web-only pieces
+(the `frontend-style` skill, Playwright) are dropped automatically.
 
 ```bash
 cp examples/flutter-mobile/answers.env ./answers.env
