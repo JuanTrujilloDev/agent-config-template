@@ -5,9 +5,9 @@ argument-hint: "[base ref]"
 
 # /verify
 
-A skeptical self-review of your **own** uncommitted work before you call it done. "Should work" is not a status — `/verify` is how you earn "done." Run it after implementing and before `judge` or the commit; for a `/fix`, it's the lightweight verification step.
+A skeptical self-review of your **own** uncommitted work before you call it done. "Should work" is not a status — `/verify` is how you earn "done." Run it after implementing and before `code-review` or the commit; for a `/fix`, it's the lightweight verification step.
 
-This is the implementer checking its *own* diff. It complements `judge` (independent review afterward) and the Definition of Done — it doesn't replace either.
+This is the implementer checking its *own* diff. It complements `code-review` (independent review afterward) and the Definition of Done — it doesn't replace either.
 
 ## Usage
 
@@ -91,4 +91,4 @@ Don't just list problems — fix them. Then re-review the fixes with the same sk
 
 A short verdict: what you checked, what you ran and its result, what you found and fixed, and anything you couldn't verify and why. If it's genuinely clean, say so plainly — a clean pass is a real outcome, not a failure to find something.
 
-> Want a *second model's* eyes too? `judge`'s adversarial mode has an optional hook to route a review lens through an external CLI (e.g. Codex, Gemini) when you have one. `/verify` itself stays single-model and portable.
+> Want a *second model's* eyes too? the opt-in `council` skill routes a review through other providers when you have them. `/verify` itself stays single-model and portable.

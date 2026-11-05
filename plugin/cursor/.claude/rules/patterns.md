@@ -73,7 +73,7 @@ routing table and a "Simplest default first" list.
 
 ## Who uses this
 
-- **pmo (`/spec`)** — runs the protocol per mini-feature and writes the ledger line (or the refusal) in Design notes.
-- **Implementers (`/feature`, `/fix`)** — implement the ledger as written; a new abstraction not in the ledger goes back through steps 1–3 before it is coded.
-- **judge** — checks every new abstraction against the ledger; a pattern without a stated force, or a simpler rejected alternative never tried, is a Blocker.
+- **`/slice`** — runs the protocol per slice and writes the ledger line (or the refusal) in the slice brief.
+- **`implement`, `/fix`** — implement the ledger as written; a new abstraction not in the ledger goes back through steps 1–3 before it is coded.
+- **`code-review`** — checks every new abstraction against the ledger; a pattern without a stated force, or a simpler rejected alternative never tried, is a Blocker.
 - **`/verify`** — asks, for each new abstraction in your own diff, whether it has a ledger entry and whether the simplest default was tried first.

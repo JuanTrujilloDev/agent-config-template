@@ -51,10 +51,10 @@ This costs a few commands, not dozens of full-file reads — and gives the same
 
 ## Where this plugs into the workflow
 
-- **`/spec` (pmo, CONVERSE/SCOPE)** — query the graph to ground decomposition:
-  real dependencies between candidate mini-features, existing code the feature
-  can leverage (feeds the **Leverage** subsection of Design notes).
-- **`/feature` (implementer)** — impact analysis before editing: what depends
+- **`/epic` and `/slice`** — query the graph to ground decomposition:
+  real dependencies between candidate slices, existing code the epic
+  can leverage.
+- **`implement`** — impact analysis before editing: what depends
   on the thing you're about to change; check callers via the graph, then read them.
 - **`/fix` and debugging** — path queries ("how does the request reach this
   handler?") beat speculative file-hopping.
