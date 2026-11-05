@@ -1,16 +1,21 @@
+---
+name: patterns
+description: "Design-pattern restraint: inspect the project's existing patterns first, name the force present today, then choose the simplest default or refuse with a one-line why. Default-reject list and a force-to-reference table for six domains (backend, frontend, mobile, game, desktop, concurrency). Use when a slice or diff adds an abstraction."
+---
+
 # Design Patterns — restraint first
 
 A pattern is a named answer to a *force* (a variation, a boundary, a failure
 mode) that is present in the code today. Without the force, the pattern is
-indirection you pay for on every read. This rule decides, in order, whether a
-pattern earns its place; the domain references under `.claude/patterns/` say
+indirection you pay for on every read. This skill decides, in order, whether a
+pattern earns its place; the domain references under `references/` say
 which one. Inspired by 00suryavanshi00/code-design-patterns (MIT) — adapted
 wording, our rungs.
 
 ## Selection protocol (in this order)
 
 1. **Inspect existing project patterns first.** Before naming anything, look at
-   how the codebase already solves this shape of problem — `.claude/rules/code-query.md`
+   how the codebase already solves this shape of problem — the `code-query` skill
    (graph first, grep second) finds the existing repository, event bus, state
    machine, or plain module you should extend instead of duplicate. A pattern the
    project already uses beats a better pattern it does not.
@@ -23,7 +28,7 @@ wording, our rungs.
    argument — and only reach for the named pattern when the simplest default
    fails a stated way. Write the why in one line. Refusal is a valid and common
    result: `no pattern — single call site` is the expected answer for most
-   mini-features, and it needs no further justification.
+   slices, and it needs no further justification.
 
 ## Default-reject list
 
@@ -42,19 +47,16 @@ below has been tried and shown insufficient:
 Also a smell by default: an anemic domain model (data classes plus a `*Service`
 that holds all the logic) and any `*Manager` / `*Helper` wrapping one call site.
 
-## Ledger
+## Recording the decision
 
-Every pattern that survives the protocol gets one ledger line in the spec's
-Design notes, in this shape:
+The slice brief states the outcome in one line, in this shape:
 
 ```
 pattern / force / rejected alternative
 Strategy / three payment providers ship today, each with its own credentials state / dict of functions (rejected: per-provider state leaked into closures)
 ```
 
-No pattern in the mini-feature → the single line `no pattern — single call site`
-(or the actual reason: `no pattern — one variant`, `no pattern — ORM already
-abstracts storage`). A pattern without a ledger line is pattern-stuffing.
+or the refusal: `no pattern — single call site` (or the actual reason: `no pattern — one variant`, `no pattern — ORM already abstracts storage`). A pattern with no stated force is pattern-stuffing.
 
 ## Progressive disclosure — force → reference
 
@@ -64,16 +66,16 @@ routing table and a "Simplest default first" list.
 
 | Force lives in… | Reference |
 |---|---|
-| APIs, persistence, migrations, retries, caching (backend) | `.claude/patterns/backend.md` |
-| UI composition, client state, derived vs stored state (frontend) | `.claude/patterns/frontend.md` |
-| Navigation, offline/sync, view models, platform bridges (mobile) | `.claude/patterns/mobile.md` |
-| Unity components, data assets, pooling, update-loop budgets (game) | `.claude/patterns/game.md` |
-| MVVM/MVC, undo, document models, background work (desktop) | `.claude/patterns/desktop.md` |
-| Worker pools, backpressure, circuit breakers, actors, outbox (concurrency / distributed) | `.claude/patterns/concurrency.md` |
+| APIs, persistence, migrations, retries, caching (backend) | `references/backend.md` |
+| UI composition, client state, derived vs stored state (frontend) | `references/frontend.md` |
+| Navigation, offline/sync, view models, platform bridges (mobile) | `references/mobile.md` |
+| Unity components, data assets, pooling, update-loop budgets (game) | `references/game.md` |
+| MVVM/MVC, undo, document models, background work (desktop) | `references/desktop.md` |
+| Worker pools, backpressure, circuit breakers, actors, outbox (concurrency / distributed) | `references/concurrency.md` |
 
 ## Who uses this
 
-- **`/slice`** — runs the protocol per slice and writes the ledger line (or the refusal) in the slice brief.
-- **`implement`, `/fix`** — implement the ledger as written; a new abstraction not in the ledger goes back through steps 1–3 before it is coded.
-- **`code-review`** — checks every new abstraction against the ledger; a pattern without a stated force, or a simpler rejected alternative never tried, is a Blocker.
-- **`/verify`** — asks, for each new abstraction in your own diff, whether it has a ledger entry and whether the simplest default was tried first.
+- **`/slice`** — runs the protocol per slice and writes the decision (or the refusal) in the brief.
+- **`implement`, `/fix`** — build what the brief decided; a new abstraction it does not name goes back through steps 1–3 first.
+- **`code-review`** — a new abstraction without a stated force, or with a simpler default never tried, is a Blocker.
+- **`/verify`** — asks, for each new abstraction in your own diff, whether the simplest default was tried first.

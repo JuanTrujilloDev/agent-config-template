@@ -1,6 +1,6 @@
 # Desktop patterns — application structure
 
-Read this only when `.claude/rules/patterns.md` routed a desktop force here.
+Read this only when the `patterns` skill routed a desktop force here.
 Every row's *simplest alternative* is tried before the pattern is named.
 
 | Force | Pattern | Simplest alternative |

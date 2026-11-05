@@ -1,3 +1,8 @@
+---
+name: backend-style
+description: "Backend code style for this project: formatting, file organization, validation at boundaries, error handling, testing, persistence and background jobs. Loaded by implement and code-review for db and be slices."
+---
+
 # Code Style — {{project_name}}
 
 > Applies to: `{{src_dir}}/**`. {{language}} {{language_version}}, {{framework}}.

@@ -1,6 +1,6 @@
 # Mobile patterns — navigation, state, offline, platform
 
-Read this only when `.claude/rules/patterns.md` routed a mobile force here.
+Read this only when the `patterns` skill routed a mobile force here.
 Every row's *simplest alternative* is tried before the pattern is named.
 
 | Force | Pattern | Simplest alternative |

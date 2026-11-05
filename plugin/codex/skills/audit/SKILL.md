@@ -5,12 +5,11 @@ description: "Code-quality + security audit of the codebase, a path, or a branch
 
 # /audit
 
-> **On Codex (no subagents):** you play every role yourself, switching hats
-> explicitly and in sequence — `pmo` (spec/contract), the dev specialist
-> (implement), `judge` (review), `security-reviewer` (when auth/permissions/
-> data are touched). Same artifacts under `docs/specs/<slug>/`, same human
-> gates (contract approval; failing tests under TDD), same Definition of Done.
-> Announce each hat switch in one line.
+> **On Codex (no subagents):** run every step in this thread, in sequence.
+> `code-review` runs its Standards axis, then its Spec axis, and reports them
+> separately; `security-reviewer` becomes a read-only pass you announce in one
+> line. Same files under `docs/epics/<ID>/`, same user gates (epic draft, slice
+> brief, approved tests), same Definition of Done.
 
 
 Run a comprehensive code-quality + security audit on the codebase or a specific scope.

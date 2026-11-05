@@ -1,6 +1,6 @@
 # Concurrency & distributed patterns
 
-Read this only when `.claude/rules/patterns.md` routed a concurrency or
+Read this only when the `patterns` skill routed a concurrency or
 distributed-systems force here. Every row's *simplest alternative* is tried
 before the pattern is named.
 

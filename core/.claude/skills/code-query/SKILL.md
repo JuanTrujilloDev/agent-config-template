@@ -1,3 +1,7 @@
+---
+name: code-query
+description: "Graph-first code querying: consult a codebase knowledge graph (e.g. graphify) before file search for structural questions (what depends on X, how A and B connect, what a subsystem does); falls back to a deterministic repo map. Use when drafting an epic or slice, before editing, and for impact analysis."
+---
 
 # Code Query — graph first, grep second
 
@@ -15,7 +19,7 @@ graph already holds. Query the structure first; read files only once you know
 | "What depends on X?" / "What breaks if I change X?" | Graph (impact analysis), then read the hits. |
 | "How are A and B connected?" | Graph path query. |
 | "What does this subsystem do?" / unfamiliar repo | Graph communities / repo map, then targeted reads. |
-| "Which mini-features does this touch?" (planning) | Graph first — it turns decomposition guesses into listed dependencies. |
+| "Which slices does this touch?" (planning) | Graph first — it turns decomposition guesses into listed dependencies. |
 
 ## 1. If a knowledge graph is available (e.g. [graphify](https://github.com/Graphify-Labs/graphify))
 

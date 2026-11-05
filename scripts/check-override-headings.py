@@ -12,7 +12,6 @@ PAIRS = (
     ("plugin/skills/port-config/SKILL.md", "hosts/codex/skills/port-config/SKILL.md"),
     ("plugin/skills/sdd-workflow/SKILL.md", "hosts/codex/skills/sdd-workflow/SKILL.md"),
     ("plugin/commands/setup-companions.md", "hosts/codex/skills/setup-companions/SKILL.md"),
-    ("core/.claude/rules/patterns.md", "plugin/skills/patterns/SKILL.md"),
     ("core/.claude/rules/principles.md", "plugin/skills/principles/SKILL.md"),
 )
 MARKER_TOKEN = "override-ignore-h2"

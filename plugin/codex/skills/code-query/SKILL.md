@@ -1,6 +1,6 @@
 ---
 name: code-query
-description: Graph-first code querying — consult a codebase knowledge graph (e.g. graphify) before file search when the question is structural (what depends on X, how are A and B connected, what does this subsystem do). Falls back to a deterministic repo map when no graph exists. Reference when planning a spec, decomposing a feature, doing impact analysis, or orienting in an unfamiliar codebase.
+description: "Graph-first code querying: consult a codebase knowledge graph (e.g. graphify) before file search for structural questions (what depends on X, how A and B connect, what a subsystem does); falls back to a deterministic repo map. Use when drafting an epic or slice, before editing, and for impact analysis."
 ---
 
 # Code Query — graph first, grep second
@@ -19,7 +19,7 @@ graph already holds. Query the structure first; read files only once you know
 | "What depends on X?" / "What breaks if I change X?" | Graph (impact analysis), then read the hits. |
 | "How are A and B connected?" | Graph path query. |
 | "What does this subsystem do?" / unfamiliar repo | Graph communities / repo map, then targeted reads. |
-| "Which mini-features does this touch?" (planning) | Graph first — it turns decomposition guesses into listed dependencies. |
+| "Which slices does this touch?" (planning) | Graph first — it turns decomposition guesses into listed dependencies. |
 
 ## 1. If a knowledge graph is available (e.g. [graphify](https://github.com/Graphify-Labs/graphify))
 
@@ -55,12 +55,12 @@ This costs a few commands, not dozens of full-file reads — and gives the same
 
 ## Where this plugs into the workflow
 
-- **`/spec` (pmo, CONVERSE/SCOPE)** — query the graph to ground decomposition:
-  real dependencies between candidate mini-features, existing code the feature
-  can leverage (feeds the **Leverage** subsection of Design notes).
-- **`/feature` (implementer)** — impact analysis before editing: what depends
+- **`/epic` and `/slice`** — query the graph to ground decomposition:
+  real dependencies between candidate slices, existing code the epic
+  can leverage.
+- **`implement`** — impact analysis before editing: what depends
   on the thing you're about to change; check callers via the graph, then read them.
 - **`/fix` and debugging** — path queries ("how does the request reach this
   handler?") beat speculative file-hopping.
-- **Read Before You Write** (principles) — the graph finds the callers/usages
+- **Read Before You Write** (`.claude/rules/principles.md`) — the graph finds the callers/usages
   you owe a check; the reading itself is never skipped.

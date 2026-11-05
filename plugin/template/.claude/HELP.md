@@ -55,7 +55,7 @@ Everything else runs in your thread; there is no coordinator or dev subagent.
 | What | Where |
 |---|---|
 | Principles | `.claude/rules/principles.md` |
-| Style rules | `.claude/rules/{backend{{#has_frontend}},frontend{{/has_frontend}}}-style.md` |
+| Skills (epic, slice, tests-first, implement, code-review, style, patterns) | `.claude/skills/<name>/SKILL.md` |
 | Epics and slices | `docs/epics/<ID>/epic.md`, `docs/epics/<ID>/slices/<n>.md` |
 | Agents, commands, hooks | `.claude/agents/`, `.claude/commands/`, `.claude/hooks/` |
 

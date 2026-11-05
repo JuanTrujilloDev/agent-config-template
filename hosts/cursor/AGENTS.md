@@ -97,7 +97,7 @@ For a plan, comparison, diagram, table, or report the user asked to mark up, use
 ## Detail
 
 - Project skills: `.claude/skills/` — Cursor reads these rendered, stack-dependent skills natively
-- Style rules: `.claude/rules/backend-style.md`{{#has_frontend}}, `.claude/rules/frontend-style.md`{{/has_frontend}} (auto-attached via `.cursor/rules/*.mdc`)
-- Structural code questions (what depends on what): `.claude/rules/code-query.md` — graph first, grep second
+- Style skills: `.claude/skills/backend-style/`{{#has_frontend}}, `.claude/skills/frontend-style/`{{/has_frontend}} (loaded per slice layer)
+- Structural code questions (what depends on what): the `code-query` skill (`.claude/skills/code-query/`) — graph first, grep second
 - Full principles: `.claude/rules/principles.md`
 - Never commit `.env` files; validate input at every boundary

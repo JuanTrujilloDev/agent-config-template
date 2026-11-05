@@ -38,7 +38,7 @@ Epics and slices: `docs/epics/<ID>/epic.md`, `docs/epics/<ID>/slices/<n>.md`
 - **Formatter:** {{formatter}} — run `{{format_cmd}}`
 - **Linter:** {{linter}} — run `{{lint_cmd}}`
 
-Detailed patterns: `.claude/rules/backend-style.md`{{#has_frontend}}, `.claude/rules/frontend-style.md`{{/has_frontend}}. Structural code questions: `.claude/rules/code-query.md` (graph first, grep second). Before adding an abstraction: `.claude/rules/patterns.md` (name the force or refuse).
+Style skills (loaded by `implement` and `code-review` per slice layer): `backend-style`{{#has_frontend}}, `frontend-style`{{/has_frontend}}. Structural code questions: the `code-query` skill (graph first, grep second). Before adding an abstraction: the `patterns` skill (name the force or refuse).
 
 ## Commands
 

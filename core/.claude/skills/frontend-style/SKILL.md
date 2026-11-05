@@ -1,4 +1,9 @@
 <!-- requires: has_frontend -->
+---
+name: frontend-style
+description: "Frontend code style for this project: components, state, events, API integration, accessibility, testing. Loaded by implement and code-review for fe slices."
+---
+
 # Frontend Code Style — {{project_name}}
 
 > Applies to: `{{frontend_dir}}**`. {{frontend_framework}}.
