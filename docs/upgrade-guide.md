@@ -43,9 +43,13 @@ python3 .claude/skills/update-config/migrate.py --apply   # archive done specs, 
 python3 .claude/skills/epic/validate-epics.py docs/epics
 ```
 
-`--merge` adds hooks but never removes them, so delete the `UserPromptSubmit`
-entry for `coding-reminder.sh` from `.claude/settings.json` by hand. Delete the
-three retired keys from `answers.env`. Edited copies of dropped files are
+`--merge --prune` (v0.11.1+) also drops the `UserPromptSubmit` entry for the
+pruned `coding-reminder.sh` from `.claude/settings.json`; without `--prune`,
+delete that entry by hand. v0.11 rewrote the Workflow, Agents and Commands
+sections of `CLAUDE.md`, which `--merge` never touches (`CUSTOMIZED`): diff it
+against a fresh render and fold those sections in, since it is always loaded and
+the old one names the dropped agents and commands. Delete the three retired keys
+from `answers.env`. Edited copies of dropped files are
 `CUSTOMIZED-OBSOLETE` and stay until you remove them.
 
 

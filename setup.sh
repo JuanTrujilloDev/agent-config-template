@@ -668,7 +668,7 @@ try:
                 except OSError:
                     pass
 
-    def merge_settings(rel):
+    def merge_settings(rel, removed=()):
         check_inside([rel])  # never union-merge through a symlink that escapes TARGET
         src = os.path.join(STAGING, rel); dst = tpath(rel)
         try:
@@ -701,11 +701,34 @@ try:
                 if ek not in seen:
                     existing.append(entry); seen.add(ek)
             oh[event] = existing
+        # Drop hook commands that point at a file --prune just removed (v0.10's coding-reminder.sh),
+        # so the host never runs a missing script.
+        gone = [r.replace(os.sep, "/") for r in removed]
+        dropped = 0
+        for event in list(oh):
+            entries = []
+            for entry in oh[event] or []:
+                if isinstance(entry, dict) and isinstance(entry.get("hooks"), list):
+                    live = [h for h in entry["hooks"]
+                            if not (isinstance(h, dict) and any(g in str(h.get("command", "")) for g in gone))]
+                    dropped += len(entry["hooks"]) - len(live)
+                    if not live:
+                        continue
+                    entry = dict(entry, hooks=live)
+                entries.append(entry)
+            if entries:
+                oh[event] = entries
+            else:
+                del oh[event]
         if oh:
             out["hooks"] = oh
+        else:
+            out.pop("hooks", None)
         with open(dst, "w", encoding="utf-8") as f:
             json.dump(out, f, indent=2); f.write("\n")
         print("    merged .claude/settings.json (union permissions + additive hooks)")
+        if dropped:
+            print(f"    dropped {dropped} hook command(s) pointing at pruned files")
 
     def relink_claude_md():
         cm = tpath("CLAUDE.md"); dot = tpath(".claude")
@@ -834,7 +857,7 @@ try:
                 elif rel in OVERWRITE_FILES:
                     write_file(rel); advance.add(rel); overwritten += 1; print(f"  ~ {rel}")
                 elif rel == SETTINGS_REL:
-                    merge_settings(rel); merged += 1
+                    merge_settings(rel, removed); merged += 1
                 else:
                     kept += 1  # keep the user's existing file
                     if initial_state[rel] == "SAME":
