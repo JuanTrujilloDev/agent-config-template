@@ -5,9 +5,11 @@ Usage: validate-epics.py [PATH]   PATH = docs/epics (default) or one epic folder
 
 ERROR (exit 1): missing epic.md or a required section, a duplicate story id, a slice without
 `- Layer:` / `- Stories covered:`, or any AC, TS, slice or test name that points at an unknown story.
-WARN (exit 0): size guidance and shape hints — epic >120 lines, slice >60 lines or >5 stories,
-a story without exactly one AC and one TS, a TS over 5 lines, a missing source header or Branch line.
-`archive/` folders are skipped.
+WARN (exit 0): size guidance and shape hints — an epic with no stories, epic >120 lines, slice >60
+lines or >5 stories, a story without exactly one AC and one TS, a TS over 5 lines, a missing source
+header or Branch line.
+Exit 2: an explicit PATH that does not exist. `archive/` folders are skipped. Only `slices/<n>.md`
+are slices; reports beside them (`<n>.security.md`, `<n>.mutation.md`) are not checked.
 """
 import re
 import sys
@@ -68,6 +70,8 @@ def check_epic(folder, root):
     for n in sorted({n for n in stories if stories.count(n) > 1}):
         say("ERROR", rel(epic), f"story S{n} defined more than once")
     known = set(stories)
+    if not known:
+        say("WARN", rel(epic), "no `- **S<n>**` stories under `## User Stories`")
     for title, kind, label in (("Acceptance Criteria", "S", "AC"), ("Test Scenarios", "TS", "TS")):
         got = entries(secs.get(title, []), kind)
         nums = [n for n, _ in got]
@@ -80,7 +84,7 @@ def check_epic(folder, root):
             for n, size in got:
                 if size > 5:
                     say("WARN", rel(epic), f"TS{n} spans {size} lines (guidance ≤5)")
-    for path in sorted((folder / "slices").glob("*.md")):
+    for path in sorted(p for p in (folder / "slices").glob("*.md") if re.fullmatch(r"\d+\.md", p.name)):
         check_slice(path, known, rel)
 
 
@@ -109,6 +113,9 @@ def check_slice(path, known, rel):
 
 def main():
     target = Path(sys.argv[1] if len(sys.argv) > 1 else "docs/epics")
+    if len(sys.argv) > 1 and not target.exists():
+        print(f"no such path: {target}", file=sys.stderr)
+        return 2
     if (target / "epic.md").is_file():
         folders = [target]
     elif target.is_dir():
