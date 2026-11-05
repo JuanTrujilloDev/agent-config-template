@@ -51,4 +51,13 @@ grep_case "v0.11.1 F2 other hooks kept" "$F_T/.claude/settings.json" 'agent-enfo
 grep_case "v0.11.1 F2 merge reports the dropped hook" <(printf '%s\n' "$F_OUT") 'dropped 1 hook command'
 check "v0.11.1 F2 settings.json still valid JSON" "0" "$(python3 -m json.tool "$F_T/.claude/settings.json" >/dev/null 2>&1; echo $?)"
 
+# 3. code-review treats ## Approved tests and - Branch: as append-only; tests-first locks the whole tests commit.
+F_CR="$ROOT/core/.claude/skills/code-review/SKILL.md"; F_TF="$ROOT/core/.claude/skills/tests-first/SKILL.md"
+grep_case "v0.11.1 F4 code-review diffs the slice file against the fixed point" "$F_CR" 'git diff \$\(git merge-base <fixed-point> HEAD\) -- docs/epics/<ID>/slices/<n>\.md'
+grep_case "v0.11.1 F4 code-review: slice file is append-only" "$F_CR" 'append-only.*Approved tests.*- Branch:'
+grep_case "v0.11.1 F4 code-review reads the last Commit line" "$F_CR" 'the last `Commit: <sha>` line'
+grep_case "v0.11.1 F5 tests-first locks every file in the tests commit" "$F_TF" 'git show --name-only --format= <sha>'
+grep_case "v0.11.1 F5 tests-first example lists a fixture" "$F_TF" '^- `tests/sso/conftest\.py`$'
+grep_case "v0.11.1 F4 tests-first: re-approval appends" "$F_TF" 'append a new `Commit:` line'
+
 [ -n "${V0111_ALONE:-}" ] && exit $FAIL

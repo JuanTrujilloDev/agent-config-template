@@ -49,7 +49,8 @@ The repo overrides: a documented standard wins where it endorses something flagg
 
 ## 3. Approved-tests gate (before the sub-agents)
 
-Read `## Approved tests` in the slice file: the `Commit: <sha>` line and the listed paths. Run `git diff <sha> -- <paths>` (covers commits and the working tree). Non-empty output is a **Spec blocker** that fails the review regardless of everything else: approved tests were changed after approval. Quote the diff stat.
+1. **The slice file is append-only.** Run `git diff $(git merge-base <fixed-point> HEAD) -- docs/epics/<ID>/slices/<n>.md` (commits and working tree). A removed or changed line under `## Approved tests`, or on the `- Branch:` line, is a **Spec blocker**: it would lift the lock or redirect this gate. Added lines are fine (a re-approval appends a new `Commit:` line).
+2. **Approved tests are unchanged.** Read `## Approved tests`: the last `Commit: <sha>` line and every listed path. Run `git diff <sha> -- <paths>` (covers commits and the working tree). Non-empty output is a **Spec blocker** that fails the review regardless of everything else: approved tests or fixtures were changed after approval. Quote the diff stat.
 
 ## 4. Spawn both sub-agents in parallel
 

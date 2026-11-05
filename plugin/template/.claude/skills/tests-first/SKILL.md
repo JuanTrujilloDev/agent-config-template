@@ -42,14 +42,15 @@ Reply with the test file paths, the command, and the red output pasted verbatim.
 
 ## After yes
 
-Append to the slice file, one line per approved test file, plus the commit that holds them:
+Append to the slice file the commit that holds the tests and one line per file that commit touched, fixtures and factories included (`git show --name-only --format= <sha>`):
 
 ```markdown
 ## Approved tests
 Commit: `<sha>`
 - `tests/sso/test_callback.py`
+- `tests/sso/conftest.py`
 ```
 
-Commit that edit. From now on the `agent-enforcement` hook blocks edits to these paths on this branch, and `code-review` fails when `git diff <sha> -- <paths>` is not empty. If a test turns out wrong later, stop and ask; the user unlocks with `AGENT_CONFIG_UNLOCK_TESTS=1` and approves the changed test again (new `Commit:` line).
+Commit that edit. From now on the `agent-enforcement` hook blocks edits to these paths on this branch, and `code-review` fails when `git diff <sha> -- <paths>` is not empty. The section is append-only: never edit or delete its lines or the `- Branch:` line (`code-review` fails on it). If a test turns out wrong later, stop and ask; the user unlocks with `AGENT_CONFIG_UNLOCK_TESTS=1` and approves the changed test again (append a new `Commit:` line).
 
 Next: `implement`.
