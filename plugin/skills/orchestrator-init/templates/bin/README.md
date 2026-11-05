@@ -8,7 +8,7 @@ Scripts that keep `state/*.yaml`, the rendered `PROGRESS.md` files and the {{tra
 | `state.py` | Edits a state file: `run-add`, `run-set`, `set`, `task-set`, `check-tick`, `check-reset`, `validate`. Validates enums, sets `updated`, re-renders unless `--no-render`. Comments in the YAML are not preserved. |
 | `tracker-comment.py` | Renders the {{tracker}} comment (Markdown or `--html`) from the state file. It never calls {{tracker}}; whoever posts it does so after {{approver}}'s yes. |
 | `archive-evidence.py` | Moves a run's evidence folder to `~/orchestrator-artifacts/<task>/<run-id>/`, tars it, prints the SHA-256, writes `manifest.json`, and with `--state` records path and hash on the run. Never deletes; refuses git-tracked files unless `--allow-tracked`. |
-| `resource-check.py` | Pre-dispatch check (macOS): free memory, load, heavy processes, local runs recorded as running. `--kind remote` always fits; `--kind local --need MB --project key` applies the policy (default 2500 MB free, no second local run for the same project, at most 2 local runs machine-wide). Exit 0 dispatch, 1 wait, 2 could not measure. |
+| `resource-check.py` | Pre-dispatch check (macOS and Linux): free memory, load, heavy processes, local runs recorded as running. `--kind remote` always fits; `--kind local --need MB --project key` applies the policy (default 2500 MB free, no second local run for the same project, at most 2 local runs machine-wide). Exit 0 dispatch, 1 wait, 2 could not measure. |
 
 ## Standard sequence for one delegation
 

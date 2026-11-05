@@ -13,7 +13,7 @@ Optional. Renders the file skeleton of an orchestrator: a folder that plans work
 | --- | --- |
 | `AGENTS.md` | Orchestration rules skeleton: people, tracker projects, T3 project ids, cycle, threads, an empty model routing table (Trivial, Simple, Medium, Complex), progress check, config review. `<placeholders>` stay for the user to fill. |
 | `bin/` | `state.py`, `render-progress.py`, `resource-check.py`, `tracker-comment.py`, `archive-evidence.py`, `_common.py`, `README.md`. Python with PEP 723 metadata, run through `uv` (PyYAML). Paths resolve from the scripts' own folder. |
-| `state/SCHEMA.md` | Format of `state/<TASK-ID>.yaml`. |
+| `state/SCHEMA.md`, `state/EXAMPLE.yaml` | Format of `state/<TASK-ID>.yaml`, and a fictional example to copy for each new task. |
 | `plans/TEMPLATE.md` | Plan shape: current block, security invariants, epics and tasks, parallelism, review log. |
 | `inbox/`, `outbox/` | `README.md` with the request format, plus `done/`. |
 | `learnings/`, `flakes/` | Empty, with `.gitkeep`. |
@@ -32,7 +32,7 @@ Optional. Renders the file skeleton of an orchestrator: a folder that plans work
    python3 -I <this skill's folder>/render.py --target <path> --tracker "<tracker>" --approver "<approver>"
    ```
 
-   Show its output as it is: one line per file, `create` or `skip`. An existing file is always `skip`; the renderer never overwrites.
+   Show its output as it is: one line per file, `create`, `skip` or `conflict`. An existing file is always `skip`; the renderer never overwrites. A `conflict` (a file where a folder is needed) exits 2: tell the user which path to move, and do not ask to write.
 3. **Confirm.** Ask: "Create these files? (yes/no)". Anything but a clear yes: stop, nothing is written.
 4. **Write.** Run the same command with `--write`.
 5. **Print the schedule prompts.** The renderer ends by printing `Orchestrator progress check` (every 45 min) and `Config review (bi-weekly)` (every 14 days). Repeat both blocks verbatim in your reply and tell the user to create each one by hand with T3 `schedule_task`, bound to the orchestrator thread, then record the schedule ids in `AGENTS.md`.

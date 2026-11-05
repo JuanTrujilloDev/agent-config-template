@@ -1,0 +1,87 @@
+# Fictional example of an orchestrator state file. See SCHEMA.md.
+# Copy it to state/<TASK-ID>.yaml for a new task, then change it only with bin/state.py.
+task: ABC-123
+title: Example task for the state schema
+project: example
+repo: ~/dev/example
+tracker:
+  workspace: example-workspace
+  project_id: <tracker project id>
+  work_item_id: <tracker card id>
+  state: In progress
+  last_comment_id: <comment id>
+plan: plans/ABC-123/plan.md
+status: executing
+updated: "2026-10-18T20:30:00-05:00"
+unchanged_checks: 0
+orchestrator_thread: Orchestrator
+current:
+  summary: >-
+    Epic 1 is executing. Task 1.1 was delivered on branch abc-123/e1 and is in paired
+    review (two reviewers dispatched together on the frozen range). Task 1.2 waits for the
+    review result.
+  next_step: Batch both reviewers' findings into one fix round when both reports land.
+  blockers: []
+  approvals_pending:
+    - Approve the Epic 2 plan section before any Epic 2 dispatch.
+  model_switches: []
+epics:
+  - id: "1"
+    name: Baseline
+    state: executing
+    tasks:
+      - id: "1.1"
+        name: Add the widget endpoint
+        owner: <model> medium
+        state: in review
+        branch: abc-123/e1
+        worktree: ~/dev/example-wt-e1
+        thread: ABC-123 / 1.1
+        notes: ship-check clean; provenance block present
+      - id: "1.2"
+        name: Widget UI
+        owner: <model> medium
+        state: queued
+        notes: design preflight approved
+runs:
+  - id: abc-123-11-widget-endpoint-r1
+    kind: execute
+    provider: <provider>
+    model: <model>
+    effort: medium
+    skills: [ship-check]
+    state: completed
+    task_id: "<T3 delegated task id>"
+    started: "2026-10-18T18:40:00-05:00"
+    finished: "2026-10-18T19:05:00-05:00"
+    range: "a1b2c3d..d4e5f6a"
+    result: delivered
+    report: plans/ABC-123/abc-123-11-widget-endpoint-r1.md
+    evidence:
+      path: ~/orchestrator-artifacts/ABC-123/abc-123-11-widget-endpoint-r1
+      sha256: 9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08
+    tracker_comment: <comment id>
+    notes: unit 120/0/0 executor; e2e 14/0/1 executor
+  - id: abc-123-11-review-a-r1
+    kind: review
+    provider: <provider>
+    model: <model>
+    effort: medium
+    skills: [second-review, adversarial-code-review]
+    state: running
+    local: false
+    task_id: "<T3 delegated task id>"
+    started: "2026-10-18T19:10:00-05:00"
+    range: "a1b2c3d..d4e5f6a"
+  - id: abc-123-11-review-b-r1
+    kind: review
+    provider: <provider>
+    model: <model>
+    effort: medium
+    skills: [security-audit, adversarial-ux]
+    state: running
+    local: false
+    task_id: "<T3 delegated task id>"
+    started: "2026-10-18T19:10:00-05:00"
+    range: "a1b2c3d..d4e5f6a"
+sync_notes: []

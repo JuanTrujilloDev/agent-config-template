@@ -60,8 +60,9 @@ def state_dir(root: Path) -> Path:
 
 def state_path(root: Path, task: str) -> Path:
     task = task.strip()
-    if not re.fullmatch(r"[A-Z]+-\d+", task):
-        raise StateError(f"task id must look like ABC-123, got {task!r}")
+    # Any tracker key that is safe as a file name: ABC-123, QA2-15, 123 (GitHub Issues).
+    if not re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9_-]{0,63}", task):
+        raise StateError(f"task id must be letters, digits, - or _ (e.g. ABC-123 or 123), got {task!r}")
     return state_dir(root) / f"{task}.yaml"
 
 

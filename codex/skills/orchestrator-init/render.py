@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 """Render the orchestrator skeleton from templates/ into --target.
 
-Without --write: print the plan (create / skip per file) and write nothing.
+Without --write: print the plan (create / skip / conflict per file) and write nothing.
+A conflict (a file where a folder is needed) exits 2 before anything is written.
 With --write: create the missing files, never overwrite an existing one, then
 print the two schedule prompts for the user to create by hand in T3.
 Standard library only. Run it with `python3 -I`.
@@ -37,24 +38,36 @@ def main() -> int:
     tokens = {"{{approver}}": args.approver, "{{tracker}}": args.tracker, "{{orchestrator_dir}}": str(target)}
 
     print(f"Orchestrator folder: {target}")
+    # Plan every file first, so a conflict stops the run before anything is written.
+    plan, conflict = [], False
     for src in sorted(p for p in TEMPLATES.rglob("*") if p.is_file()):
         rel = src.relative_to(TEMPLATES)
         dst = target / rel
-        if dst.exists() or dst.is_symlink():
+        # Every folder the file needs, from / down to its parent: an existing non-folder blocks mkdir.
+        blocker = next((a for a in reversed(dst.parents) if (a.exists() or a.is_symlink()) and not a.is_dir()), None)
+        if blocker:
+            print(f"conflict {rel} ({blocker} exists and is not a folder)")
+            conflict = True
+        elif dst.exists() or dst.is_symlink():
             print(f"skip    {rel} (exists, left as is)")
-            continue
-        print(f"create  {rel}")
-        if args.write:
-            text = src.read_text(encoding="utf-8")
-            for token, value in tokens.items():
-                text = text.replace(token, value)
-            dst.parent.mkdir(parents=True, exist_ok=True)
-            dst.write_text(text, encoding="utf-8")
-            shutil.copymode(src, dst)
+        else:
+            print(f"create  {rel}")
+            plan.append((src, dst))
 
+    if conflict:
+        print("\nConflict: move or rename the paths above, then re-run. Nothing written.")
+        return 2
     if not args.write:
         print("\nPlan only: nothing written. Re-run with --write after the user says yes.")
         return 0
+    for src, dst in plan:
+        text = src.read_text(encoding="utf-8")
+        for token, value in tokens.items():
+            text = text.replace(token, value)
+        dst.parent.mkdir(parents=True, exist_ok=True)
+        dst.write_text(text, encoding="utf-8")
+        shutil.copymode(src, dst)
+
     print("\nCreate these two T3 scheduled tasks by hand (schedule_task); this skill does not create them.\n")
     for rel in SCHEDULES:
         print((target / rel).read_text(encoding="utf-8"))

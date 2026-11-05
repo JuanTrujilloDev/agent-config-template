@@ -87,6 +87,14 @@ def main() -> int:
     ap.add_argument("--state", action="store_true", help="record path and sha256 on the run in the state file")
     args = ap.parse_args()
 
+    # Both ids become folder names under the store: validate before anything moves.
+    try:
+        spath = state_path(args.root.resolve(), args.task)
+    except StateError as e:
+        die(str(e))
+    if "/" in args.run or args.run.strip() in ("", ".", ".."):
+        die(f"--run must be a plain name without '/', got {args.run!r}")
+
     src = args.source.expanduser().resolve()
     if not src.is_dir():
         die(f"{src} is not a directory")
@@ -121,7 +129,6 @@ def main() -> int:
 
     if args.state:
         try:
-            spath = state_path(args.root.resolve(), args.task)
             data = load_state(spath)
             run = find_run(data, args.run)
             if run is None:

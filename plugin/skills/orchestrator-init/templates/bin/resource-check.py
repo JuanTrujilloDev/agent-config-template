@@ -3,7 +3,8 @@
 # requires-python = ">=3.9"
 # dependencies = ["pyyaml"]
 # ///
-"""Pre-dispatch resource check for this machine (macOS: reads sysctl and vm_stat).
+"""Pre-dispatch resource check for this machine (macOS and Linux: reads sysctl and
+vm_stat, or /proc/meminfo).
 
 Reports free memory, load average, heavy processes with RSS, and the local
 workloads currently recorded as running in state/*.yaml. Then
@@ -39,11 +40,21 @@ LOCAL_KINDS = {"execute", "fix", "review", "diagnosis", "publication", "closeout
 
 
 def sh(cmd: List[str]) -> str:
-    return subprocess.run(cmd, capture_output=True, text=True, check=False).stdout
+    try:
+        return subprocess.run(cmd, capture_output=True, text=True, check=False).stdout
+    except OSError as e:  # command missing: exit 2 (could not measure), never 1 (wait)
+        print(f"could not run {cmd[0]}: {e}")
+        sys.exit(2)
 
 
 def memory_mb() -> Tuple[int, int]:
-    """(total MB, free-ish MB). Free = free + inactive + speculative pages."""
+    """(total MB, free-ish MB). Linux: MemTotal, MemAvailable. macOS: free + inactive + speculative pages."""
+    try:
+        kb = dict(re.findall(r"^(MemTotal|MemAvailable):\s+(\d+) kB", Path("/proc/meminfo").read_text(), re.M))
+    except OSError:
+        kb = {}
+    if "MemTotal" in kb:
+        return int(kb["MemTotal"]) // 1024, int(kb.get("MemAvailable", 0)) // 1024
     total = int(sh(["sysctl", "-n", "hw.memsize"]).strip() or 0) // (1024 * 1024)
     out = sh(["vm_stat"])
     m = re.search(r"page size of (\d+) bytes", out)
@@ -111,7 +122,7 @@ def main() -> int:
 
     total, free = memory_mb()
     if total == 0:
-        print("could not read hw.memsize / vm_stat")
+        print("could not read memory (/proc/meminfo or sysctl hw.memsize)")
         return 2
     l1, l5, l15 = load_avg()
     cores = os.cpu_count() or 8
