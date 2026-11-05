@@ -5,11 +5,9 @@ V090_ORCH_SRC="$ROOT/core/.claude/agents/orchestrator.md"
 V090_ORCH_PLUGIN="$ROOT/plugin/agents/orchestrator.md"
 V090_FEATURE_SRC="$ROOT/core/.claude/commands/feature.md"
 V090_FEATURE_PLUGIN="$ROOT/plugin/commands/feature.md"
-V090_HELP="$ROOT/core/.claude/HELP.md"
 V090_SDD="$ROOT/docs/sdd-workflow.md"
 V090_SDD_PLUGIN="$ROOT/plugin/skills/sdd-workflow/SKILL.md"
 V090_SDD_CODEX="$ROOT/hosts/codex/skills/sdd-workflow/SKILL.md"
-V090_TRACE='@s[0-9]+.*\[FR-[0-9]+.*SC-[0-9]+'
 
 for f in "$V090_PMO_SRC" "$V090_PMO_PLUGIN"; do
   grep_case "v0.9.0 @s1 $(basename "$f") separates FR" "$f" '## Functional requirements.*FR-###|FR-###.*functional requirements'
@@ -25,9 +23,6 @@ for f in "$V090_ORCH_SRC" "$V090_ORCH_PLUGIN" "$V090_FEATURE_SRC" "$V090_FEATURE
   grep_case "v0.9.0 @s4 $(basename "$f") prints questions" "$f" '(print|list|show).*unresolved|unresolved.*(print|list|show)'
 done
 
-grep_case "v0.9.0 @s5 HELP has FR template" "$V090_HELP" '^## Functional requirements|FR-001'
-grep_case "v0.9.0 @s5 HELP has SC template" "$V090_HELP" '^## Success criteria|SC-001'
-grep_case "v0.9.0 @s5 HELP has traced scenario" "$V090_HELP" "$V090_TRACE"
 
 for f in "$V090_SDD" "$V090_SDD_PLUGIN" "$V090_SDD_CODEX"; do
   grep_case "v0.9.0 @s6 $(basename "$f") FR/SC traceability" "$f" 'FR-###.*SC-###|functional requirements.*success criteria'

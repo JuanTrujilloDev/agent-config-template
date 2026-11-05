@@ -1,175 +1,70 @@
-# {{project_name}} — Claude Code Usage Guide
+# {{project_name}} — Usage Guide
 
-Practical guide to working with the agent in this project. **Read [Core Operating Principles](rules/principles.md) first** — they're the foundation of everything below.
+Read [the principles](rules/principles.md) first; everything below builds on them.
 
----
+## What do I run when…?
 
-## TL;DR — What do I do when…?
-
-| Situation | What to do |
+| Situation | Run |
 |---|---|
 {{#ticket_tracker_plane}}
-| **Plane task assigned** | `/feature {{branch_prefix}}-<#>` → the agent pulls the ticket, runs full flow |
+| Plane epic assigned | `/epic {{branch_prefix}}-<#>`: reads the card, drafts stories and slices |
 {{/ticket_tracker_plane}}
 {{#ticket_tracker_jira}}
-| **Jira task assigned** | `/feature {{branch_prefix}}-<#>` → the agent pulls the ticket, runs full flow |
+| Jira epic assigned | `/epic {{branch_prefix}}-<#>`: reads the ticket, drafts stories and slices |
 {{/ticket_tracker_jira}}
 {{#ticket_tracker_linear}}
-| **Linear task assigned** | `/feature <ticket-id>` → the agent pulls the ticket, runs full flow |
+| Linear epic assigned | `/epic <ticket-id>`: reads the ticket, drafts stories and slices |
 {{/ticket_tracker_linear}}
-| **Spec a feature first** | `/spec <description>` → `pmo` writes spec + Given/When/Then contract + mini-features; you approve |
-| **New feature, no ticket** | `/feature <description>` → full spec-driven flow, orchestrated and gated |
-| **Small scoped fix (obvious cause)** | `/fix <description>` → skips spec + Design First, keeps the full Definition of Done |
-| **Before you call it done** | `/verify` → re-read the request, read the diff, run it, fix what you find |
-| **Hotfix (prod broken)** | *"Hotfix: \<symptom\>. Branch from `{{default_branch}}` as `hotfix/\<slug\>`. Spawn the right dev agent directly, single small PR."* — `orchestrator`/`pmo` skipped; `judge` still runs |
-| **Bug fix (non-urgent)** | Reproduce → minimal fix → tests → standard agent flow on a `fix/<slug>` branch |
-| **Refactor (no behavior change)** | `judge` first to baseline → `*-dev` agent on `refactor/<slug>` → single PR ≤{{max_files_per_pr}} files |
-| **Tiny change** (typo, comment, single-value config; ≤50 lines, ≤1 new def) | Edit directly, or `/fix`. The hook is advisory. |
-| **Question / investigation** | Use `Explore` agent — no code changes, no branch needed |
-| **Pre-merge check** | `/audit` or invoke `judge` + `security-reviewer` manually |
-| **Touching auth, permissions, data exposure** | `security-reviewer` is **mandatory** before merge |
-| **Reviewing teammate's PR** | *"Review PR #\<n\>"* → the agent fetches via `gh`, runs `judge` (+ `security-reviewer` if relevant) |
+| New feature, no ticket | `/epic <ask>`: asks whether to put the epic on a tracker; if not, `docs/epics/<ID>/` is the source of truth |
+| Epic approved, next piece of work | `/slice <ID> <n>` → `tests-first` → `implement` → `code-review` → `/pr` |
+| Small fix with an obvious cause | `/fix <description>`: no epic, full Definition of Done |
+| Prod is broken | `hotfix/<slug>` from `{{default_branch}}`, then `/fix`; `code-review` still runs |
+| Refactor, no behaviour change | `refactor/<slug>`; existing tests must stay green and unchanged |
+| Before calling anything done | `/verify`: re-read the request and the diff, run it, fix what you find |
+| Auth, permissions, data exposure | `security-reviewer` before merge, always |
+| Pre-merge or teammate PR | `/audit` (or "review PR #\<n\>") |
+| Question or investigation | Ask; no branch, no code changes |
 
----
+## The slice loop
 
-## The agent map
+```
+/epic <ID or ask>                            → draft: groups, stories, AC, TS, slices    → you: "approve" or "change 3"
+/slice <ID> 1                                → brief: stories, seams, fixtures, tests    → you: "yes"
+tests-first                                  → tests committed, red output pasted        → you read the tests: "yes"
+implement                                    → code to green, Definition of Done pasted
+code-review                                  → Standards + Spec axes, one fix round
+/pr                                          → base = previous layer branch while open
+```
 
-| Agent | Spawn it when… | Output |
-|---|---|---|
-| `pmo` | You need a spec: idea/SOW → Given/When/Then contract + PR-sized mini-features | `docs/specs/<slug>/{spec,contract,features}` |
-| `orchestrator` | You want the full spec-driven flow run and gated for a feature | coordinates; never edits code |
+One slice per PR, one layer per slice: `feature/<ID>-<group>-db` → `-be` → `-fe`. Aim for 200–400 non-test lines; the cap is {{max_files_per_pr}} files / {{max_loc_per_pr}} lines.
+
+## Agents
+
 {{#has_ui}}
-| `ui-designer` | A non-trivial UI change is needed | Wireframes, mockups, flow descriptions |
+- `ui-designer` — wireframes and component specs before UI code (`/design`).
 {{/has_ui}}
-| `{{primary_dev_agent}}` | Implementation work | Code + tests {{#enforce_layer_split}}on `*-be` branch{{/enforce_layer_split}} |
-{{#has_frontend}}
-| `frontend-dev` | UI work | Code + tests {{#enforce_layer_split}}on `*-fe` branch (after BE merged){{/enforce_layer_split}} |
-{{/has_frontend}}
-| `judge` | Before any commit/PR — and on teammate PRs | Findings report (read-only) |
-| `security-reviewer` | Change touches auth/permissions/data | Findings report (read-only) |
+- `security-reviewer` — read-only audit for auth, permissions, data and input boundaries.
 {{#enforce_mutation_testing}}
-| `mutation-tester` | Validate the tests bite before a mini-feature closes | Mutation score (read-only) |
+- `mutation-tester` — checks that the slice's tests bite (opt-in).
 {{/enforce_mutation_testing}}
 
----
+Everything else runs in your thread; there is no coordinator or dev subagent.
 
-## The "Definition of Done" checklist
+## Where things live
 
-A task is **NOT** done until all pass, in order:
-
-1. **Format** — `{{format_cmd}}`
-2. **Lint** — `{{lint_cmd}}`
-3. **Unit tests** — `{{test_cmd}}` (≥{{test_coverage_target}}% coverage)
-4. **Review** — `judge` agent (code + tests vs the contract); address all blockers
-5. **Security review** — `security-reviewer` if change touches auth/permissions/data
-{{#has_e2e}}
-6. **Live browser verification** — for FE-touching changes OR big changes (>5 files / 500 lines): walk through smoke flows + the task's success criteria via `mcp__playwright__*`
-{{/has_e2e}}
-
-The agent that did the work runs the checklist and reports results before declaring done.
-
----
-
-## Branch cheat sheet
-
-**Never code on `{{default_branch}}`.**
-
-| Type | Pattern |
-|---|---|
-{{#branch_prefix}}
-| Feature | `feature/{{branch_prefix}}-<#>-<slug>`{{#enforce_layer_split}} (split: `-be` / `-fe`){{/enforce_layer_split}} |
-| Fix | `fix/[{{branch_prefix}}-<#>-]<slug>` |
-{{/branch_prefix}}
-{{^branch_prefix}}
-| Feature | `feature/<slug>`{{#enforce_layer_split}} (split: `-be` / `-fe`){{/enforce_layer_split}} |
-| Fix | `fix/<slug>` |
-{{/branch_prefix}}
-| Hotfix | `hotfix/<slug>` (branches from `{{default_branch}}`) |
-| Refactor | `refactor/<slug>` |
-| Chore | `chore/<slug>` |
-| Docs | `docs/<slug>` |
-
----
-
-## Worked example — feature flow
-
-The spec and contract keep requirements, success, and scenarios traceable:
-
-```markdown
-## Functional requirements
-- FR-001 — Export the visible holdings.
-## Success criteria
-- SC-001 — A user can open the exported file in a spreadsheet.
-- @s1 [FR-001, SC-001] Given visible holdings, When export runs, Then a file downloads.
-```
-
-```
-You:    /feature {{#branch_prefix}}{{branch_prefix}}-87{{/branch_prefix}}{{^branch_prefix}}add CSV export to holdings list{{/branch_prefix}}
-
-Agent:  [pulls ticket / converses the spec]
-        Spawning pmo...
-[spec + contract produced]
-        Contract ready in docs/specs/<slug>/contract.md. Goal: <one sentence>.
-        Scenarios: @s1 ... @s2 ... @s3 ...
-        Approve the contract? (yes/edit)
-
-You:    yes
-
-Agent:  Contract approved. Spawning orchestrator...
-[plan produced]
-        Plan: BE-1 (... files, ... LOC), FE-1 (... files, ... LOC).
-        {{#enforce_layer_split}}BE ships first.{{/enforce_layer_split}} Approve? (yes/edit)
-
-You:    yes
-
-Agent:  Checking out branch... Spawning {{#enforce_layer_split}}backend-dev{{/enforce_layer_split}}{{^enforce_layer_split}}{{primary_dev_agent}}{{/enforce_layer_split}}.
-        Design First: <design artifact>. Approve? (yes/edit)
-
-You:    yes
-
-[implements + runs DoD: format, lint, tests, judge, security-reviewer{{#has_e2e}}, playwright{{/has_e2e}}]
-        PR opened. DoD: ✓✓✓✓✓.
-```
-
----
-
-## Quick reference
-
-### Spawning agents manually
-- *"spawn {{primary_dev_agent}} to add ..."*
-- *"have judge check the last 3 commits"*
-
-### Bypassing the enforcement hook (rare)
-- *"This is a minor copy tweak, just edit directly."*
-- The hook still warns; CLAUDE.md flags it as a deliberate override.
-- Don't make this a habit.
-
-### Where things live
 | What | Where |
 |---|---|
 | Principles | `.claude/rules/principles.md` |
-| Style guides | `.claude/rules/{backend{{#has_frontend}},frontend{{/has_frontend}}}-style.md` |
-| Agents | `.claude/agents/*.md` |
-| Commands | `.claude/commands/*.md` |
-| Hooks | `.claude/hooks/*.sh` |
-| Briefs / SOWs | `docs/specs/` |
-| Implementation plans | `docs/plans/` |
-| Specs + contracts | `docs/specs/<slug>/` |
-| SDD/TDD workflow | `docs/sdd-workflow.md` |
-
----
+| Style rules | `.claude/rules/{backend{{#has_frontend}},frontend{{/has_frontend}}}-style.md` |
+| Epics and slices | `docs/epics/<ID>/epic.md`, `docs/epics/<ID>/slices/<n>.md` |
+| Agents, commands, hooks | `.claude/agents/`, `.claude/commands/`, `.claude/hooks/` |
 
 ## Troubleshooting
 
-**"The hook warned about my edit but I just want to fix one line."**
-Only the protected-branch check hard-blocks — check out a typed branch and retry.
-The size advisory (>50 lines or a new def/class) never blocks; it's a reminder to
-prefer the right agent. Trivial edits pass silently.
+**"BLOCKED: '{{default_branch}}' is a protected branch."** Check out a typed branch (principles, Branch Discipline) and retry.
 
-**"No agent was spawned."**
-Reference `CLAUDE.md` Agent Usage Rules. If it happens repeatedly, the `coding-reminder.sh` hook may not be firing — check `.claude/settings.json`.
+**"BLOCKED: … is an approved test."** The slice's tests are locked once you approved them. Fix the code, not the test. If the test is wrong, agree the change, restart with `AGENT_CONFIG_UNLOCK_TESTS=1`, and approve the tests again.
 
 {{#has_e2e}}
-**"`mcp__playwright__*` tools aren't available."**
-Restart the host app after editing config. Verify `.claude/mcp.json` has the `playwright` server entry.
+**"`mcp__playwright__*` tools aren't available."** Restart the host after editing the config and check `.claude/mcp.json` has the `playwright` entry.
 {{/has_e2e}}

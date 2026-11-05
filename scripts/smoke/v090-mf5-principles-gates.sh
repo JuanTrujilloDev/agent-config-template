@@ -17,7 +17,8 @@ for f in "$ROOT/core/.claude/agents/judge.md" "$ROOT/plugin/agents/judge.md"; do
   grep_case "v0.9.0 @s32 $(basename "$f") justified fixture cited" "$f" 'Simplicity First.*Use a small parser'
 done
 
-for f in "$ROOT/core/.claude/rules/principles.md" "$ROOT/plugin/skills/principles/SKILL.md" "$ROOT/hosts/cursor/principles.mdc"; do
+# core principles.md dropped in v0.11 chunk 1 (no double gate)
+for f in "$ROOT/plugin/skills/principles/SKILL.md" "$ROOT/hosts/cursor/principles.mdc"; do
   grep_case "v0.9.0 @s33 $(basename "$f") pre-Gate principles" "$f" '[Bb]efore Gate 1'
   grep_case "v0.9.0 @s33 $(basename "$f") judge recheck" "$f" '[Jj]udge.*same.*table'
 done
