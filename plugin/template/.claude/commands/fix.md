@@ -1,5 +1,5 @@
 ---
-description: Fast path for a small scoped change with an obvious cause — skips the spec and Design First, keeps the full Definition of Done.
+description: Fast path for a small scoped change with an obvious cause — skips the epic and Design First, keeps the full Definition of Done.
 argument-hint: "<description>"
 ---
 
@@ -25,8 +25,6 @@ For a tracked fix, reference the ticket: `/fix {{branch_prefix}}-<#>` — e.g. `
 {{/branch_prefix}}
 ## What it does
 
-Read `agent_style` from `.claude/answers.local.env` once before spawning (absent, empty, or unrecognized = `terse`). Add `agent_style: <terse|descriptive> — return per "Report format" in .claude/rules/principles.md` to every subagent prompt this command spawns. Persisted artifacts stay prose.
-
 1. **Reproduce red first.** Obtain a red-capable reproduction — a failing test or a command that fails for *this* bug and goes green only when fixed — before naming the cause.
 
    If you cannot get a reproduction in one step, stop and switch to `/epic`. Write 2–4 ranked falsifiable hypotheses only when the reproduction does not single out a cause, and test them one variable at a time.
@@ -37,7 +35,7 @@ Read `agent_style` from `.claude/answers.local.env` once before spawning (absent
    - `{{format_cmd}}` → `{{lint_cmd}}` → `{{test_cmd}}`
    - Run `code-review` — address all blockers
    - Spawn `security-reviewer` if the fix touches auth/permissions/data
-6. **Offer one optional manual check** matched to `{{project_type}}`: `web-app` → browser walk; `library-cli` or `desktop-app` → run the CLI/app; `mobile-app` → simulator; anything else → artifact/screenshot review. Never make it a gate. When this fix has a `features.json` entry, record `verified_by_human`: `yes` when verified, `no` when explicitly declined, `skipped` when the user says skip or does not answer; freeform fixes only make the offer.
+6. **Offer one optional manual check** matched to `{{project_type}}`: `web-app` → browser walk; `library-cli` or `desktop-app` → run the CLI/app; `mobile-app` → simulator; anything else → artifact/screenshot review. Never make it a gate.
 7. **Commit / open the PR** on the typed branch.
 
 ## Guardrails
