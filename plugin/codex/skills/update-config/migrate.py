@@ -3,12 +3,15 @@
 
 Usage: migrate.py [--root DIR] [--apply] [SLUG ...]
 
-Without --apply it prints the plan and writes nothing. Per slug:
+Without --apply it prints the plan and writes nothing; it still parses and renders every open
+spec, so one that cannot be converted is an ERROR row in the plan, not a traceback in --apply. Per slug:
 - every original file moves verbatim to docs/epics/archive/<slug>/ (spec.md gains one header line);
 - `done` (every mini-feature in features.json is done): nothing else;
 - `open`: docs/epics/<slug>/epic.md and slices/<id>.md are generated from spec.md, contract.md
   and features.json (Problem -> Request, Goal -> Description, mini-feature -> capability group,
-  @sN scenario -> SN TODO story + TSN with the literal text, FR/SC tags dropped).
+  @sN scenario -> SN TODO story + TSN with the literal text, FR/SC and (smoke) tags dropped).
+  Both scenario grammars are read: `- **@sN (tag)** Given …` and `- @sN **(tag)** Given …`.
+  The epic folder is built in a temp dir and renamed into place, so a failure leaves nothing behind.
 Idempotent: a slug already under docs/epics/archive/ with no docs/specs/<slug>/ is skipped.
 """
 import argparse
@@ -16,12 +19,14 @@ import json
 import re
 import shutil
 import sys
+import tempfile
 from datetime import datetime, timezone
 from pathlib import Path
 
 ARCHIVE_HEADER = "<!-- archived from docs/specs/{slug}/ by migrate.py; source=migrated; never rendered -->\n"
 HEADING = re.compile(r"^## (?:MF(\d+) — |(\d+)\. )(\S+)")
-SCENARIO = re.compile(r"^- \*\*@s(\d+)(?:\s*[(\[][^)\]]*[)\]])*\*\*\s*(.*)$")
+SCENARIO = re.compile(r"^- (?:\*\*)?@s(\d+)\b(.*)$")
+TAGS = re.compile(r"^\s*(?:\*\*)?(?:\s*[(\[][^)\]]*[)\]])*(?:\*\*)?\s*")  # **(smoke)**, [FR-001], …
 
 
 def status(spec):
@@ -48,7 +53,7 @@ def scenarios(contract):
             continue
         s = SCENARIO.match(line)
         if s and current:
-            current[1].append((int(s.group(1)), [s.group(2)]))
+            current[1].append((int(s.group(1)), [TAGS.sub("", s.group(2), count=1)]))
         elif current and current[1] and line.startswith("  ") and line.strip():
             current[1][-1][1].append(line.strip())
         elif not line.strip() or line.startswith(("-", "#")):
@@ -56,7 +61,8 @@ def scenarios(contract):
     return groups
 
 
-def render_open(spec, slug, items, out):
+def render_open(spec, slug, items):
+    """{relative path: content} for docs/epics/<slug>/; reads only, writes nothing."""
     text = (spec / "spec.md").read_text(encoding="utf-8")
     title = re.sub(r"\s+—\s+Spec$", "", (re.search(r"^# (.*)$", text, re.M) or [None, slug])[1])
     groups = scenarios((spec / "contract.md").read_text(encoding="utf-8")) if (spec / "contract.md").exists() else {}
@@ -78,16 +84,29 @@ def render_open(spec, slug, items, out):
             "## Capability groups", "| Group | Tracker | Stories |\n| --- | --- | --- |\n" + "\n".join(rows),
             "## User Stories", "\n".join(stories), "## Acceptance Criteria", "\n".join(acs),
             "## Test Scenarios", "\n".join(tss)]
-    (out / "slices").mkdir(parents=True)
-    (out / "epic.md").write_text("\n\n".join(body) + "\n", encoding="utf-8")
+    files = {"epic.md": "\n\n".join(body) + "\n"}
     for mf in items:
         name, ids = by_id[mf.get("id")]
         refs = ", ".join(f"S{n}" for n in ids) or "—"
-        (out / "slices" / f"{mf.get('id')}.md").write_text(
+        files[f"slices/{mf.get('id')}.md"] = (
             f"{head}# Slice {mf.get('id')} — mixed: {name}\n\n- Layer: mixed\n- Capability group: {name}\n"
             f"- Stories covered: {refs}\n- Status: {mf.get('status', 'todo')}\n\n## Expected behaviour\n"
             f"TODO: see docs/epics/archive/{slug}/contract.md.\n\n## Tests\n"
-            + "".join(f"- TS{n}\n" for n in ids), encoding="utf-8")
+            + "".join(f"- TS{n}\n" for n in ids))
+    return files
+
+
+def write_atomically(files, out):
+    """Build the folder next to its target, then rename it into place."""
+    tmp = Path(tempfile.mkdtemp(prefix=f".{out.name}.", dir=out.parent))
+    try:
+        for rel, content in files.items():
+            (tmp / rel).parent.mkdir(parents=True, exist_ok=True)
+            (tmp / rel).write_text(content, encoding="utf-8")
+        tmp.rename(out)
+    except BaseException:
+        shutil.rmtree(tmp, ignore_errors=True)
+        raise
 
 
 def main():
@@ -119,12 +138,19 @@ def main():
             print(f"{slug:<28} {'?':<7} {'ERROR':<16} features.json: {e}")
             errors += 1
             continue
+        try:
+            files = render_open(spec, slug, items) if state == "open" else {}
+        except (OSError, ValueError, KeyError, TypeError, AttributeError) as e:
+            print(f"{slug:<28} {state:<7} {'ERROR':<16} {type(e).__name__}: {e}")
+            errors += 1
+            continue
         count = sum(1 for p in spec.rglob("*") if p.is_file())
         print(f"{slug:<28} {state:<7} {'archive' if state == 'done' else 'archive + epic':<16} {count}")
         if not args.apply:
             continue
-        if state == "open":
-            render_open(spec, slug, items, epics / slug)
+        if files:
+            epics.mkdir(parents=True, exist_ok=True)
+            write_atomically(files, epics / slug)
         archive.parent.mkdir(parents=True, exist_ok=True)
         shutil.move(str(spec), str(archive))
         spec_md = archive / "spec.md"

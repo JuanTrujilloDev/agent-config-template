@@ -60,4 +60,37 @@ grep_case "v0.11.1 F5 tests-first locks every file in the tests commit" "$F_TF" 
 grep_case "v0.11.1 F5 tests-first example lists a fixture" "$F_TF" '^- `tests/sso/conftest\.py`$'
 grep_case "v0.11.1 F4 tests-first: re-approval appends" "$F_TF" 'append a new `Commit:` line'
 
+# 4. migrate.py: old `- @sN **(tag)**` grammar on the open path; render errors are ERROR rows in plan and apply.
+F_MIG="$ROOT/core/.claude/skills/update-config/migrate.py"
+F_M="$WORK/f-mig"; mkdir -p "$F_M/docs/specs"
+for s in adaptive-skills review-debt; do
+  cp -R "$ROOT/docs/epics/archive/$s" "$F_M/docs/specs/$s"
+  sed -i.bak '1{/^<!-- archived from docs\/specs\//d;}' "$F_M/docs/specs/$s/spec.md" && rm -f "$F_M/docs/specs/$s/spec.md.bak"
+done
+python3 - "$F_M/docs/specs" <<'PY'
+import json, sys
+for slug, change in (("adaptive-skills", "open"), ("review-debt", "bad-id")):
+    p = f"{sys.argv[1]}/{slug}/features.json"; d = json.load(open(p))
+    d["mini_features"][-1]["status"] = "in_progress"
+    if change == "bad-id":
+        d["mini_features"][0]["id"] = "MF1"
+    json.dump(d, open(p, "w"), indent=2)
+PY
+grep_case "v0.11.1 F6 fixture uses the old - @sN **(tag)** grammar" "$F_M/docs/specs/adaptive-skills/contract.md" '^- @s[0-9]+ \*\*\('
+python3 "$F_MIG" --root "$F_M" >"$WORK/f-mig-plan.txt" 2>&1
+grep_case "v0.11.1 F7 plan shows a render error as an ERROR row" "$WORK/f-mig-plan.txt" '^review-debt +open +ERROR +ValueError'
+check "v0.11.1 F7 plan has no traceback" "0" "$(grep -c Traceback "$WORK/f-mig-plan.txt")"
+python3 "$F_MIG" --root "$F_M" --apply >"$WORK/f-mig-apply.txt" 2>&1
+check "v0.11.1 F7 apply exits 1 on an ERROR row" "1" "$?"
+check "v0.11.1 F7 apply has no traceback" "0" "$(grep -c Traceback "$WORK/f-mig-apply.txt")"
+check "v0.11.1 F7 errored slug left in docs/specs, nothing under docs/epics" "present absent" \
+  "$([ -d "$F_M/docs/specs/review-debt" ] && printf present || printf absent) $([ -e "$F_M/docs/epics/review-debt" ] && echo present || echo absent)"
+check "v0.11.1 F7 no temp dir left behind" "0" "$(ls -a "$F_M/docs/epics" | grep -c '^\.[a-z]')"
+F_ME="$F_M/docs/epics/adaptive-skills/epic.md"
+check "v0.11.1 F6 old-grammar open epic keeps every scenario" "66" "$(grep -c '^- \*\*TS[0-9]' "$F_ME")"
+grep_case "v0.11.1 F6 old-grammar TS literal kept, tag dropped" "$F_ME" '^- \*\*TS[0-9]+\*\* Given '
+check "v0.11.1 F6 old-grammar epic has no tags left" "0" "$(grep -cE '\*\*\(|\[FR-|@s[0-9]' "$F_ME")"
+check "v0.11.1 F6 old-grammar slices cover stories" "0" "$(grep -c '^- Stories covered: —$' "$F_M"/docs/epics/adaptive-skills/slices/*.md | grep -vc ':0$')"
+grep_case "v0.11.1 F7 rerun skips the migrated slug" <(python3 "$F_MIG" --root "$F_M" adaptive-skills 2>&1) '^adaptive-skills +- +skip \(migrated\)'
+
 [ -n "${V0111_ALONE:-}" ] && exit $FAIL
