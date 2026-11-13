@@ -30,6 +30,7 @@ Read [the principles](rules/principles.md) first; everything below builds on the
 ```
 /epic <ID or ask>                            → draft: groups, stories, AC, TS, slices    → you: "approve" or "change 3"
 /slice <ID> 1                                → brief: stories, seams, fixtures, tests    → you: "yes"
+/slice <ID> 1 cold-review                    → same, plus two fresh reviewers' findings (opt-in)
 tests-first                                  → tests committed, red output pasted        → you read the tests: "yes"
 implement                                    → code to green, Definition of Done pasted
 code-review                                  → Standards + Spec axes, one fix round
