@@ -8,9 +8,9 @@ fi
 
 B_BOOT="$ROOT/bootstrap.sh"
 B_GIT() { git -c user.name=smoke -c user.email=smoke@example.invalid -c commit.gpgsign=false -c tag.gpgsign=false "$@"; }
-B_ABSENT() { [ -e "$1" ] && echo present || echo absent; }
+B_EXISTS() { [ -e "$1" ] && echo present || echo absent; }
 
-check "adhoc22 bootstrap.sh exists" "present" "$(B_ABSENT "$B_BOOT")"
+check "adhoc22 bootstrap.sh exists" "present" "$(B_EXISTS "$B_BOOT")"
 check "adhoc22 bootstrap.sh parses as POSIX sh" "0" "$(sh -n "$B_BOOT" 2>/dev/null; echo $?)"
 check "adhoc22 bootstrap.sh has no bash-only [[" "0" "$(grep -c '\[\[' "$B_BOOT" 2>/dev/null; true)"
 
@@ -47,8 +47,8 @@ check "adhoc22 no answer writes nothing" "" "$(cd "$B_R" && git status --porcela
 
 # 3. Accept: renders, writes the lock and a generated answers.env; temp folder cleaned.
 check "adhoc22 accept exits 0" "0" "$(B_RUN "$B_R" y)"
-check "adhoc22 accept writes the lock file" "present" "$(B_ABSENT "$B_R/agent-config.lock.json")"
-check "adhoc22 accept renders principles" "present" "$(B_ABSENT "$B_R/.claude/rules/principles.md")"
+check "adhoc22 accept writes the lock file" "present" "$(B_EXISTS "$B_R/agent-config.lock.json")"
+check "adhoc22 accept renders principles" "present" "$(B_EXISTS "$B_R/.claude/rules/principles.md")"
 grep_case "adhoc22 generated answers.env records the host" "$B_R/answers.env" '^TARGET_HOSTS=claude$'
 grep_case "adhoc22 generated answers.env names the repo" "$B_R/answers.env" '^project_name=b-repo$'
 grep_case "adhoc22 generated answers.env uses template defaults" "$B_R/answers.env" '^default_branch=main$'
@@ -60,9 +60,32 @@ check "adhoc22 temp folder cleaned after accept" "0" "$(ls -A "$B_TMP" | wc -l |
 (cd "$B_R" && B_GIT add -A && B_GIT commit -qm render)
 check "adhoc22 re-run on a rendered repo exits 0" "0" "$(B_RUN "$B_R" n)"
 grep_case "adhoc22 re-run reads the repo answers.env" "$WORK/b-out.txt" 'answers: answers\.env'
+# Update: a file still matching its lock baseline but older than the template is refreshed on apply.
+python3 - "$B_R" <<'PY2'
+import hashlib, json, pathlib, sys
+t = pathlib.Path(sys.argv[1]); rel = ".claude/rules/principles.md"
+(t / rel).write_text((t / rel).read_text() + "older template line\n")
+lock = json.loads((t / "agent-config.lock.json").read_text())
+lock["files"][rel]["sha256"] = hashlib.sha256((t / rel).read_bytes()).hexdigest()
+(t / "agent-config.lock.json").write_text(json.dumps(lock, indent=2, sort_keys=True) + "\n")
+PY2
+printf 'my edit\n' >>"$B_R/.claude/agents/security-reviewer.md"
+(cd "$B_R" && B_GIT add -A && B_GIT commit -qm older)
+check "adhoc22 update accept exits 0" "0" "$(B_RUN "$B_R" y)"
+grep_case "adhoc22 update preview shows the stale file" "$WORK/b-out.txt" 'STALE-MANAGED +\.claude/rules/principles\.md'
+check "adhoc22 update refreshes the stale file" "0" "$(grep -c 'older template line' "$B_R/.claude/rules/principles.md")"
+check "adhoc22 update keeps an edited file" "1" "$(grep -c 'my edit' "$B_R/.claude/agents/security-reviewer.md")"
+B_NEW "$WORK/b-gen"
+printf '#!/bin/bash\n' >"$B_R/.claude/hooks/retired.sh"
+python3 -c 'import hashlib,json,sys; p=sys.argv[1]+"/agent-config.lock.json"; d=json.load(open(p)); d["files"][".claude/hooks/retired.sh"]={"template_version":"0.9.2","sha256":hashlib.sha256(open(sys.argv[1]+"/.claude/hooks/retired.sh","rb").read()).hexdigest()}; json.dump(d,open(p,"w"),indent=2)' "$B_R"
+(cd "$B_R" && B_GIT add -A && B_GIT commit -qm retired)
+check "adhoc22 accept without --prune keeps an OBSOLETE file" "present" "$(B_RUN "$B_R" y >/dev/null; B_EXISTS "$B_R/.claude/hooks/retired.sh")"
+check "adhoc22 --prune deletes the OBSOLETE file on accept" "absent" "$(B_RUN "$B_R" y --force --prune >/dev/null; B_EXISTS "$B_R/.claude/hooks/retired.sh")"
+check "adhoc22 --legacy refused without a repo answers.env" "1" "$(B_RUN "$WORK/b-gen" y --legacy)"
+check "adhoc22 refused --legacy writes nothing" "" "$(cd "$WORK/b-gen" && git status --porcelain)"
 B_NEW "$WORK/b-codex"
 check "adhoc22 --host codex accept exits 0" "0" "$(B_RUN "$WORK/b-codex" y --host codex)"
-check "adhoc22 --host codex renders .agents/skills" "present" "$(B_ABSENT "$WORK/b-codex/.agents/skills")"
+check "adhoc22 --host codex renders .agents/skills" "present" "$(B_EXISTS "$WORK/b-codex/.agents/skills")"
 check "adhoc22 unknown option exits 1" "1" "$(B_RUN "$B_R" n --bogus)"
 
 # 5. setup.sh --abort on a fresh target prints the plan and writes nothing.
@@ -76,7 +99,8 @@ B_L="$WORK/b-legacy"; bash "$ROOT/setup.sh" --target "$B_L" --answers "$B_ANS" >
 rm -f "$B_L/agent-config.lock.json"
 printf 'old line\n' >>"$B_L/.claude/agents/security-reviewer.md"
 printf '#!/bin/bash\necho reminder\n' >"$B_L/.claude/hooks/coding-reminder.sh"
-mkdir -p "$B_L/tools"; printf 'mine\n' >"$B_L/tools/own.py"; printf 'mine\n' >"$B_L/AGENTS.md"
+mkdir -p "$B_L/tools" "$B_L/.claude/skills/mine"; printf 'mine\n' >"$B_L/tools/own.py"; printf 'mine\n' >"$B_L/AGENTS.md"
+printf 'mine\n' >"$B_L/.claude/skills/mine/SKILL.md"; printf 'mine\n' >"$B_L/.claude/commands/my-own.md"
 B_PLAN() { bash "$ROOT/setup.sh" --target "$B_L" --answers "$B_ANS" "$@" 2>&1; }
 grep_case "adhoc22 pre-lock plan shows LEGACY" <(B_PLAN) 'LEGACY +\.claude/agents/security-reviewer\.md'
 check "adhoc22 --legacy needs --merge" "1" "$(B_PLAN --legacy >/dev/null; echo $?)"
@@ -86,13 +110,20 @@ check "adhoc22 lock records the legacy file" "yes" "$(B_LOCKED .claude/agents/se
 check "adhoc22 lock records the retired file" "yes" "$(B_LOCKED .claude/hooks/coding-reminder.sh)"
 check "adhoc22 lock skips tools/ files the template does not emit" "no" "$(B_LOCKED tools/own.py)"
 check "adhoc22 lock skips a user AGENTS.md" "no" "$(B_LOCKED AGENTS.md)"
+check "adhoc22 lock skips a project's own skill" "no" "$(B_LOCKED .claude/skills/mine/SKILL.md)"
+check "adhoc22 lock skips a project's own command" "no" "$(B_LOCKED .claude/commands/my-own.md)"
 grep_case "adhoc22 legacy entries are marked" "$B_L/agent-config.lock.json" '"template_version": "legacy"' 2
 B_P2=$(B_PLAN)
 grep_case "adhoc22 after --legacy the old file is STALE-MANAGED" <(printf '%s\n' "$B_P2") 'STALE-MANAGED +\.claude/agents/security-reviewer\.md'
 grep_case "adhoc22 after --legacy the retired file is OBSOLETE" <(printf '%s\n' "$B_P2") '^  OBSOLETE +\.claude/hooks/coding-reminder\.sh'
 B_PLAN --merge --prune >/dev/null
-check "adhoc22 --prune removes the retired file" "absent" "$(B_ABSENT "$B_L/.claude/hooks/coding-reminder.sh")"
-check "adhoc22 --prune keeps tools/own.py" "present" "$(B_ABSENT "$B_L/tools/own.py")"
+check "adhoc22 --prune removes the retired file" "absent" "$(B_EXISTS "$B_L/.claude/hooks/coding-reminder.sh")"
+check "adhoc22 --prune keeps tools/own.py" "present" "$(B_EXISTS "$B_L/tools/own.py")"
+check "adhoc22 --prune keeps a project's own skill" "present" "$(B_EXISTS "$B_L/.claude/skills/mine/SKILL.md")"
+B_G="$WORK/b-grok"; bash "$ROOT/setup.sh" --target "$B_G" --answers "$B_ANS" --host grok >/dev/null 2>&1
+rm -f "$B_G/agent-config.lock.json"; printf 'mine\n' >"$B_G/AGENTS.md"
+bash "$ROOT/setup.sh" --target "$B_G" --answers "$B_ANS" --host grok --merge --legacy >/dev/null 2>&1
+check "adhoc22 --legacy never adopts a rendered AGENTS.md path" "0" "$(grep -c '"AGENTS.md"' "$B_G/agent-config.lock.json")"
 
 # 7. migrate.py: scenarios under a heading it cannot map are an ERROR row, never dropped silently.
 B_M="$WORK/b-mig"; mkdir -p "$B_M/docs/specs/named"

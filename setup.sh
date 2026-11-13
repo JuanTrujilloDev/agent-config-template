@@ -20,10 +20,10 @@
 #                 Add --prune to delete unchanged managed files no longer in
 #                 the template; customized or unproven paths are always kept.
 #                 Add --legacy on a repo rendered before agent-config.lock.json:
-#                 records the current hash of every unrecorded managed file under
-#                 .claude/, .cursor/ and .agents/ as its baseline, so the next plan
-#                 shows STALE-MANAGED / OBSOLETE instead of LEGACY. Use it only
-#                 when those files are unedited template output.
+#                 records the current hash of each unrecorded file under .claude/,
+#                 .cursor/ and .agents/ that the template renders or once shipped
+#                 as its baseline, so the next plan shows STALE-MANAGED / OBSOLETE
+#                 instead of LEGACY. Use it only on unedited template output.
 #   --overwrite   Replace template-managed files. Still never touches
 #                 .claude/settings.local.json, and never deletes files the
 #                 template doesn't manage.
@@ -612,6 +612,29 @@ try:
             os.makedirs(d, exist_ok=True)
         shutil.copy2(src, dst)
 
+    # Template files retired since v0.8 (from git history). --legacy may adopt these and nothing else
+    # the template does not render, so a project's own skills or commands never become OBSOLETE.
+    RETIRED = set("""
+    .agents/skills/feature/SKILL.md .agents/skills/sdd-workflow/SKILL.md .agents/skills/security-audit/SKILL.md
+    .agents/skills/spec/SKILL.md .claude/agents/backend-dev.md .claude/agents/code-reviewer.md .claude/agents/core-dev.md
+    .claude/agents/desktop-dev.md .claude/agents/frontend-dev.md .claude/agents/game-dev.md .claude/agents/judge.md
+    .claude/agents/mobile-dev.md .claude/agents/orchestrator.md .claude/agents/pm.md .claude/agents/pmo.md
+    .claude/agents/po-manager.md .claude/commands/feature.md .claude/commands/idea.md .claude/commands/plan.md
+    .claude/commands/sow.md .claude/commands/spec.md .claude/hooks/coding-reminder.sh .claude/patterns/backend.md
+    .claude/patterns/concurrency.md .claude/patterns/desktop.md .claude/patterns/frontend.md .claude/patterns/game.md
+    .claude/patterns/mobile.md .claude/rules/backend-style.md .claude/rules/code-query.md .claude/rules/frontend-style.md
+    .claude/rules/patterns.md .claude/skills/feature/SKILL.md .claude/skills/spec/SKILL.md
+    .cursor/rules/backend-style.mdc .cursor/rules/frontend-style.mdc
+    """.replace("/", os.sep).split())
+    ADOPTABLE_DIRS = tuple(d for d in MANAGED_DIRS if d != "tools" + os.sep)  # projects often own tools/
+
+    def adopt_legacy(to_write, advance, removed):
+        # Pre-lock repo: record what is on disk as the baseline for rendered and known-retired paths
+        # under .claude/, .cursor/ and .agents/. AGENTS.md and tools/ are never adopted.
+        return sorted(r for r in set(to_write) | RETIRED
+                      if r.startswith(ADOPTABLE_DIRS) and lock_managed(r) and r not in previous_files
+                      and r not in advance and r not in removed and os.path.isfile(tpath(r)) and not os.path.islink(tpath(r)))
+
     def write_lock(advance, remove=(), adopted=()):
         path = tpath(LOCK_REL)
         files = {rel: entry for rel, entry in previous_files.items() if lock_managed(rel)}
@@ -878,17 +901,7 @@ try:
                     if initial_state[rel] == "SAME":
                         advance.add(rel)
             if LEGACY:
-                # Pre-lock repo: trust what is on disk as the baseline. tools/ is left out because
-                # projects often own a tools/ folder; MANAGED_EXACT (AGENTS.md, ...) for the same reason.
-                walked = []
-                for d in MANAGED_DIRS:
-                    if d.startswith("tools" + os.sep):
-                        continue
-                    for root, _, files in os.walk(tpath(d)):
-                        walked += [os.path.relpath(os.path.join(root, n), TARGET) for n in files]
-                adopted = sorted(r for r in set(walked) | set(to_write)
-                                 if r not in previous_files and r not in advance and r not in removed
-                                 and lock_managed(r) and not r.startswith("tools" + os.sep) and os.path.isfile(tpath(r)))
+                adopted = adopt_legacy(to_write, advance, removed)
                 advance.update(adopted)
                 print(f"  adopted {len(adopted)} unrecorded managed file(s) as baselines (template_version=legacy)")
             if DOT_CLAUDE_MD in OVERWRITE_FILES and symlink_conflict():

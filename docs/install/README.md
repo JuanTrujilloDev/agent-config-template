@@ -23,8 +23,9 @@ What it does, in order:
 3. Uses the repo's `answers.env`. Without one, it generates a generic one from
    the defaults in `template.config.yaml`.
 4. Prints the `setup.sh` change plan. Nothing is written yet.
-5. Asks `Apply? (y/N)` on your terminal. Only `y` runs `setup.sh --merge`,
-   which adds missing files and keeps yours, then writes `answers.env` and
+5. Asks `Apply? (y/N)` on your terminal. Only `y` runs `setup.sh --merge`:
+   it adds missing files, refreshes `STALE-MANAGED` files (unedited since the
+   last render), keeps every other file, and writes `answers.env` and
    `agent-config.lock.json`. It removes the temp folder either way.
 
 The generated `answers.env` is generic, not inferred from your code. Calibrate
@@ -67,15 +68,19 @@ A Cursor marketplace listing is not yet verified. Once it is listed: open
 ## Update an existing repo
 
 Run the one command again with the new tag (`--ref <tag>`). It reuses your
-`answers.env`, shows `STALE-MANAGED`, `CUSTOMIZED-MANAGED` and `OBSOLETE` rows,
-and applies `--merge` only after you say yes. With a plugin installed, the
+`answers.env` and shows the plan. On `y` it refreshes the `STALE-MANAGED` files
+and keeps `CUSTOMIZED-MANAGED` ones. `OBSOLETE` files stay unless you add
+`--prune`, which deletes the `OBSOLETE` files the preview lists. With a plugin installed, the
 `update-config` skill does the same and also migrates old `docs/specs/`.
 
 Rendered before `agent-config.lock.json` existed, so every changed file shows
 `LEGACY` and `--prune` removes nothing? If those files are unedited template
-output, add `--legacy`: the apply records their current hashes as baselines,
-and the next preview shows them as `STALE-MANAGED` or `OBSOLETE`. Review the
-`OBSOLETE` list before you run `setup.sh --merge --prune`.
+output, add `--legacy` (it needs the repo's `answers.env`). The apply records
+the current hash of each file the template renders or once shipped under
+`.claude/`, `.cursor/` and `.agents/` as its baseline; `AGENTS.md`, `tools/` and
+your own skills and commands are never adopted. The next preview shows the
+adopted files as `STALE-MANAGED` or `OBSOLETE`. Review that `OBSOLETE` list,
+then run the command once more with `--prune`.
 
 More: [existing-project guide](../guides/existing-projects.md) ·
 [upgrade guide](../upgrade-guide.md).

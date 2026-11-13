@@ -21,12 +21,15 @@ Run inside the git repository you want to set up (any subfolder works; the repo 
   --answers <file>  answers file. Default: ./answers.env; when absent, one is generated from the
                     template defaults and written to answers.env on apply.
   --legacy          on apply, bring a repo rendered before agent-config.lock.json under the lock
-                    (setup.sh --merge --legacy). Only for unedited template output.
+                    (setup.sh --merge --legacy). Only for unedited template output; needs the
+                    repo's answers.env.
+  --prune           on apply, also delete the OBSOLETE files the preview lists (setup.sh --prune).
   --force           run on a working tree with uncommitted changes.
   --source <url>    template git URL (a mirror or a local file:// repo). Default: GitHub.
   -h, --help        show this help.
 
-Needs git, python3 and bash. Apply runs setup.sh --merge: missing files are added, your files are kept.
+Needs git, python3 and bash. Apply runs setup.sh --merge: missing files are added, STALE-MANAGED
+files (unedited since the last render) are refreshed, everything else is kept.
 EOF
 }
 
@@ -34,7 +37,7 @@ die() { printf 'bootstrap: %s\n' "$1" >&2; exit 1; }
 need() { command -v "$1" >/dev/null 2>&1 || die "$1 is required but not on PATH"; }
 
 main() {
-  ref="$DEFAULT_REF"; source_url="$DEFAULT_SOURCE"; host=""; answers=""; force=""; legacy=""
+  ref="$DEFAULT_REF"; source_url="$DEFAULT_SOURCE"; host=""; answers=""; force=""; legacy=""; prune=""
   while [ $# -gt 0 ]; do
     case "$1" in
       --host|--ref|--answers|--source)
@@ -45,6 +48,7 @@ main() {
         shift 2 ;;
       --force) force=1; shift ;;
       --legacy) legacy=1; shift ;;
+      --prune) prune=1; shift ;;
       -h|--help) usage; exit 0 ;;
       *) usage >&2; die "unknown option: $1" ;;
     esac
@@ -73,6 +77,7 @@ main() {
   generated=""
   [ -n "$answers" ] || [ ! -f answers.env ] || answers="$root/answers.env"
   if [ -z "$answers" ]; then
+    [ -z "$legacy" ] || die "--legacy needs the answers.env this repo was rendered with; none found"
     generated="$tmp/answers.env"
     branch=$(git symbolic-ref --quiet --short refs/remotes/origin/HEAD 2>/dev/null || true)
     write_default_answers "$tmp/template/template.config.yaml" "$(basename "$root")" "${host:-claude}" "${branch#*/}" \
@@ -86,10 +91,16 @@ main() {
   set -- --target . --answers "$answers"
   if [ -n "$host" ]; then set -- "$@" --host "$host"; fi
   echo ""
-  bash "$tmp/template/setup.sh" "$@" --abort </dev/null || die "preview failed; nothing was written"
+  bash "$tmp/template/setup.sh" "$@" --abort </dev/null >"$tmp/plan.txt" 2>&1 \
+    || { cat "$tmp/plan.txt"; die "preview failed; nothing was written"; }
+  cat "$tmp/plan.txt"
+  # Unedited template files (hash matches the lock) are refreshed; edited and legacy ones are kept.
+  stale=$(awk '$1 == "STALE-MANAGED" && NF == 2 { printf "%s%s", sep, $2; sep = "," }' "$tmp/plan.txt")
   echo ""
+  echo "Apply adds the ADD files, merges settings.json, refreshes every STALE-MANAGED file and keeps all others."
   printf 'Apply? (y/N) '
   reply=""
+  # AGENT_CONFIG_TTY: test seam for the answer source; users never need it.
   read -r reply 2>/dev/null <"${AGENT_CONFIG_TTY:-/dev/tty}" || reply=""
   case "$reply" in
     y|Y|yes|Yes|YES) ;;
@@ -97,6 +108,8 @@ main() {
   esac
 
   if [ -n "$legacy" ]; then set -- "$@" --legacy; fi
+  if [ -n "$prune" ]; then set -- "$@" --prune; fi
+  if [ -n "$stale" ]; then set -- "$@" --overwrite-files "$stale"; fi
   bash "$tmp/template/setup.sh" "$@" --merge </dev/null || die "apply failed; review git status"
   if [ -n "$generated" ] && [ ! -e answers.env ]; then
     cp "$generated" answers.env || die "cannot write answers.env"
