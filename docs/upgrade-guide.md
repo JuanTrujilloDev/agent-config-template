@@ -2,6 +2,11 @@
 
 How to pull updates from the template into a project that's already configured.
 
+## Unreleased
+
+- `bootstrap.sh --orchestrator <dir> --tracker <name> --approver <name>` (opt-in): after the apply, scaffolds an orchestrator folder with the `orchestrator-init` skill's `render.py`. Needs `uv` on `PATH`, checked before the clone only with this option.
+- `bootstrap.sh` drops `setup.sh`'s "Regenerate the STALE-MANAGED files" hint from its preview (it named the temp clone); direct `setup.sh` runs keep it.
+
 ## Upgrading from v0.11.1 to v0.12.0
 
 No breaking change; re-run `update-config`, or the one-command install with `--ref v0.12.0`.

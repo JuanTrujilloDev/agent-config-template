@@ -75,6 +75,7 @@ check "adhoc22 update accept exits 0" "0" "$(B_RUN "$B_R" y)"
 grep_case "adhoc22 update preview shows the stale file" "$WORK/b-out.txt" 'STALE-MANAGED +\.claude/rules/principles\.md'
 check "adhoc22 update refreshes the stale file" "0" "$(grep -c 'older template line' "$B_R/.claude/rules/principles.md")"
 check "adhoc22 update keeps an edited file" "1" "$(grep -c 'my edit' "$B_R/.claude/agents/security-reviewer.md")"
+check "adhoc22 bootstrap preview drops setup.sh's Regenerate line (temp path)" "0" "$(grep -c 'Regenerate the STALE-MANAGED' "$WORK/b-out.txt")"
 B_NEW "$WORK/b-gen"
 printf '#!/bin/bash\n' >"$B_R/.claude/hooks/retired.sh"
 python3 -c 'import hashlib,json,sys; p=sys.argv[1]+"/agent-config.lock.json"; d=json.load(open(p)); d["files"][".claude/hooks/retired.sh"]={"template_version":"0.9.2","sha256":hashlib.sha256(open(sys.argv[1]+"/.claude/hooks/retired.sh","rb").read()).hexdigest()}; json.dump(d,open(p,"w"),indent=2)' "$B_R"
@@ -87,6 +88,32 @@ B_NEW "$WORK/b-codex"
 check "adhoc22 --host codex accept exits 0" "0" "$(B_RUN "$WORK/b-codex" y --host codex)"
 check "adhoc22 --host codex renders .agents/skills" "present" "$(B_EXISTS "$WORK/b-codex/.agents/skills")"
 check "adhoc22 unknown option exits 1" "1" "$(B_RUN "$B_R" n --bogus)"
+
+# 4b. --orchestrator <dir>: uv checked only then, before cloning; after apply, orchestrator-init's render.py writes the folder.
+# PATH without uv: one folder linking every other PATH executable (uv may share a folder with git or python3).
+B_NOUV="$WORK/b-nouv"; mkdir -p "$B_NOUV"
+printf '%s' "$PATH" | tr ':' '\n' | while read -r d; do
+  for f in "$d"/*; do n=${f##*/}; [ "$n" = uv ] || [ -e "$B_NOUV/$n" ] || [ ! -x "$f" ] || ln -s "$f" "$B_NOUV/$n"; done
+done
+B_UVSTUB="$WORK/b-uvstub"; mkdir -p "$B_UVSTUB"; printf '#!/bin/sh\n' >"$B_UVSTUB/uv"; chmod +x "$B_UVSTUB/uv"
+B_O="$WORK/b-orch"; B_NEW "$B_O"
+B_ORUN() { P=$1; shift; (PATH=$P; B_RUN "$@"); }
+check "adhoc22 without --orchestrator uv is not needed" "0" "$(B_ORUN "$B_NOUV" "$B_O" n)"
+check "adhoc22 --orchestrator without uv exits 1" "1" "$(B_ORUN "$B_NOUV" "$B_O" y --orchestrator orch --tracker Plane --approver Ana)"
+grep_case "adhoc22 --orchestrator without uv names uv" "$WORK/b-out.txt" 'uv is required'
+check "adhoc22 --orchestrator without uv fails before cloning" "0" "$(grep -c '^Cloning' "$WORK/b-out.txt")"
+check "adhoc22 --orchestrator without uv writes nothing" "" "$(cd "$B_O" && git status --porcelain)"
+check "adhoc22 --orchestrator needs --tracker and --approver" "1" "$(B_ORUN "$B_UVSTUB:$B_NOUV" "$B_O" y --orchestrator orch)"
+grep_case "adhoc22 --orchestrator names the missing flags" "$WORK/b-out.txt" '--tracker.*--approver'
+check "adhoc22 --orchestrator decline exits 0" "0" "$(B_ORUN "$B_UVSTUB:$B_NOUV" "$B_O" n --orchestrator orch --tracker Plane --approver Ana)"
+grep_case "adhoc22 --orchestrator preview lists the orchestrator files" "$WORK/b-out.txt" '^create +bin/state\.py'
+check "adhoc22 --orchestrator decline writes nothing" "absent" "$(B_EXISTS "$B_O/orch")"
+check "adhoc22 --orchestrator accept exits 0" "0" "$(B_ORUN "$B_UVSTUB:$B_NOUV" "$B_O" y --orchestrator orch --tracker Plane --approver "Ana O'Neil")"
+check "adhoc22 --orchestrator accept renders the template too" "present" "$(B_EXISTS "$B_O/.claude/rules/principles.md")"
+check "adhoc22 --orchestrator accept writes bin/state.py" "present" "$(B_EXISTS "$B_O/orch/bin/state.py")"
+grep_case "adhoc22 --orchestrator fills an approver with a space and apostrophe" "$B_O/orch/AGENTS.md" "Ana O'Neil"
+grep_case "adhoc22 --orchestrator prints the schedule prompts" "$WORK/b-out.txt" 'Orchestrator progress check'
+check "adhoc22 --orchestrator temp folder cleaned" "0" "$(ls -A "$B_TMP" | wc -l | tr -d ' ')"
 
 # 5. setup.sh --abort on a fresh target prints the plan and writes nothing.
 B_ANS="$ROOT/examples/python-fastapi/answers.env"
@@ -115,6 +142,7 @@ check "adhoc22 lock skips a project's own command" "no" "$(B_LOCKED .claude/comm
 grep_case "adhoc22 legacy entries are marked" "$B_L/agent-config.lock.json" '"template_version": "legacy"' 2
 B_P2=$(B_PLAN)
 grep_case "adhoc22 after --legacy the old file is STALE-MANAGED" <(printf '%s\n' "$B_P2") 'STALE-MANAGED +\.claude/agents/security-reviewer\.md'
+grep_case "adhoc22 direct setup.sh keeps the Regenerate line" <(printf '%s\n' "$B_P2") 'Regenerate the STALE-MANAGED'
 grep_case "adhoc22 after --legacy the retired file is OBSOLETE" <(printf '%s\n' "$B_P2") '^  OBSOLETE +\.claude/hooks/coding-reminder\.sh'
 B_PLAN --merge --prune >/dev/null
 check "adhoc22 --prune removes the retired file" "absent" "$(B_EXISTS "$B_L/.claude/hooks/coding-reminder.sh")"

@@ -13,6 +13,11 @@
 
 It turns a ticket or an ask into one approved epic of one-case stories, then ships it one layered slice at a time: tests first and locked, code to green, two-axis review, one small PR. Epics and slices live on disk (or on your tracker), so the workflow survives restarts across web, backend, mobile, Unity, desktop, CLI, and data projects.
 
+## Unreleased
+
+- `bootstrap.sh --orchestrator <dir> --tracker <name> --approver <name>` (opt-in) also scaffolds an `orchestrator-init` folder after the apply; it needs `uv`, checked before the clone only when the option is given.
+- `bootstrap.sh` no longer prints `setup.sh`'s "Regenerate the STALE-MANAGED files" command, which pointed at its deleted temp clone; the apply refreshes those files itself. A direct `setup.sh` run still prints it.
+
 ## v0.12.0 — one-command install
 
 - `bootstrap.sh` installs the template into any git repo with one command (see [Install](#install)): it clones the pinned tag, previews, and writes only after you answer `y`. Re-running it with a newer tag updates the files you never edited. `setup.sh --merge --legacy` brings a repo rendered before `agent-config.lock.json` under the lock, and `setup.sh --abort` no longer writes anything on a fresh target.

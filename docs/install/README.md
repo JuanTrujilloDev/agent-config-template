@@ -28,6 +28,13 @@ What it does, in order:
    last render), keeps every other file, and writes `answers.env` and
    `agent-config.lock.json`. It removes the temp folder either way.
 
+Optional: `--orchestrator <dir> --tracker <name> --approver <name>` also
+scaffolds an orchestrator folder after the apply, the same files the
+`orchestrator-init` skill writes (its `render.py`). The folder's plan is part
+of the preview; existing files are kept. It needs `uv` on `PATH` (checked
+before the clone, only with this option) and prints the two T3 schedule
+prompts for you to create by hand.
+
 The generated `answers.env` is generic, not inferred from your code. Calibrate
 it with `/setup-template` from a plugin (below), or edit it and run the command
 again.
