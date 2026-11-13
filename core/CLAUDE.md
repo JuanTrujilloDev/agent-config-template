@@ -54,7 +54,7 @@ Style skills (loaded by `implement` and `code-review` per slice layer): `backend
 `/epic` → `/slice` → `tests-first` → `implement` → `code-review` → `/pr`, all in this thread.
 
 1. **`/epic <{{#branch_prefix}}{{branch_prefix}}-<#> or {{/branch_prefix}}ask>`** drafts the epic once: capability groups, one-case stories, acceptance criteria, Given/When/Then test scenarios, layered slices. You approve by number.
-2. **`/slice <ID> <n>`** briefs the next slice in `db → be → fe` order: stories, seams, fixtures, expected behaviour. You say yes.
+2. **`/slice <ID> <n>`** briefs the next slice in `db → be → fe` order: stories, seams, fixtures, expected behaviour. You say yes. Add `cold-review` and two fresh reviewers read the slice before you do.
 3. **`tests-first`** writes the slice's tests through the public seam, runs them red and commits them. You read the tests and say yes; their paths go under `## Approved tests` in the slice file and are locked.
 4. **`implement`** writes the code to green without touching approved tests, then runs the Definition of Done.
 5. **`code-review`** checks the diff against the principles, the style rule and the slice; one fix round, then `/pr`.
