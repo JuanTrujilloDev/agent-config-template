@@ -2,12 +2,16 @@
 
 How to pull updates from the template into a project that's already configured.
 
-## Unreleased
+## Upgrading from v0.11.1 to v0.12.0
+
+No breaking change; re-run `update-config`, or the one-command install with `--ref v0.12.0`.
 
 - `bootstrap.sh`: one command installs the template into any git repo, `curl -fsSL <raw URL at a tag> | sh -s -- --host claude|cursor|codex`. It clones the pinned tag, previews, asks `Apply? (y/N)`, then runs `setup.sh --merge` and refreshes the `STALE-MANAGED` files. See [Install](install/README.md).
 - `setup.sh --abort` now prints the plan and writes nothing on a fresh target too (it used to render everything).
 - `setup.sh --merge --legacy` brings a repo rendered before `agent-config.lock.json` under the lock: unrecorded files under `.claude/`, `.cursor/` and `.agents/` that the template renders or once shipped get their current hash as a `legacy` baseline, so the next preview shows `STALE-MANAGED` or `OBSOLETE` instead of `LEGACY`, and `--prune` can remove retired files.
 - `migrate.py` reports a scenario under a heading it cannot map to a mini-feature as an `ERROR` row instead of dropping it.
+- `orchestrator-init`: `bin/state.py` accepts the `tests` run kind, validates `tracker.state` (case-insensitive, common Jira/Linear/GitHub columns) and reads `plane.<x>` as `tracker.<x>`. The skeleton gains `plans/launch-standing-orders.md` and the fresh-thread, owner-round and epic → story → slice rules.
+- `/slice <ID> <n> cold-review` (opt-in): two fresh reviewers, Comprehension and Readiness, read the epic, the slice draft and the repo before you approve the slice. The draft stays outside `slices/` until your yes.
 
 ## Upgrading from v0.11.0 to v0.11.1
 
@@ -102,7 +106,7 @@ git add answers.env   # the source of truth — re-renders the same config later
 
 ```bash
 # 1. Pull the latest template (or check out a tag for stability)
-cd ~/code/agent-config-template && git pull origin main   # or: git checkout v0.11.1
+cd ~/code/agent-config-template && git pull origin main   # or: git checkout v0.12.0
 
 # 2. Preview what would change in your project
 cd ~/code/my-project
@@ -112,7 +116,7 @@ cd ~/code/my-project
 ~/code/agent-config-template/setup.sh --target . --answers ./answers.env --merge
 
 # 4. Commit
-git add .claude/ CLAUDE.md docs/ agent-config.lock.json && git commit -m "chore: upgrade agent-config-template to v0.11.1"
+git add .claude/ CLAUDE.md docs/ agent-config.lock.json && git commit -m "chore: upgrade agent-config-template to v0.12.0"
 ```
 
 A template upgrade (`setup.sh --merge`) is its own `chore:` commit — never mixed into a feature PR.

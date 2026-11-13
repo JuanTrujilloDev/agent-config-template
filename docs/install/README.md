@@ -5,7 +5,7 @@
 Run it at the root of the git repository you want to set up:
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/JuanTrujilloDev/agent-config-template/<tag>/bootstrap.sh | sh -s -- --host claude
+curl -fsSL https://raw.githubusercontent.com/JuanTrujilloDev/agent-config-template/v0.12.0/bootstrap.sh | sh -s -- --host claude
 ```
 
 `--host` takes `claude`, `cursor` or `codex` (a comma list renders several;

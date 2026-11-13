@@ -4,8 +4,8 @@
 # No telemetry; the clone is the only network call. Usage: see usage() below, or run with --help.
 # The whole script is one function call at the bottom, so `curl ... | sh` never runs a half-read file.
 
-# RELEASE STEP: set this to the tag the file ships in (e.g. v0.12.0) before tagging; README pins its sha256.
-DEFAULT_REF="main"
+# RELEASE STEP: set this to the tag the file ships in before tagging; README pins its sha256.
+DEFAULT_REF="v0.12.0"
 DEFAULT_SOURCE="https://github.com/JuanTrujilloDev/agent-config-template.git"
 
 usage() {

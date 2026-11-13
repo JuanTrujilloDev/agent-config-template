@@ -140,4 +140,5 @@ before "adhoc22 install page: plugin path before existing-repo update" "$B_INST"
 grep_case "adhoc22 install page does not claim a Cursor listing" "$B_INST" 'not yet verified'
 before "adhoc22 README install block leads with the command" "$ROOT/README.md" 'bootstrap\.sh \| sh' '/plugin marketplace add'
 grep_case "adhoc22 README marks the sha256 as a release step" "$ROOT/README.md" 'RELEASE STEP.*sha256'
-grep_case "adhoc22 CHANGELOG has an Unreleased entry" "$ROOT/docs/upgrade-guide.md" '^## Unreleased'
+grep_case "adhoc22 upgrade guide has the v0.12.0 section" "$ROOT/docs/upgrade-guide.md" '^## Upgrading from v0\.11\.1 to v0\.12\.0$'
+check "adhoc22 bootstrap DEFAULT_REF is the template version" "v$(sed -n 's/^TEMPLATE_VERSION="\(.*\)"$/\1/p' "$ROOT/setup.sh")" "$(sed -n 's/^DEFAULT_REF="\(.*\)"$/\1/p' "$B_BOOT")"

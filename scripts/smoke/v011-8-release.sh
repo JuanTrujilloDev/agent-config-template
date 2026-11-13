@@ -8,14 +8,14 @@ if [ -z "${ROOT:-}" ]; then
 fi
 
 for m in plugin/.claude-plugin/plugin.json .claude-plugin/marketplace.json .cursor-plugin/plugin.json codex/.codex-plugin/plugin.json; do
-  grep_case "v0.11 i8 $m at 0.11.1" "$ROOT/$m" '"version": *"0\.11\.1"'
+  grep_case "v0.11 i8 $m at 0.12.0" "$ROOT/$m" '"version": *"0\.12\.0"'
 done
-grep_case "v0.11 i8 setup.sh TEMPLATE_VERSION 0.11.1" "$ROOT/setup.sh" '^TEMPLATE_VERSION="0\.11\.1"$'
-grep_case "v0.11 i8 packaging reports 0.11.1" <(cd "$ROOT" && python3 scripts/validate-packaging.py 2>&1) 'packaging valid @ v0\.11\.1'
+grep_case "v0.11 i8 setup.sh TEMPLATE_VERSION 0.12.0" "$ROOT/setup.sh" '^TEMPLATE_VERSION="0\.12\.0"$'
+grep_case "v0.11 i8 packaging reports 0.12.0" <(cd "$ROOT" && python3 scripts/validate-packaging.py 2>&1) 'packaging valid @ v0\.12\.0'
 
 # Docs.
 V8_UG="$ROOT/docs/upgrade-guide.md"
-check "v0.11 i8 upgrade guide: 0.11.1 is the first release section" "## Upgrading from v0.11.0 to v0.11.1" "$(grep -m1 '^## Upgrading' "$V8_UG")"
+check "v0.11 i8 upgrade guide: 0.12.0 is the first release section" "## Upgrading from v0.11.1 to v0.12.0" "$(grep -m1 '^## Upgrading' "$V8_UG")"
 grep_case "v0.11 i8 upgrade guide keeps the breaking section" "$V8_UG" '^## Upgrading from v0\.10\.0 to v0\.11\.0 — breaking$'
 for t in '`/spec`' '`/feature`' 'update-config' 'migrate\.py' 'workflow_mode' 'AGENT_CONFIG_UNLOCK_TESTS=1' '--prune'; do
   grep_case "v0.11 i8 breaking section names $t" <(section "$V8_UG" '^## Upgrading from v0\.10\.0 to v0\.11\.0') "$t"

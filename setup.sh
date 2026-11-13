@@ -76,7 +76,7 @@
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-TEMPLATE_VERSION="0.11.1"
+TEMPLATE_VERSION="0.12.0"
 # Canonical source is core/ at the repo root; the bundled plugin copy ships as
 # template/. The same script works in both locations by auto-detecting.
 if [ -d "$SCRIPT_DIR/core" ]; then
