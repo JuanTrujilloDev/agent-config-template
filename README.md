@@ -90,7 +90,7 @@ cause.
 ticket or ask
   └─ /epic: capability groups, one-case stories, AC, Given/When/Then TS, layered slices
        └─ you approve by number (tracker cards, or docs/epics/<ID>/ with source=local)
-            └─ /slice <ID> <n>: one layer (db → be → fe) of one group → you say yes
+            └─ /slice <ID> <n> [cold-review]: one layer (db → be → fe) of one group → you say yes
                  └─ tests-first: all the slice's tests, red → you approve → locked
                       └─ implement → code-review (Standards + Spec, one fix round)
                            └─ /pr, stacked on the previous layer's branch → next slice
@@ -101,7 +101,6 @@ ticket or ask
 - One slice per PR, one layer per slice, 200–400 non-test lines.
 - `validate-epics.py` checks the grammar and warns on size; CI runs it here.
 - `council` is an opt-in, single-round review by three providers.
-- `/slice <ID> <n> cold-review` is opt-in: two fresh reviewers with no thread context read the slice and list what they would guess, before you approve it.
 
 Full rules: [epic → story → slice](docs/epic-story-slice.md).
 

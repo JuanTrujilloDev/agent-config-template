@@ -1,6 +1,6 @@
 cold-review.md is adapted from https://github.com/google/elephant-goldfish-model at commit 270b103
-(skills/egm-review/SKILL.md, agents/comprehension.md, agents/implementation_readiness.md)
-under this license. Changes: the prompts were rewritten and shortened for slice files.
+(skills/egm-review/SKILL.md, agents/comprehension.md, agents/implementation_readiness.md; prompts
+rewritten and shortened for slice files) under this license:
 
 
                                  Apache License

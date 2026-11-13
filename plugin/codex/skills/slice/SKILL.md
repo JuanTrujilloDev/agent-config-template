@@ -61,17 +61,17 @@ Rules:
 
 ## 4. Cold review (only with `cold-review`)
 
-Off by default. Run it when the arguments or the request say `cold-review`: two reviewers who never saw this thread read the slice before the user does. One round, no loop.
+Run it only when the arguments or the request say `cold-review`: two reviewers who never saw this thread read the slice before the user does. One round, no loop.
 
-1. Write the draft to `docs/epics/<ID>/slices/<n>.md`, uncommitted (delete it if the user drops the slice).
-2. Start two fresh sub-agents in parallel with the prompts in [cold-review.md](cold-review.md): **Comprehension** writes what it thinks will be built; **Readiness** lists what a developer would have to guess. Give each only its prompt and three inputs: `docs/epics/<ID>/epic.md`, the slice file, the repo. Nothing from the conversation: no brief table, no code-query findings, no summary of what you meant.
-3. Model: Claude Sonnet 5.5 with `effort: medium` set explicitly (it defaults to `high`), a different model from the author on purpose. Cost: roughly 0.2–0.4M tokens per round (an estimate).
-4. Hosts without sub-agents (Codex) run Comprehension, then Readiness, one after the other in this thread, each starting from the three inputs only and not from the brief; say the review is weaker for it.
+1. Write the draft slice file to a temporary path outside the repository (`$TMPDIR/slice-<ID>-<n>.md`), never to `slices/`: that file is written only after the yes, and on a tracker epic it is rendered.
+2. Start two fresh sub-agents in parallel with the prompts in [cold-review.md](cold-review.md): **Comprehension** writes what it thinks will be built; **Readiness** lists what a developer would have to guess. Give each only its prompt and three inputs: `docs/epics/<ID>/epic.md`, the draft slice file, the repo. Nothing from the conversation: no brief table, no code-query findings, no summary of what you meant.
+3. Model (Claude hosts): Claude Sonnet 5.5 with `effort: medium` set explicitly (it defaults to `high`), a different model from the author on purpose. Cost: roughly 0.2–0.4M tokens per round (an estimate).
+4. Hosts without sub-agents (Codex) run Comprehension, then Readiness, one after the other in this thread, re-reading the three inputs and judging only from them, not from the brief; say the review is weaker for it.
 5. In the reply, under the brief (not in the slice file), add `## Cold review`: Comprehension's paraphrase, then one short findings list from both. A paraphrase that differs from what you meant is a finding. Per finding, fix the draft or answer it in one line. The user reads it with the slice.
 
 ## 5. After yes
 
-- Write `docs/epics/<ID>/slices/<n>.md` (or keep the cold-review draft). If the epic lives on a tracker and the brief changed the sub-issue, update its body, then `/epic render <ID>` instead of editing the file.
+- Write `docs/epics/<ID>/slices/<n>.md`. If the epic lives on a tracker and the brief changed the sub-issue, update its body, then `/epic render <ID>` instead of editing the file.
 - Create the branch from the line above (from the stacked base, else the default branch).
 - Run `python3 .claude/skills/epic/validate-epics.py docs/epics/<ID>`.
 - Next: `tests-first`. It appends `## Approved tests` once the user approves the tests; that section and the `- Branch:` line drive the approved-tests lock.
