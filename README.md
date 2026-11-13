@@ -13,6 +13,10 @@
 
 It turns a ticket or an ask into one approved epic of one-case stories, then ships it one layered slice at a time: tests first and locked, code to green, two-axis review, one small PR. Epics and slices live on disk (or on your tracker), so the workflow survives restarts across web, backend, mobile, Unity, desktop, CLI, and data projects.
 
+## Unreleased
+
+- `orchestrator-init`: `bin/state.py` accepts the `tests` run kind, validates `tracker.state` and reads `plane.<x>` as `tracker.<x>`; `validate-packaging.py` fails if those drift. The skeleton gains `plans/launch-standing-orders.md` and the fresh-thread, owner-round and epic → story → slice rules.
+
 ## v0.11.1 — fixes
 
 Patch release from the v0.11.0 review: slice reports no longer fail `validate-epics.py`, `--merge --prune` drops the stale v0.10 prompt hook from `settings.json`, `code-review` treats the slice's `## Approved tests` as append-only, `migrate.py` reads the older `@sN` grammar, and the test lock resolves symlinks and case. See the [upgrade guide](docs/upgrade-guide.md).

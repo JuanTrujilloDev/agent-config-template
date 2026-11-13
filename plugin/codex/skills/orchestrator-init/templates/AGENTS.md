@@ -41,7 +41,20 @@ Workspace: `<tracker workspace>`. {{tracker}} access goes through `<connection o
 
 - Every task, review or fix round runs in its own new T3 thread named `<TASK-ID> / <what>`, with the model set explicitly from the routing table. This thread only coordinates: it reads results and writes state, inbox and outbox.
 - A thread that needs a push ends its turn with "commit done, push pending approval"; this thread never approves a push and lists every pending push in its next reply.
-- Task threads read the project repo's own rules (`AGENTS.md`, `CLAUDE.md`), not this file.
+- **Fresh thread per round.** A review, fix or follow-up round never goes as a second turn into a long thread: it gets a new thread whose launch message pastes the previous report (MR/PR, head SHA, findings, decisions). Reason: every extra turn re-reads the whole thread, and cache reads dominate the bill. The one exception is a thread that is mid-task and idle for minutes, not hours.
+- **Owner-driven rounds.** When {{approver}} continues a task thread themselves, record each of their rounds as a run (provider, model and times from `t3_thread_read`) and launch no parallel thread for the same work. The progress check reads every task thread past its last recorded run.
+- Every launch message ends with the block in `plans/launch-standing-orders.md`, pasted unchanged. Task threads read the project repo's own rules (`AGENTS.md`, `CLAUDE.md`), not this file.
+
+## Epic → story → slice
+
+Follows the agent-config-template `epic`, `slice`, `tests-first` and `code-review` skills.
+
+- **Epic**: one {{tracker}} card labelled `epic`, the source of truth. Its stories live in the card body (one case each, one acceptance criterion and one test scenario per story), not as separate cards. The repo copy under `docs/epics/<ID>/` is generated from it.
+- **Slice**: a sub-card of the epic labelled `slice` plus its layer (`backend`, `frontend`), naming the stories it covers. Slices stack DB → BE → FE per capability group, 200–400 LOC each (12 files / 3,000 LOC hard cap), one MR/PR per slice.
+- Cards are written only after {{approver}}'s yes on a numbered draft: the epic card first, each slice card when its brief is approved.
+- **One thread per slice.** It writes the tests first, pushes them red and stops; {{approver}} reads the test files. On a yes it implements in the same thread. Record two runs: kind `tests`, then kind `execute`. A split tests/code thread pair is a per-run choice in the launch draft.
+- **Review**: `code-review` is the one review round per slice MR/PR, with one fix round. `council` is opt-in, one round, for security or architecture slices only, priced in the draft.
+- **State**: the state file records the card under `tracker:`; `bin/state.py set` still reads `plane.<x>` assignments as `tracker.<x>`.
 
 ## Model routing by complexity
 

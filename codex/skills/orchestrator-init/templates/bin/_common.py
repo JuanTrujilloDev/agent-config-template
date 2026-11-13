@@ -20,11 +20,13 @@ STATE_SKIP = {"SCHEMA.md", "EXAMPLE.yaml", "README.md"}
 
 ENUMS: Dict[str, List[str]] = {
     "status": ["draft", "approved", "executing", "reviewing", "done", "paused", "cancelled"],
+    # Column names of your tracker board: edit this list to match yours.
+    "tracker.state": ["Backlog", "ToDo", "In progress", "In review", "Done", "Closed", "Cancelled", "Archive"],
     "epic.state": ["queued", "executing", "in review", "done", "cancelled"],
     "task.state": ["queued", "executing", "in review", "blocked", "done", "cancelled"],
     "run.kind": [
         "execute", "review", "fix", "preflight", "research", "design", "learnings",
-        "closeout", "publication", "sync", "diagnosis",
+        "closeout", "publication", "sync", "diagnosis", "tests",
     ],
     "run.state": ["queued", "running", "completed", "failed", "cancelled", "blocked"],
     "run.result": ["clean", "changes_requested", "blocked", "inconclusive", "delivered", "n/a"],
@@ -153,6 +155,7 @@ def validate_state(data: Dict[str, Any]) -> List[str]:
         if not data.get(key):
             problems.append(f"missing required field {key!r}")
     chk("status", data.get("status"), "status")
+    chk("tracker.state", (data.get("tracker") or {}).get("state"), "tracker.state")
     if "unchanged_checks" in data and not isinstance(data["unchanged_checks"], int):
         problems.append("unchanged_checks must be an integer")
     for epic in data.get("epics") or []:

@@ -14,6 +14,7 @@ Optional. Renders the file skeleton of an orchestrator: a folder that plans work
 | `bin/` | `state.py`, `render-progress.py`, `resource-check.py`, `tracker-comment.py`, `archive-evidence.py`, `_common.py`, `README.md`. Python with PEP 723 metadata, run through `uv` (PyYAML). Paths resolve from the scripts' own folder. |
 | `state/SCHEMA.md`, `state/EXAMPLE.yaml` | Format of `state/<TASK-ID>.yaml`, and a fictional example to copy for each new task. |
 | `plans/TEMPLATE.md` | Plan shape: current block, security invariants, epics and tasks, parallelism, review log. |
+| `plans/launch-standing-orders.md` | The standing orders pasted at the end of every task-thread launch: `/slice` first, tests red then stop, no merge, push pending approval. |
 | `inbox/`, `outbox/` | `README.md` with the request format, plus `done/`. |
 | `learnings/`, `flakes/` | Empty, with `.gitkeep`. |
 | `skills/VENDORED.md` | Header of the pinned-skills table. |
