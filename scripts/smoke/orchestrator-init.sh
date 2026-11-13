@@ -102,6 +102,8 @@ print("ok")' "$OI_OUT/bin" 2>&1)"
   check "orchestrator-init state.py set plane.x writes tracker.x" "0 Done False" "$? $(oi_tracker)"
   python3 "$OI_ST" set --task ABC-123 tracker.state=Nope --no-render >/dev/null 2>&1
   check "orchestrator-init state.py rejects an unknown tracker.state" "1 Done False" "$? $(oi_tracker)"
+  python3 "$OI_ST" set --task ABC-123 "tracker.state=In Progress" --no-render >/dev/null 2>&1
+  check "orchestrator-init state.py tracker.state ignores case" "0 In Progress False" "$? $(oi_tracker)"
 else
   echo "SKIP orchestrator-init render-progress (PyYAML missing)"
 fi

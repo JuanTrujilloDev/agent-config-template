@@ -49,10 +49,10 @@ Workspace: `<tracker workspace>`. {{tracker}} access goes through `<connection o
 
 Follows the agent-config-template `epic`, `slice`, `tests-first` and `code-review` skills.
 
-- **Epic**: one {{tracker}} card labelled `epic`, the source of truth. Its stories live in the card body (one case each, one acceptance criterion and one test scenario per story), not as separate cards. The repo copy under `docs/epics/<ID>/` is generated from it.
-- **Slice**: a sub-card of the epic labelled `slice` plus its layer (`backend`, `frontend`), naming the stories it covers. Slices stack DB → BE → FE per capability group, 200–400 LOC each (12 files / 3,000 LOC hard cap), one MR/PR per slice.
-- Cards are written only after {{approver}}'s yes on a numbered draft: the epic card first, each slice card when its brief is approved.
-- **One thread per slice.** It writes the tests first, pushes them red and stops; {{approver}} reads the test files. On a yes it implements in the same thread. Record two runs: kind `tests`, then kind `execute`. A split tests/code thread pair is a per-run choice in the launch draft.
+- **Epic**: stories are one case each, with one acceptance criterion and one test scenario per story. The `epic` skill asks whether to use {{tracker}} cards, and no is the default: then `docs/epics/<ID>/` is the source of truth. With cards, one card labelled `epic` is the source of truth, its stories live in the card body (not as separate cards), and `docs/epics/<ID>/` is generated from it.
+- **Slice**: `docs/epics/<ID>/slices/<n>.md`, and with cards a sub-card of the epic labelled `slice` plus its layer (`db`, `backend`, `frontend`), naming the stories it covers. Slices stack DB → BE → FE per capability group, 200–400 LOC each (12 files / 3,000 LOC hard cap), one MR/PR per slice.
+- Cards, when used, are written only after {{approver}}'s yes on a numbered draft: the epic card first, each slice card when its brief is approved.
+- **One thread per slice.** It writes the tests first, pushes them red and stops; {{approver}} reads the test files. On a yes it implements in the same thread if the yes comes within minutes; after a longer wait, a fresh thread with the tests report pasted in (fresh thread per round). Record two runs: kind `tests`, then kind `execute`. A split tests/code thread pair is a per-run choice in the launch draft.
 - **Review**: `code-review` is the one review round per slice MR/PR, with one fix round. `council` is opt-in, one round, for security or architecture slices only, priced in the draft.
 - **State**: the state file records the card under `tracker:`; `bin/state.py set` still reads `plane.<x>` assignments as `tracker.<x>`.
 
