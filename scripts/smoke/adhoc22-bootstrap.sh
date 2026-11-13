@@ -170,3 +170,5 @@ before "adhoc22 README install block leads with the command" "$ROOT/README.md" '
 grep_case "adhoc22 README marks the sha256 as a release step" "$ROOT/README.md" 'RELEASE STEP.*sha256'
 grep_case "adhoc22 upgrade guide has the v0.12.0 section" "$ROOT/docs/upgrade-guide.md" '^## Upgrading from v0\.11\.1 to v0\.12\.0$'
 check "adhoc22 bootstrap DEFAULT_REF is the template version" "v$(sed -n 's/^TEMPLATE_VERSION="\(.*\)"$/\1/p' "$ROOT/setup.sh")" "$(sed -n 's/^DEFAULT_REF="\(.*\)"$/\1/p' "$B_BOOT")"
+check "adhoc22 README sha256 matches bootstrap.sh" "$(python3 -c 'import hashlib,sys; print(hashlib.sha256(open(sys.argv[1],"rb").read()).hexdigest())' "$B_BOOT")" "$(sed -n 's/^`bootstrap\.sh` at `v[^`]*`: sha256 `\([0-9a-f]*\)`.*/\1/p' "$ROOT/README.md")"
+check "adhoc22 README and install page pin DEFAULT_REF" "$(sed -n 's/^DEFAULT_REF="\(.*\)"$/\1/p' "$B_BOOT") $(sed -n 's/^DEFAULT_REF="\(.*\)"$/\1/p' "$B_BOOT")" "$(grep -o 'agent-config-template/v[0-9.]*/bootstrap\.sh' "$ROOT/README.md" | sed 's|.*/\(v[0-9.]*\)/.*|\1|') $(grep -o 'agent-config-template/v[0-9.]*/bootstrap\.sh' "$ROOT/docs/install/README.md" | sed 's|.*/\(v[0-9.]*\)/.*|\1|')"

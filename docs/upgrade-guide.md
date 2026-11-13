@@ -2,7 +2,9 @@
 
 How to pull updates from the template into a project that's already configured.
 
-## Unreleased
+## Upgrading from v0.12.0 to v0.12.1
+
+No breaking change; re-run `update-config`, or the one-command install with `--ref v0.12.1`.
 
 - `bootstrap.sh --orchestrator <dir> --tracker <name> --approver <name>` (opt-in): after the apply, scaffolds an orchestrator folder with the `orchestrator-init` skill's `render.py`. Needs `uv` on `PATH`, checked before the clone only with this option.
 - `bootstrap.sh` drops `setup.sh`'s "Regenerate the STALE-MANAGED files" hint from its preview (it named the temp clone); direct `setup.sh` runs keep it.
@@ -111,7 +113,7 @@ git add answers.env   # the source of truth — re-renders the same config later
 
 ```bash
 # 1. Pull the latest template (or check out a tag for stability)
-cd ~/code/agent-config-template && git pull origin main   # or: git checkout v0.12.0
+cd ~/code/agent-config-template && git pull origin main   # or: git checkout v0.12.1
 
 # 2. Preview what would change in your project
 cd ~/code/my-project
@@ -121,7 +123,7 @@ cd ~/code/my-project
 ~/code/agent-config-template/setup.sh --target . --answers ./answers.env --merge
 
 # 4. Commit
-git add .claude/ CLAUDE.md docs/ agent-config.lock.json && git commit -m "chore: upgrade agent-config-template to v0.12.0"
+git add .claude/ CLAUDE.md docs/ agent-config.lock.json && git commit -m "chore: upgrade agent-config-template to v0.12.1"
 ```
 
 A template upgrade (`setup.sh --merge`) is its own `chore:` commit — never mixed into a feature PR.

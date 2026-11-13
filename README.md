@@ -13,7 +13,7 @@
 
 It turns a ticket or an ask into one approved epic of one-case stories, then ships it one layered slice at a time: tests first and locked, code to green, two-axis review, one small PR. Epics and slices live on disk (or on your tracker), so the workflow survives restarts across web, backend, mobile, Unity, desktop, CLI, and data projects.
 
-## Unreleased
+## v0.12.1 — bootstrap follow-ups
 
 - `bootstrap.sh --orchestrator <dir> --tracker <name> --approver <name>` (opt-in) also scaffolds an `orchestrator-init` folder after the apply; it needs `uv`, checked before the clone only when the option is given.
 - `bootstrap.sh` no longer prints `setup.sh`'s "Regenerate the STALE-MANAGED files" command, which pointed at its deleted temp clone; the apply refreshes those files itself. A direct `setup.sh` run still prints it.
@@ -36,18 +36,18 @@ Patch release from the v0.11.0 review: slice reports no longer fail `validate-ep
 - The always-loaded text drops from about 9.5k to about 3k tokens: one ≤80-line principles file, everything else is a skill loaded on demand.
 - `update-config` upgrades a rendered project and migrates old `docs/specs/` folders to `docs/epics/`.
 
-Upgrade path: `0.10.0 → 0.12.0` via `update-config`; see the [upgrade guide](docs/upgrade-guide.md).
+Upgrade path: `0.10.0 → 0.12.1` via `update-config`; see the [upgrade guide](docs/upgrade-guide.md).
 
 ## Install
 
 At the root of any git repository:
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/JuanTrujilloDev/agent-config-template/v0.12.0/bootstrap.sh | sh -s -- --host claude
+curl -fsSL https://raw.githubusercontent.com/JuanTrujilloDev/agent-config-template/v0.12.1/bootstrap.sh | sh -s -- --host claude
 ```
 
 <!-- RELEASE STEP (every release, before tagging): set the tag in the command and the line below, set DEFAULT_REF in bootstrap.sh to the same tag, then set the sha256 to `shasum -a 256 bootstrap.sh`. -->
-`bootstrap.sh` at `v0.12.0`: sha256 `7ba21ccbbccb24f9bfc5c9b79e0093f312d603f61f0ff2b56ad811a183ca6299`. It clones the
+`bootstrap.sh` at `v0.12.1`: sha256 `323aff335bbe16f980b551541d98e42ac93c291e674ae7fbd1f9e1e115d0d675`. It clones the
 template at that tag, prints the plan, and writes only after you answer `y`.
 `--host cursor` or `--host codex` for the other hosts.
 
