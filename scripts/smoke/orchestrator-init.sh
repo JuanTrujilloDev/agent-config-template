@@ -31,7 +31,7 @@ check "orchestrator-init conflict writes nothing" "file-target orch orch/inbox" 
 oi_render --write >"$WORK/oi-write.txt" 2>&1
 check "orchestrator-init write exit 0" "0" "$?"
 for f in AGENTS.md bin/README.md bin/_common.py bin/state.py bin/render-progress.py bin/resource-check.py \
-  bin/tracker-comment.py bin/archive-evidence.py state/SCHEMA.md plans/TEMPLATE.md inbox/README.md \
+  bin/tracker-comment.py bin/archive-evidence.py state/SCHEMA.md plans/TEMPLATE.md plans/launch-standing-orders.md inbox/README.md \
   outbox/README.md inbox/done/.gitkeep outbox/done/.gitkeep learnings/.gitkeep flakes/.gitkeep \
   skills/VENDORED.md schedules/progress-check.md schedules/config-review.md state/EXAMPLE.yaml; do
   check "orchestrator-init renders $f" "yes" "$(oi_has "$OI_OUT/$f")"
@@ -47,6 +47,14 @@ grep_case "orchestrator-init tracker filled" "$OI_OUT/AGENTS.md" 'Linear'
 grep_case "orchestrator-init AGENTS keeps placeholders" "$OI_OUT/AGENTS.md" '<[a-z][a-z ]+>' 3
 for tier in Trivial Simple Medium Complex; do
   grep_case "orchestrator-init routing tier $tier" "$OI_OUT/AGENTS.md" "^\| $tier"
+done
+grep_case "orchestrator-init AGENTS fresh thread per round" "$OI_OUT/AGENTS.md" 'Fresh thread per round.*re-reads the whole thread'
+grep_case "orchestrator-init AGENTS owner rounds are runs" "$OI_OUT/AGENTS.md" 'Owner-driven rounds.*no parallel thread'
+grep_case "orchestrator-init AGENTS epic story slice section" "$OI_OUT/AGENTS.md" '^## Epic → story → slice$'
+grep_case "orchestrator-init AGENTS threads cite standing orders" "$OI_OUT/AGENTS.md" 'plans/launch-standing-orders\.md'
+OI_SO="$OI_OUT/plans/launch-standing-orders.md"
+for pat in '/slice.*step 1' 'approved_by' 'commit done, push pending approval' 'Continue' 'rebase' 'default branch' 'red'; do
+  grep_case "orchestrator-init standing orders name $pat" "$OI_SO" "$pat"
 done
 grep_case "orchestrator-init prints progress check prompt" "$WORK/oi-write.txt" 'Orchestrator progress check'
 grep_case "orchestrator-init prints config review prompt" "$WORK/oi-write.txt" 'Config review \(bi-weekly\)'
@@ -85,6 +93,17 @@ print("ok")' "$OI_OUT/bin" 2>&1)"
   cp "$OI_OUT/state/EXAMPLE.yaml" "$OI_OUT/state/ABC-123.yaml" 2>/dev/null
   python3 "$OI_OUT/bin/state.py" validate --task ABC-123 >"$WORK/oi-val.txt" 2>&1
   check "orchestrator-init EXAMPLE.yaml validates as a state file" "0" "$?"
+  # ADHOC-22 S1: the features the bin/ scripts must carry (see also validate-packaging.py).
+  OI_ST="$OI_OUT/bin/state.py"
+  oi_tracker() { python3 -c 'import sys,yaml; d=yaml.safe_load(open(sys.argv[1])); print(d["tracker"].get("state"), "plane" in d)' "$OI_OUT/state/ABC-123.yaml" 2>&1; }
+  python3 "$OI_ST" run-add --task ABC-123 --id abc-123-tests-r1 --kind tests --no-render >/dev/null 2>&1
+  check "orchestrator-init state.py accepts the tests run kind" "0" "$?"
+  python3 "$OI_ST" set --task ABC-123 plane.state=Done --no-render >/dev/null 2>&1
+  check "orchestrator-init state.py set plane.x writes tracker.x" "0 Done False" "$? $(oi_tracker)"
+  python3 "$OI_ST" set --task ABC-123 tracker.state=Nope --no-render >/dev/null 2>&1
+  check "orchestrator-init state.py rejects an unknown tracker.state" "1 Done False" "$? $(oi_tracker)"
+  python3 "$OI_ST" set --task ABC-123 "tracker.state=In Progress" --no-render >/dev/null 2>&1
+  check "orchestrator-init state.py tracker.state ignores case" "0 In Progress False" "$? $(oi_tracker)"
 else
   echo "SKIP orchestrator-init render-progress (PyYAML missing)"
 fi

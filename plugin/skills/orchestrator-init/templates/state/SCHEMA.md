@@ -28,7 +28,7 @@ One YAML file per {{tracker}} task at `state/<TASK-ID>.yaml`. These files are th
 | `workspace` | Workspace slug. |
 | `project_id` | {{tracker}} project id (listed in `AGENTS.md`). |
 | `work_item_id` | Card id. |
-| `state` | Column name as recorded by the orchestrator. Only {{approver}} moves a card to a closed column. |
+| `state` | Column name as recorded by the orchestrator: `Backlog`, `ToDo`, `To Do`, `Open`, `In progress`, `In review`, `Done`, `Closed`, `Cancelled`, `Canceled`, `Archive`, case-insensitive. Edit the `tracker.state` list in `bin/_common.py` to match your board. Only {{approver}} moves a card to a closed column. `state.py set` also accepts the legacy spelling `plane.<field>` for `tracker.<field>`. |
 | `last_comment_id` | Last comment posted (rendered by `tracker-comment.py`). |
 
 ## `current`
@@ -69,7 +69,7 @@ Append-only. One entry per delegation, preflight, review, fix round or sync. Nev
 | Field | Meaning |
 | --- | --- |
 | `id` | Run id, e.g. `abc-123-34-api-r1`. Unique within the file. |
-| `kind` | `execute`, `review`, `fix`, `preflight`, `research`, `design`, `learnings`, `closeout`, `publication`, `sync`, `diagnosis`. |
+| `kind` | `execute`, `review`, `fix`, `preflight`, `research`, `design`, `learnings`, `closeout`, `publication`, `sync`, `diagnosis`, `tests` (a slice's tests-first round: tests written, pushed red, stopped for {{approver}}). |
 | `provider`, `model`, `effort` | As resolved from `orchestrator_capabilities` at dispatch. |
 | `skills` | List of skill names the brief required. |
 | `state` | `queued`, `running`, `completed`, `failed`, `cancelled`, `blocked`. |

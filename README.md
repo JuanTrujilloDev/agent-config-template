@@ -15,6 +15,7 @@ It turns a ticket or an ask into one approved epic of one-case stories, then shi
 
 ## Unreleased
 
+- `orchestrator-init`: `bin/state.py` accepts the `tests` run kind, validates `tracker.state` and reads `plane.<x>` as `tracker.<x>`; `validate-packaging.py` fails if those drift. The skeleton gains `plans/launch-standing-orders.md` and the fresh-thread, owner-round and epic → story → slice rules.
 - `slice` gains an opt-in cold review (`/slice <ID> <n> cold-review`): two fresh reviewers, Comprehension and Readiness, read the epic, the slice draft and the repo with no thread context, one round, before you approve the slice. Prompts adapted from google/elephant-goldfish-model (Apache-2.0).
 
 ## v0.11.1 — fixes

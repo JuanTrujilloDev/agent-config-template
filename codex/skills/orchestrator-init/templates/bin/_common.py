@@ -20,11 +20,14 @@ STATE_SKIP = {"SCHEMA.md", "EXAMPLE.yaml", "README.md"}
 
 ENUMS: Dict[str, List[str]] = {
     "status": ["draft", "approved", "executing", "reviewing", "done", "paused", "cancelled"],
+    # Column names of your tracker board, matched case-insensitively: edit this list to match yours.
+    "tracker.state": ["Backlog", "ToDo", "To Do", "Open", "In progress", "In review", "Done", "Closed",
+                      "Cancelled", "Canceled", "Archive"],
     "epic.state": ["queued", "executing", "in review", "done", "cancelled"],
     "task.state": ["queued", "executing", "in review", "blocked", "done", "cancelled"],
     "run.kind": [
         "execute", "review", "fix", "preflight", "research", "design", "learnings",
-        "closeout", "publication", "sync", "diagnosis",
+        "closeout", "publication", "sync", "diagnosis", "tests",
     ],
     "run.state": ["queued", "running", "completed", "failed", "cancelled", "blocked"],
     "run.result": ["clean", "changes_requested", "blocked", "inconclusive", "delivered", "n/a"],
@@ -133,6 +136,11 @@ def validate_enum(kind: str, value: Any, where: str = "") -> None:
     allowed = ENUMS.get(kind)
     if allowed is None:
         return
+    if kind == "tracker.state" and isinstance(value, str):
+        # Boards differ in case ("In Progress", "Todo"); compare folded.
+        allowed_folded = {a.casefold() for a in allowed}
+        if value.casefold() in allowed_folded:
+            return
     if value not in allowed:
         raise StateError(
             f"{where or kind}: {value!r} is not one of {allowed}"
@@ -153,6 +161,7 @@ def validate_state(data: Dict[str, Any]) -> List[str]:
         if not data.get(key):
             problems.append(f"missing required field {key!r}")
     chk("status", data.get("status"), "status")
+    chk("tracker.state", (data.get("tracker") or {}).get("state"), "tracker.state")
     if "unchanged_checks" in data and not isinstance(data["unchanged_checks"], int):
         problems.append("unchanged_checks must be an integer")
     for epic in data.get("epics") or []:

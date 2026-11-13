@@ -290,6 +290,22 @@ if companions:
     if codex_companions != companions:
         err("codex setup-companions lock differs from plugin/companions.lock.json")
 
+# --- orchestrator-init bin/ must keep the features the live orchestrator relies on ---
+# (build.sh --check keeps the codex mirrors equal to this source.)
+OI_BIN = "plugin/skills/orchestrator-init/templates/bin"
+for rel, needle, feature in (
+    ("_common.py", '"diagnosis", "tests"', "the 'tests' run kind"),
+    ("_common.py", '"tracker.state": [', "the tracker.state enum"),
+    ("_common.py", 'chk("tracker.state"', "tracker.state validation"),
+    ("_common.py", "ORCH_DIR = Path(__file__).resolve().parents[1]", "ORCH_DIR path logic"),
+    ("state.py", '"tracker.state": "tracker.state"', "tracker.state on state.py set"),
+    ("state.py", '"tracker." + k[6:] if k.startswith("plane.")', "the plane. -> tracker. alias"),
+    ("resource-check.py", "/proc/meminfo", "Linux memory probe"),
+):
+    p = os.path.join(REPO, OI_BIN, rel)
+    if not os.path.isfile(p) or needle not in open(p, encoding="utf-8").read():
+        err(f"{OI_BIN}/{rel}: lost {feature} (drift from the orchestrator's bin/)")
+
 # --- Version consistency ---
 distinct = {v for v in versions.values() if v}
 if len(distinct) > 1:

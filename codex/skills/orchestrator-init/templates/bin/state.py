@@ -37,7 +37,7 @@ from _common import (  # noqa: E402
 )
 
 RUN_ENUM_FIELDS = {"kind": "run.kind", "state": "run.state", "result": "run.result"}
-TOP_ENUM_FIELDS = {"status": "status"}
+TOP_ENUM_FIELDS = {"status": "status", "tracker.state": "tracker.state"}
 
 
 def _render(root: Path, quiet: bool) -> None:
@@ -101,7 +101,9 @@ def cmd_run_set(args, data):
 
 
 def cmd_set(args, data):
-    assignments = parse_assignments(args.pairs)
+    # `plane.<x>` is the legacy spelling of `tracker.<x>`.
+    assignments = {("tracker." + k[6:] if k.startswith("plane.") else k): v
+                   for k, v in parse_assignments(args.pairs).items()}
     for key in assignments:
         if key in ("runs", "epics"):
             raise StateError(f"use run-add/run-set/task-set for {key!r}")
