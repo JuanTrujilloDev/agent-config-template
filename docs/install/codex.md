@@ -1,14 +1,7 @@
 # Install on Codex
 
 The repo doubles as a Codex plugin marketplace (`.agents/plugins/marketplace.json`
-→ `codex/`). Inside Codex:
-
-```
-codex plugin marketplace add JuanTrujilloDev/agent-config-template
-codex plugin add agent-config-template@juantrujillodev
-```
-
-Restart Codex (or start a new thread) to load it.
+→ `codex/`). Install steps: [Install](README.md#plugin-install-alternative).
 
 ## What you get
 
@@ -30,7 +23,7 @@ Restart Codex (or start a new thread) to load it.
   Codex; Branch Discipline is a written rule in `principles`. For always-on
   weight, add one line to your project's `AGENTS.md`:
   `Follow the agent-config-template principles skill for every coding task.`
-- **No `setup-template`.** The interactive calibration runs from Claude Code; from a clone you can still render a Codex-ready tree with `./setup.sh --host codex` (see `docs/install/host-capability-matrix.md`).
+- **No `setup-template`.** The interactive calibration runs from Claude Code; render a Codex-ready tree with the [one command](README.md#one-command) and `--host codex` (see `docs/install/host-capability-matrix.md`).
 
 ## Companions
 

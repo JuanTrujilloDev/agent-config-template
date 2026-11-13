@@ -28,7 +28,7 @@ With an existing config and no mode this writes nothing and prints one line per 
 | `STALE-MANAGED` | template file you never edited | overwrite |
 | `CUSTOMIZED-MANAGED` | template file you edited | keep; never touched by this skill |
 | `CUSTOMIZED` | yours by design (`CLAUDE.md`, `docs/CONTEXT.md`, `docs/design-system/`) | keep; reconcile by hand |
-| `LEGACY` | no baseline to compare | ask |
+| `LEGACY` | no baseline to compare | ask; if the user confirms the files are unedited template output, `--merge --legacy` records them as baselines |
 | `OBSOLETE` | file the template no longer ships, unedited | prune |
 | `CUSTOMIZED-OBSOLETE` | dropped file you edited | keep; never touched by this skill |
 

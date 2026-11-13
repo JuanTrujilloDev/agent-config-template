@@ -34,7 +34,18 @@ Upgrade path: `0.10.0 → 0.11.1` via `update-config`; see the [upgrade guide](d
 
 ## Install
 
-### Claude Code
+At the root of any git repository:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/JuanTrujilloDev/agent-config-template/<tag>/bootstrap.sh | sh -s -- --host claude
+```
+
+<!-- RELEASE STEP (Juan, at tagging): set <tag> in the command and the line below, set DEFAULT_REF in bootstrap.sh to the same tag, then set the sha256 to `shasum -a 256 bootstrap.sh` at that tag. -->
+`bootstrap.sh` at `<tag>`: sha256 `<sha256 — set at release>`. It clones the
+template at that tag, prints the plan, and writes only after you answer `y`.
+`--host cursor` or `--host codex` for the other hosts.
+
+Or install the plugin instead. Claude Code:
 
 ```text
 /plugin marketplace add JuanTrujilloDev/agent-config-template
@@ -42,35 +53,9 @@ Upgrade path: `0.10.0 → 0.11.1` via `update-config`; see the [upgrade guide](d
 /agent-config-template:setup-template
 ```
 
-[Claude install details](docs/install/claude.md)
-
-### Cursor
-
-```text
-Cursor → Customize → Plugins → search "Agent Config Template" → Install
-/setup-template
-```
-
-[Cursor install details](docs/install/cursor.md)
-
-### Grok in Cursor
-
-```text
-Install the same Cursor plugin, select a Grok model, then run:
-/setup-template
-```
-
-[Standalone Grok Build details](docs/install/grok.md)
-
-### Codex
-
-```bash
-codex plugin marketplace add JuanTrujilloDev/agent-config-template
-codex plugin add agent-config-template@juantrujillodev
-```
-
-[Codex install details](docs/install/codex.md) ·
-[host capability matrix](docs/install/host-capability-matrix.md)
+Codex: `codex plugin marketplace add JuanTrujilloDev/agent-config-template`, then
+`codex plugin add agent-config-template@juantrujillodev`.
+Cursor, Grok, updates and pre-lock repos: [install guide](docs/install/README.md).
 
 Start with:
 
@@ -147,7 +132,7 @@ For CI or offline rendering, use the repository CLI with `answers.env`:
 
 The preview is read-only. `--merge` keeps custom files and union-merges settings; `--overwrite-files <paths>` replaces only selected stale managed files. The template supports project type, language/framework, commands, directories, branch policy, ticket tracker, PR limits, mutation testing, background jobs, and UI toggles.
 
-Successful renders maintain `agent-config.lock.json` with exact managed-file baselines. Preview distinguishes `STALE-MANAGED`, `CUSTOMIZED-MANAGED`, or `LEGACY`, plus retired `OBSOLETE` or `CUSTOMIZED-OBSOLETE` files. After review, `--merge --prune` deletes only unchanged `OBSOLETE` files; user edits stay. Fully quoted `answers.env` values are accepted, host names are case-insensitive, and an existing `.claude/answers.local.env` is automatically added to `.gitignore` after a successful write.
+Successful renders maintain `agent-config.lock.json` with exact managed-file baselines. Preview distinguishes `STALE-MANAGED`, `CUSTOMIZED-MANAGED`, or `LEGACY`, plus retired `OBSOLETE` or `CUSTOMIZED-OBSOLETE` files. After review, `--merge --prune` deletes only unchanged `OBSOLETE` files; user edits stay. A repo rendered before the lock existed can adopt its unedited files as baselines with `--merge --legacy`. Fully quoted `answers.env` values are accepted, host names are case-insensitive, and an existing `.claude/answers.local.env` is automatically added to `.gitignore` after a successful write.
 
 For a configured codebase, use the short
 [existing-project guide](docs/guides/existing-projects.md). For every setting,

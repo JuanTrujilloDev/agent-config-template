@@ -42,16 +42,19 @@ def section(text, title):
 
 def scenarios(contract):
     """{mini-feature number: (name, [(n, [lines])])} from contract.md."""
-    groups, current = {}, None
+    groups, current, heading = {}, None, "(no heading)"
     for line in contract.splitlines():
         h = HEADING.match(line)
         if h:
             current = groups.setdefault(int(h.group(1) or h.group(2)), (h.group(3), []))
             continue
         if line.startswith("## "):
-            current = None
+            current, heading = None, line[3:].strip()
             continue
         s = SCENARIO.match(line)
+        if s and not current:
+            # A scenario we cannot map to a mini-feature must stop the slug, not vanish from the epic.
+            raise ValueError(f"@s{s.group(1)} sits under '## {heading}', not '## MFn — name' or '## n. name'")
         if s and current:
             current[1].append((int(s.group(1)), [TAGS.sub("", s.group(2), count=1)]))
         elif current and current[1] and line.startswith("  ") and line.strip():

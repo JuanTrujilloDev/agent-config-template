@@ -7,10 +7,7 @@ render *is* the Grok Build render.
 
 ## Render
 
-```bash
-cp examples/<stack>/answers.env ./answers.env   # edit to your project
-./setup.sh --host grok --target /path/to/project --answers ./answers.env
-```
+Run the [one command](README.md#one-command) with `--host grok` in the project.
 
 `grok` is an alias, not a separate tree: it renders the standard `.claude/`
 tree + `CLAUDE.md`, plus a rendered `AGENTS.md` on top. A plain claude render

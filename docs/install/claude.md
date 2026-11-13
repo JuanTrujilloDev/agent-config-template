@@ -4,12 +4,7 @@ The richest experience: agents, slash commands, skills, **enforcement hooks**, a
 
 ## Install
 
-Inside Claude Code:
-
-```
-/plugin marketplace add JuanTrujilloDev/agent-config-template
-/plugin install agent-config-template@juantrujillodev
-```
+See [Install](README.md): the one command, or the three plugin lines.
 
 ## What you get
 
@@ -33,7 +28,7 @@ export CLAUDE_CONFIG_PROTECTED_BRANCHES="main,qa,prod"  # default: main,master
 /agent-config-template:setup-template
 ```
 
-Renders a `.claude/` tree + `CLAUDE.md` tuned to your stack. **Non-destructive** — against an existing config it shows a per-file plan and won't write without your `--merge` / `--overwrite` choice; `.claude/settings.local.json` is never touched. Manual clone path: `setup.sh --target . --answers ./answers.env [--merge]`.
+Renders a `.claude/` tree + `CLAUDE.md` tuned to your stack. **Non-destructive** — against an existing config it shows a per-file plan and won't write without your `--merge` / `--overwrite` choice; `.claude/settings.local.json` is never touched. Without the plugin: the [one command](README.md#one-command).
 
 ## Update
 
