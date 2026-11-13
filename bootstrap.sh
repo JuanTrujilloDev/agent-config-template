@@ -25,9 +25,11 @@ Run inside the git repository you want to set up (any subfolder works; the repo 
                     repo's answers.env.
   --prune           on apply, also delete the OBSOLETE files the preview lists (setup.sh --prune).
   --force           run on a working tree with uncommitted changes.
-  --orchestrator <dir>  after apply, also scaffold an orchestrator folder (the orchestrator-init
-                    skill's render.py); needs --tracker <name> and --approver <name>, and uv on PATH.
-                    Existing files are kept; the two T3 schedule prompts are printed, never created.
+  --orchestrator <dir>
+                    after apply, also scaffold an orchestrator folder (the orchestrator-init skill's
+                    render.py; a relative <dir> is from where you run this). Needs --tracker <name>,
+                    --approver <name> and uv on PATH. Existing files are kept; the two T3 schedule
+                    prompts are printed, never created.
   --source <url>    template git URL (a mirror or a local file:// repo). Default: GitHub.
   -h, --help        show this help.
 
@@ -104,7 +106,7 @@ main() {
   bash "$tmp/template/setup.sh" "$@" --abort </dev/null >"$tmp/plan.txt" 2>&1 \
     || { cat "$tmp/plan.txt"; die "preview failed; nothing was written"; }
   # setup.sh's "Regenerate the STALE-MANAGED files" hint names this temp clone; apply refreshes them itself.
-  awk '/Regenerate the STALE-MANAGED files/ { getline; next } /^  Note: pipe the same answers/ { next } { print }' "$tmp/plan.txt"
+  awk '/Regenerate the STALE-MANAGED files/ { getline; next } { print }' "$tmp/plan.txt"
   # Unedited template files (hash matches the lock) are refreshed; edited and legacy ones are kept.
   stale=$(awk '$1 == "STALE-MANAGED" && NF == 2 { printf "%s%s", sep, $2; sep = "," }' "$tmp/plan.txt")
   render="$tmp/template/plugin/skills/orchestrator-init/render.py"

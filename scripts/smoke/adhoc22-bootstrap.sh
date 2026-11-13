@@ -90,7 +90,11 @@ check "adhoc22 --host codex renders .agents/skills" "present" "$(B_EXISTS "$WORK
 check "adhoc22 unknown option exits 1" "1" "$(B_RUN "$B_R" n --bogus)"
 
 # 4b. --orchestrator <dir>: uv checked only then, before cloning; after apply, orchestrator-init's render.py writes the folder.
-B_NOUV=$(printf '%s' "$PATH" | tr ':' '\n' | while read -r d; do [ -x "$d/uv" ] || printf '%s:' "$d"; done)
+# PATH without uv: one folder linking every other PATH executable (uv may share a folder with git or python3).
+B_NOUV="$WORK/b-nouv"; mkdir -p "$B_NOUV"
+printf '%s' "$PATH" | tr ':' '\n' | while read -r d; do
+  for f in "$d"/*; do n=${f##*/}; [ "$n" = uv ] || [ -e "$B_NOUV/$n" ] || [ ! -x "$f" ] || ln -s "$f" "$B_NOUV/$n"; done
+done
 B_UVSTUB="$WORK/b-uvstub"; mkdir -p "$B_UVSTUB"; printf '#!/bin/sh\n' >"$B_UVSTUB/uv"; chmod +x "$B_UVSTUB/uv"
 B_O="$WORK/b-orch"; B_NEW "$B_O"
 B_ORUN() { P=$1; shift; (PATH=$P; B_RUN "$@"); }
@@ -104,10 +108,10 @@ grep_case "adhoc22 --orchestrator names the missing flags" "$WORK/b-out.txt" '--
 check "adhoc22 --orchestrator decline exits 0" "0" "$(B_ORUN "$B_UVSTUB:$B_NOUV" "$B_O" n --orchestrator orch --tracker Plane --approver Ana)"
 grep_case "adhoc22 --orchestrator preview lists the orchestrator files" "$WORK/b-out.txt" '^create +bin/state\.py'
 check "adhoc22 --orchestrator decline writes nothing" "absent" "$(B_EXISTS "$B_O/orch")"
-check "adhoc22 --orchestrator accept exits 0" "0" "$(B_ORUN "$B_UVSTUB:$B_NOUV" "$B_O" y --orchestrator orch --tracker Plane --approver Ana)"
+check "adhoc22 --orchestrator accept exits 0" "0" "$(B_ORUN "$B_UVSTUB:$B_NOUV" "$B_O" y --orchestrator orch --tracker Plane --approver "Ana O'Neil")"
 check "adhoc22 --orchestrator accept renders the template too" "present" "$(B_EXISTS "$B_O/.claude/rules/principles.md")"
 check "adhoc22 --orchestrator accept writes bin/state.py" "present" "$(B_EXISTS "$B_O/orch/bin/state.py")"
-grep_case "adhoc22 --orchestrator fills the approver" "$B_O/orch/AGENTS.md" 'Ana'
+grep_case "adhoc22 --orchestrator fills an approver with a space and apostrophe" "$B_O/orch/AGENTS.md" "Ana O'Neil"
 grep_case "adhoc22 --orchestrator prints the schedule prompts" "$WORK/b-out.txt" 'Orchestrator progress check'
 check "adhoc22 --orchestrator temp folder cleaned" "0" "$(ls -A "$B_TMP" | wc -l | tr -d ' ')"
 
