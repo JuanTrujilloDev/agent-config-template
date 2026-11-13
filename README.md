@@ -13,8 +13,9 @@
 
 It turns a ticket or an ask into one approved epic of one-case stories, then ships it one layered slice at a time: tests first and locked, code to green, two-axis review, one small PR. Epics and slices live on disk (or on your tracker), so the workflow survives restarts across web, backend, mobile, Unity, desktop, CLI, and data projects.
 
-## Unreleased
+## v0.12.0 — one-command install
 
+- `bootstrap.sh` installs the template into any git repo with one command (see [Install](#install)): it clones the pinned tag, previews, and writes only after you answer `y`. Re-running it with a newer tag updates the files you never edited. `setup.sh --merge --legacy` brings a repo rendered before `agent-config.lock.json` under the lock, and `setup.sh --abort` no longer writes anything on a fresh target.
 - `orchestrator-init`: `bin/state.py` accepts the `tests` run kind, validates `tracker.state` and reads `plane.<x>` as `tracker.<x>`; `validate-packaging.py` fails if those drift. The skeleton gains `plans/launch-standing-orders.md` and the fresh-thread, owner-round and epic → story → slice rules.
 - `slice` gains an opt-in cold review (`/slice <ID> <n> cold-review`): two fresh reviewers, Comprehension and Readiness, read the epic, the slice draft and the repo with no thread context, one round, before you approve the slice. Prompts adapted from google/elephant-goldfish-model (Apache-2.0).
 
@@ -30,18 +31,18 @@ Patch release from the v0.11.0 review: slice reports no longer fail `validate-ep
 - The always-loaded text drops from about 9.5k to about 3k tokens: one ≤80-line principles file, everything else is a skill loaded on demand.
 - `update-config` upgrades a rendered project and migrates old `docs/specs/` folders to `docs/epics/`.
 
-Upgrade path: `0.10.0 → 0.11.1` via `update-config`; see the [upgrade guide](docs/upgrade-guide.md).
+Upgrade path: `0.10.0 → 0.12.0` via `update-config`; see the [upgrade guide](docs/upgrade-guide.md).
 
 ## Install
 
 At the root of any git repository:
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/JuanTrujilloDev/agent-config-template/<tag>/bootstrap.sh | sh -s -- --host claude
+curl -fsSL https://raw.githubusercontent.com/JuanTrujilloDev/agent-config-template/v0.12.0/bootstrap.sh | sh -s -- --host claude
 ```
 
-<!-- RELEASE STEP (Juan, at tagging): set <tag> in the command and the line below, set DEFAULT_REF in bootstrap.sh to the same tag, then set the sha256 to `shasum -a 256 bootstrap.sh` at that tag. -->
-`bootstrap.sh` at `<tag>`: sha256 `<sha256 — set at release>`. It clones the
+<!-- RELEASE STEP (every release, before tagging): set the tag in the command and the line below, set DEFAULT_REF in bootstrap.sh to the same tag, then set the sha256 to `shasum -a 256 bootstrap.sh`. -->
+`bootstrap.sh` at `v0.12.0`: sha256 `7ba21ccbbccb24f9bfc5c9b79e0093f312d603f61f0ff2b56ad811a183ca6299`. It clones the
 template at that tag, prints the plan, and writes only after you answer `y`.
 `--host cursor` or `--host codex` for the other hosts.
 
