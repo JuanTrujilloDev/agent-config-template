@@ -25,6 +25,9 @@ Run inside the git repository you want to set up (any subfolder works; the repo 
                     repo's answers.env.
   --prune           on apply, also delete the OBSOLETE files the preview lists (setup.sh --prune).
   --force           run on a working tree with uncommitted changes.
+  --orchestrator <dir>  after apply, also scaffold an orchestrator folder (the orchestrator-init
+                    skill's render.py); needs --tracker <name> and --approver <name>, and uv on PATH.
+                    Existing files are kept; the two T3 schedule prompts are printed, never created.
   --source <url>    template git URL (a mirror or a local file:// repo). Default: GitHub.
   -h, --help        show this help.
 
@@ -38,12 +41,14 @@ need() { command -v "$1" >/dev/null 2>&1 || die "$1 is required but not on PATH"
 
 main() {
   ref="$DEFAULT_REF"; source_url="$DEFAULT_SOURCE"; host=""; answers=""; force=""; legacy=""; prune=""
+  orch=""; tracker=""; approver=""
   while [ $# -gt 0 ]; do
     case "$1" in
-      --host|--ref|--answers|--source)
+      --host|--ref|--answers|--source|--orchestrator|--tracker|--approver)
         [ $# -ge 2 ] || die "$1 needs a value"
         case "$1" in
           --host) host="$2" ;; --ref) ref="$2" ;; --answers) answers="$2" ;; --source) source_url="$2" ;;
+          --orchestrator) orch="$2" ;; --tracker) tracker="$2" ;; --approver) approver="$2" ;;
         esac
         shift 2 ;;
       --force) force=1; shift ;;
@@ -55,6 +60,11 @@ main() {
   done
 
   need git; need python3; need bash
+  if [ -n "$orch" ]; then
+    [ -n "$tracker" ] && [ -n "$approver" ] || die "--orchestrator needs --tracker <name> and --approver <name>"
+    command -v uv >/dev/null 2>&1 || die "uv is required by --orchestrator (its bin/ scripts run through uv); install it: https://docs.astral.sh/uv/"
+    case "$orch" in /*) ;; *) orch="$PWD/$orch" ;; esac
+  fi
   if [ -n "$answers" ]; then
     case "$answers" in /*) ;; *) answers="$PWD/$answers" ;; esac
     [ -f "$answers" ] || die "answers file not found: $answers"
@@ -93,9 +103,17 @@ main() {
   echo ""
   bash "$tmp/template/setup.sh" "$@" --abort </dev/null >"$tmp/plan.txt" 2>&1 \
     || { cat "$tmp/plan.txt"; die "preview failed; nothing was written"; }
-  cat "$tmp/plan.txt"
+  # setup.sh's "Regenerate the STALE-MANAGED files" hint names this temp clone; apply refreshes them itself.
+  awk '/Regenerate the STALE-MANAGED files/ { getline; next } /^  Note: pipe the same answers/ { next } { print }' "$tmp/plan.txt"
   # Unedited template files (hash matches the lock) are refreshed; edited and legacy ones are kept.
   stale=$(awk '$1 == "STALE-MANAGED" && NF == 2 { printf "%s%s", sep, $2; sep = "," }' "$tmp/plan.txt")
+  render="$tmp/template/plugin/skills/orchestrator-init/render.py"
+  if [ -n "$orch" ]; then
+    [ -f "$render" ] || die "$ref has no orchestrator-init render.py; use a newer --ref or drop --orchestrator"
+    echo ""
+    python3 -I "$render" --target "$orch" --tracker "$tracker" --approver "$approver" </dev/null \
+      || die "orchestrator preview failed; nothing was written"
+  fi
   echo ""
   echo "Apply adds the ADD files, merges settings.json, refreshes every STALE-MANAGED file and keeps all others."
   printf 'Apply? (y/N) '
@@ -114,6 +132,12 @@ main() {
   if [ -n "$generated" ] && [ ! -e answers.env ]; then
     cp "$generated" answers.env || die "cannot write answers.env"
     echo "  + answers.env (template defaults: run /setup-template, or edit it and re-run, to calibrate)"
+  fi
+  if [ -n "$orch" ]; then
+    echo ""
+    python3 -I "$render" --target "$orch" --tracker "$tracker" --approver "$approver" --write </dev/null \
+      || die "orchestrator scaffold failed; the template was applied, review git status"
+    echo "Orchestrator: fill the <placeholders> in $orch/AGENTS.md and create the two schedules above by hand."
   fi
   echo ""
   echo "Done. Review with git status and git diff, then commit on a branch."
