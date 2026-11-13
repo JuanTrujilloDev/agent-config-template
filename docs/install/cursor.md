@@ -5,19 +5,17 @@ agents, commands, and hooks.
 
 ## Install
 
-1. Open **Customize → Plugins** in Cursor.
-2. Search for **Agent Config Template** and select **Install**.
-3. Choose project or user scope.
-4. Run `/setup-template` in the project.
+Steps, and the one command for `--host cursor`: [Install](README.md). The
+Cursor marketplace listing is not yet verified.
 
-Cursor installs the plugin from its marketplace and exposes the bundle through
+Once installed, Cursor exposes the bundle through
 `CURSOR_PLUGIN_ROOT`. `/setup-template` uses the bundled renderer, asks one
 decision round, writes `answers.env`, previews existing-file conflicts, and
 applies only after approval. It selects the Cursor host automatically.
 
 The plugin repository must first pass Cursor's marketplace review. Maintainers
 submit it at [cursor.com/marketplace/publish](https://cursor.com/marketplace/publish).
-Normal users install from Cursor; they do not clone this repository.
+Until it is listed, users run the one command; neither path needs a clone.
 
 ## What you get
 

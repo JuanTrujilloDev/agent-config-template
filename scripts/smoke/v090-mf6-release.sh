@@ -20,8 +20,9 @@ for host in Claude Cursor Grok Codex; do
   grep_case "v0.9.0 @s36 first 80 names $host" "$V090_MF6_FIRST" "$host"
 done
 grep_case "v0.9.0 @s36 first 80 Claude install" "$V090_MF6_FIRST" 'plugin marketplace add'
-grep_case "v0.9.0 @s36 first 80 Cursor install" "$V090_MF6_FIRST" 'Customize.*Plugins'
-grep_case "v0.9.0 @s36 first 80 Grok install" "$V090_MF6_FIRST" 'Grok in Cursor'
+# ADHOC-22: the README leads with bootstrap.sh; Cursor (listing unverified) and Grok install via --host / the install guide.
+grep_case "v0.9.0 @s36 first 80 Cursor install" "$V090_MF6_FIRST" '--host cursor'
+grep_case "v0.9.0 @s36 first 80 Grok install" "$V090_MF6_FIRST" 'Grok.*docs/install/README\.md'
 grep_case "v0.9.0 @s36 first 80 Codex install" "$V090_MF6_FIRST" 'codex plugin marketplace add'
 grep_case "v0.11 @s36 first 80 first command" "$V090_MF6_FIRST" '^/epic '
 check "v0.9.0 @s37 one workflow diagram" "1" "$(grep -c '<!-- workflow-diagram -->' "$V090_MF6_README" | tr -d ' ')"

@@ -2,6 +2,13 @@
 
 How to pull updates from the template into a project that's already configured.
 
+## Unreleased
+
+- `bootstrap.sh`: one command installs the template into any git repo, `curl -fsSL <raw URL at a tag> | sh -s -- --host claude|cursor|codex`. It clones the pinned tag, previews, asks `Apply? (y/N)`, then runs `setup.sh --merge`. See [Install](install/README.md).
+- `setup.sh --abort` now prints the plan and writes nothing on a fresh target too (it used to render everything).
+- `setup.sh --merge --legacy` brings a repo rendered before `agent-config.lock.json` under the lock: unrecorded managed files under `.claude/`, `.cursor/` and `.agents/` get their current hash as a `legacy` baseline, so the next preview shows `STALE-MANAGED` or `OBSOLETE` instead of `LEGACY`, and `--prune` can remove retired files.
+- `migrate.py` reports a scenario under a heading it cannot map to a mini-feature as an `ERROR` row instead of dropping it.
+
 ## Upgrading from v0.11.0 to v0.11.1
 
 Patch release; no new steps beyond re-running `update-config` (or `setup.sh --merge`). Fixes from the v0.11.0 review:
@@ -164,7 +171,8 @@ v0.9.2 makes upgrade decisions evidence-based without adding dependencies:
 On the first upgrade from an older release there is no baseline, so differing
 managed files are `LEGACY`. Review them and explicitly select only the upstream
 files you want with `--merge --overwrite-files <paths>`; that successful write
-establishes their v0.9.2 baselines. Then future previews can distinguish stale
+establishes their v0.9.2 baselines. If they are all unedited template output,
+`--merge --legacy` records every one of them as a baseline in one step. Then future previews can distinguish stale
 template output from user edits exactly.
 
 ```bash
