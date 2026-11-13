@@ -16,6 +16,7 @@ It turns a ticket or an ask into one approved epic of one-case stories, then shi
 ## Unreleased
 
 - `orchestrator-init`: `bin/state.py` accepts the `tests` run kind, validates `tracker.state` and reads `plane.<x>` as `tracker.<x>`; `validate-packaging.py` fails if those drift. The skeleton gains `plans/launch-standing-orders.md` and the fresh-thread, owner-round and epic → story → slice rules.
+- `slice` gains an opt-in cold review (`/slice <ID> <n> cold-review`): two fresh reviewers, Comprehension and Readiness, read the epic, the slice draft and the repo with no thread context, one round, before you approve the slice. Prompts adapted from google/elephant-goldfish-model (Apache-2.0).
 
 ## v0.11.1 — fixes
 
@@ -90,7 +91,7 @@ cause.
 ticket or ask
   └─ /epic: capability groups, one-case stories, AC, Given/When/Then TS, layered slices
        └─ you approve by number (tracker cards, or docs/epics/<ID>/ with source=local)
-            └─ /slice <ID> <n>: one layer (db → be → fe) of one group → you say yes
+            └─ /slice <ID> <n> [cold-review]: one layer (db → be → fe) of one group → you say yes
                  └─ tests-first: all the slice's tests, red → you approve → locked
                       └─ implement → code-review (Standards + Spec, one fix round)
                            └─ /pr, stacked on the previous layer's branch → next slice
@@ -216,7 +217,7 @@ The operating principles build on [forrestchang/andrej-karpathy-skills](https://
 
 [GitHub Spec Kit](https://github.com/github/spec-kit) is MIT-licensed inspiration for separating specification, planning, tasks, and convergence. No artifacts were copied; this project is not affiliated with or endorsed by GitHub.
 
-The `epic`, `slice`, `tests-first`, `implement` and `code-review` skills are adapted from [Matt Pocock's MIT-licensed skills](https://github.com/mattpocock/skills) (`to-spec`, `to-tickets`, `tdd`, `implement`, `code-review`); `tests-first/tests.md` and `mocking.md` are copied verbatim, with the MIT notice beside them. `council` is adapted from [tstack](https://github.com/t3dotgg/tstack) (MIT). This project is not affiliated with either author.
+The `epic`, `slice`, `tests-first`, `implement` and `code-review` skills are adapted from [Matt Pocock's MIT-licensed skills](https://github.com/mattpocock/skills) (`to-spec`, `to-tickets`, `tdd`, `implement`, `code-review`); `tests-first/tests.md` and `mocking.md` are copied verbatim, with the MIT notice beside them. `council` is adapted from [tstack](https://github.com/t3dotgg/tstack) (MIT). The `slice` cold-review prompts are adapted from [google/elephant-goldfish-model](https://github.com/google/elephant-goldfish-model) (Apache-2.0), with the licence beside them. This project is not affiliated with any of these authors.
 
 ## Support
 

@@ -7,6 +7,7 @@ How a feature moves through a project rendered by agent-config-template v0.11. T
 ```
 /epic <ID or ask>   → draft: capability groups, stories, AC, TS, slices   → you: "approve" or "change 3"
 /slice <ID> <n>     → brief: stories, seams, fixtures, tests table         → you: "yes"
+  … cold-review     → opt-in: two fresh reviewers read the slice first      → you read both
 tests-first         → all the slice's tests, red run pasted, committed     → you read the tests: "yes"
 implement           → code to green, Definition of Done pasted
 code-review         → Standards + Spec axes, one fix round
