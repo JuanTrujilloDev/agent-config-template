@@ -6,7 +6,7 @@ if [ -z "${ROOT:-}" ]; then
   . "$ROOT/scripts/smoke/lib.sh"
 fi
 
-check "v0.13 i10 README: v0.13.0 is the first release section" "## v0.13.0 — plan, design, deslop" "$(grep -m1 '^## v0\.' "$ROOT/README.md")"
+grep_case "v0.13 i10 README keeps the v0.13.0 section" "$ROOT/README.md" '^## v0\.13\.0 — plan, design, deslop$'
 for t in 'scope-page' 'architect' 'Complexity' 'verify_changed\.py' 'architecture-map\.md' 'Placement' 'lang-python' 'plan-design-build\.md'; do
   grep_case "v0.13 i10 README notes name $t" <(section "$ROOT/README.md" '^## v0\.13\.0') "$t"
 done

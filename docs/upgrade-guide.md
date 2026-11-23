@@ -2,6 +2,14 @@
 
 How to pull updates from the template into a project that's already configured.
 
+## Upgrading from v0.13.0 to v0.13.1
+
+No breaking change; re-run `update-config`, or the one-command install with `--ref v0.13.1`.
+
+- **What changed.** The `orchestrator-init` skeleton follows the v0.13 flow (flows, design, plan, `/epic`, slices; the epic thread, the owner gate, scope pages, the Slice gates, Epic orders and High-level orders, optional `design_folder` and `stage` in state files). `architect` asks you to pick one model per provider before it briefs them.
+- **Who needs to act.** Only users of `orchestrator-init` or `architect`. `update-config` refreshes the project's `architect`; `orchestrator-init` ships with the plugin, so update the plugin on your host (Claude Code: `claude plugin update agent-config-template@juantrujillodev`). `orchestrator-init` never overwrites: an orchestrator folder made before v0.13.1 keeps its old `AGENTS.md`, standing orders and schedules; render a fresh skeleton elsewhere and copy the v0.13 sections over by hand.
+- **Command.** `update-config`.
+
 ## Upgrading from v0.12.1 to v0.13.0
 
 No breaking change to existing epics or slices; re-run `update-config`, or the one-command install with `--ref v0.13.0`. New and changed files arrive as `STALE-MANAGED` (overwrite) or new; then:
@@ -123,7 +131,7 @@ git add answers.env   # the source of truth — re-renders the same config later
 
 ```bash
 # 1. Pull the latest template (or check out a tag for stability)
-cd ~/code/agent-config-template && git pull origin main   # or: git checkout v0.13.0
+cd ~/code/agent-config-template && git pull origin main   # or: git checkout v0.13.1
 
 # 2. Preview what would change in your project
 cd ~/code/my-project
@@ -133,7 +141,7 @@ cd ~/code/my-project
 ~/code/agent-config-template/setup.sh --target . --answers ./answers.env --merge
 
 # 4. Commit
-git add .claude/ CLAUDE.md docs/ agent-config.lock.json && git commit -m "chore: upgrade agent-config-template to v0.13.0"
+git add .claude/ CLAUDE.md docs/ agent-config.lock.json && git commit -m "chore: upgrade agent-config-template to v0.13.1"
 ```
 
 A template upgrade (`setup.sh --merge`) is its own `chore:` commit — never mixed into a feature PR.
