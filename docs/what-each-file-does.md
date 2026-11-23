@@ -45,6 +45,7 @@ Loaded on demand, never on every turn.
 
 | Skill | Role |
 |---|---|
+| `lang-python`, `lang-javascript`, `lang-typescript`, `lang-css` | How each language is written well anywhere, at most 15 rows each; loaded by `paths:` when a matching file is read or edited; never repeats the style skills |
 | `scope-page` (+ `build.mjs`, `page.js`, `verify.mjs`, `tokens.css`, `example/`) | The scope as an offline story walkthrough; after design approval, slices per flow and a Plan checklist from per-slice progress files |
 | `architect` (+ `design-template.md`) | Once per epic: three providers each write a full design, one consolidation, interrogation by running things, the user approves |
 | `epic` (+ `validate-epics.py`) | `/epic`: draft the epic once; `render <ID>` writes the repo copy from tracker cards; validator for `docs/epics/` |

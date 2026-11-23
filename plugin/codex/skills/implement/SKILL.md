@@ -16,7 +16,7 @@ disable-model-invocation: true
 
 Input: the slice file `docs/epics/<ID>/slices/<n>.md` (the current branch's slice when no argument is given) with a non-empty `## Approved tests` section. No approved tests yet: run `tests-first` first.
 
-1. **Load context.** Read the slice file, its stories and TS lines in `epic.md`, and every approved test file. Load the style skill for the layer: `backend-style` for `db` and `be`, `frontend-style` for `fe`.
+1. **Load context.** Read the slice file, its stories and TS lines in `epic.md`, and every approved test file. Load the style skill for the layer: `backend-style` for `db` and `be`, `frontend-style` for `fe`. The language skill for each file you touch (`lang-python`, `lang-javascript`, `lang-typescript`, `lang-css`) loads by path; read it if your host does not load it.
 2. **Check the branch** against the slice's `- Branch:` line.
    **UI code:** before writing it, read `docs/design-system/MASTER.md` (and `docs/design-system/pages/<page>.md` when the page has one; it wins where it deviates) and its value source `docs/design-system/tokens.json`. Cite tokens, never raw values: no hardcoded color, spacing, radius or font size. If MASTER.md is missing, stop and ask for `/design`.
 3. **Read before you write.** For each file you will change, read it end to end and check its callers (`code-query` skill: graph first, grep second).
