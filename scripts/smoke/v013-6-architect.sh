@@ -18,6 +18,7 @@ grep_case "v0.13 i6 lead areas: Claude frontend" "$AS" '^\| Claude .*\| Frontend
 grep_case "v0.13 i6 lead areas: Codex backend" "$AS" '^\| Codex .*\| Backend \|'
 grep_case "v0.13 i6 lead areas: Cursor security" "$AS" '^\| Cursor .*\| Security \|'
 grep_case "v0.13 i6 delegates through T3 Code" "$AS" '`orchestrator_capabilities` once.*`delegate_task` per model'
+grep_case "v0.13.1 architect asks for one model per provider" "$AS" 'Ask the user to pick one model per provider'
 grep_case "v0.13 i6 never substitutes a provider" "$AS" '\*\*never substitute\*\*'
 grep_case "v0.13 i6 lead model wins by default" "$AS" 'lead model wins by default'
 grep_case "v0.13 i6 a finding counts only when a run proves it" "$AS" 'A finding counts only when a run proves it'

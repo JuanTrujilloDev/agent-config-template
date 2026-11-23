@@ -12,6 +12,8 @@ One YAML file per {{tracker}} task at `state/<TASK-ID>.yaml`. These files are th
 | `repo` | no | Absolute path of the project checkout. Present means runs may be local workloads (see `resource-check.py`). |
 | `tracker` | yes | {{tracker}} coordinates, below. |
 | `plan` | yes | Path of the plan file, e.g. `plans/ABC-123/plan.md`. |
+| `design_folder` | no | v0.13 epics: absolute path of the design folder (scope page, `design.md`, `_build/progress/`). Must exist. |
+| `stage` | no | v0.13 epics: the approval the epic is at: `flows`, `design`, `plan`, `slices`, `done`. |
 | `status` | yes | `draft`, `approved`, `executing`, `reviewing`, `done`, `paused`, `cancelled`. |
 | `updated` | yes | ISO-8601 local time with offset. The tools set it on every change. |
 | `unchanged_checks` | yes | Consecutive scheduled checks with no substantive change. `state.py check-tick` / `check-reset`. |

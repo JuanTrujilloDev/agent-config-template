@@ -56,6 +56,14 @@ OI_SO="$OI_OUT/plans/launch-standing-orders.md"
 for pat in '/slice.*step 1' 'approved_by' 'commit done, push pending approval' 'Continue' 'rebase' 'default branch' 'red'; do
   grep_case "orchestrator-init standing orders name $pat" "$OI_SO" "$pat"
 done
+grep_case "orchestrator-init AGENTS which flow reads the lock" "$OI_OUT/AGENTS.md" 'agent-config\.lock\.json. lists .\.claude/skills/architect/SKILL\.md'
+for pat in 'The epic thread' 'Owner gate' 'Slice gates' 'Architect runs' '^## Scope pages'; do
+  grep_case "orchestrator-init AGENTS v0.13 $pat" "$OI_OUT/AGENTS.md" "$pat"
+done
+for pat in 'Slice gates\. Design folder' 'Epic orders\. Design folder' 'High-level orders\. Design folder' 'verify_changed\.py' 'Never substitute'; do
+  grep_case "orchestrator-init standing orders v0.13 $pat" "$OI_SO" "$pat"
+done
+grep_case "orchestrator-init progress check reads the Plan checklist" "$OI_OUT/schedules/progress-check.md" 'plan-checklist\.md'
 grep_case "orchestrator-init prints progress check prompt" "$WORK/oi-write.txt" 'Orchestrator progress check'
 grep_case "orchestrator-init prints config review prompt" "$WORK/oi-write.txt" 'Config review \(bi-weekly\)'
 grep_case "orchestrator-init progress check every 45 min" "$WORK/oi-write.txt" '45 min'
@@ -76,6 +84,13 @@ for t in ("123", "QA2-15", "ABC-123"): c.state_path(Path("."), t)
 for t in ("a/b", "..", "", "-1"):
     try: c.state_path(Path("."), t); sys.exit("accepted " + repr(t))
     except c.StateError: pass
+print("ok")' "$OI_OUT/bin" 2>&1)"
+  check "orchestrator-init stage and design_folder validated" "ok" "$(python3 -c '
+import sys, tempfile; sys.path.insert(0, sys.argv[1]); import _common as c
+b = {"task": "A-1", "title": "t", "plan": "p", "status": "executing"}
+d = tempfile.mkdtemp()
+assert c.validate_state({**b, "stage": "design", "design_folder": d}) == []
+assert c.validate_state({**b, "stage": "scoping"}) and c.validate_state({**b, "design_folder": "rel"})
 print("ok")' "$OI_OUT/bin" 2>&1)"
   mkdir -p "$WORK/oi-ev"
   python3 "$OI_OUT/bin/archive-evidence.py" --task ../x --run r1 --store "$WORK/oi-store" "$WORK/oi-ev" >/dev/null 2>&1

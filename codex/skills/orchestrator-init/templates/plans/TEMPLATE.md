@@ -1,5 +1,7 @@
 # ABC-0000: <task title>
 
+> A v0.13 epic (AGENTS.md "Which flow") uses its design folder instead of this file: the state file's `plan` points at the scope markdown, then at `design.md`.
+
 - {{tracker}} id: `<card id>`
 - Project repo: `<project repo path>`
 - Base branch: `main`
