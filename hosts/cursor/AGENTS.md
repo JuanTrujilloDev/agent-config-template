@@ -67,7 +67,7 @@ Commits are conventional: `type(scope): description` — feat, fix, refactor, te
 
 ## Workflow
 
-`/epic` → `/slice` → `tests-first` → `implement` → `code-review` → `/pr`, all in this thread (skills under `.claude/skills/`). Epics and slices live in `docs/epics/<ID>/`. A small change with an obvious cause uses `/fix`.
+`/epic` → `/slice` → `tests-first` → `implement` → `code-review` → `/pr`, all in this thread (skills under `.claude/skills/`). A feature with several layers or a UI starts with `scope-page` (flows) and `architect` (three designs, consolidated, approved). Epics and slices live in `docs/epics/<ID>/`. A small change with an obvious cause uses `/fix`.
 
 ## Agents (`.claude/agents/`)
 

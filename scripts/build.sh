@@ -43,7 +43,7 @@ python3 scripts/check-override-headings.py
 #   codex-specific content deltas (setup-companions, sdd-workflow, feature,
 #   port-config).
 CODEX_NOTE="hosts/codex/note-role-adaptation.md"
-CODEX_NOTE_COMMANDS=" epic slice implement code-review fix audit design "
+CODEX_NOTE_COMMANDS=" epic slice implement code-review fix audit design architect "
 
 build_codex_skills() {
   local out="$1" name desc
