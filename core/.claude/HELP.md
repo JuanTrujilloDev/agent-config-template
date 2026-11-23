@@ -15,6 +15,7 @@ Read [the principles](rules/principles.md) first; everything below builds on the
 {{#ticket_tracker_linear}}
 | Linear epic assigned | `/epic <ticket-id>`: reads the ticket, drafts stories and slices |
 {{/ticket_tracker_linear}}
+| Feature with several layers or a UI | Scope the flows (`scope-page`), then `architect <design folder>`: three models design it, you approve, the plan and checklist are added, then `/epic` |
 | New feature, no ticket | `/epic <ask>`: asks whether to put the epic on a tracker; if not, `docs/epics/<ID>/` is the source of truth |
 | Epic approved, next piece of work | `/slice <ID> <n>` → `tests-first` → `implement` → `code-review` → `/pr` |
 | Small fix with an obvious cause | `/fix <description>`: no epic, full Definition of Done |
@@ -28,6 +29,7 @@ Read [the principles](rules/principles.md) first; everything below builds on the
 ## The slice loop
 
 ```
+architect <design folder>                    → three designs, consolidated, interrogated → you: "approve"
 /epic <ID or ask>                            → draft: groups, stories, AC, TS, slices    → you: "approve" or "change 3"
 /slice <ID> 1                                → brief: stories, seams, fixtures, tests    → you: "yes"
 /slice <ID> 1 cold-review                    → same, plus two fresh reviewers' findings (opt-in)

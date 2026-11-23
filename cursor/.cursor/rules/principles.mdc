@@ -18,7 +18,8 @@ What it covers:
    small obvious changes. Approved tests (`## Approved tests` in the slice file)
    are locked: never edit one to go green; stop and ask.
 - **Read Before You Write** — never edit code you haven't read; check callers first.
-- **Code Health** — DRY by the rule of three; small functions/files; comments explain *why*.
+- **Code Health** — DRY by the rule of three; small functions/files; dependencies point one way.
+- **Deslop** — no comments (keep tool directives, license, outside links); no try/except unless the slice lists it as a last resort; guard clauses, no nested if, depth ≤2. `python3 tools/verify_changed.py` checks the added lines.
 - **Micro-PR Discipline** — one slice per PR, one layer per slice; aim for 200–400 non-test lines; cap ≤{{max_files_per_pr}} files, <{{max_loc_per_pr}} lines.
 - **Definition of Done** — format → lint → tests → `code-review`, in order, before declaring done.
 - **Conciseness** — no filler, no recaps of visible output.

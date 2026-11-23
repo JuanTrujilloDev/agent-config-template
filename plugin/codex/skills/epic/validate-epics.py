@@ -5,9 +5,10 @@ Usage: validate-epics.py [PATH]   PATH = docs/epics (default) or one epic folder
 
 ERROR (exit 1): missing epic.md or a required section, a duplicate story id, a slice without
 `- Layer:` / `- Stories covered:`, or any AC, TS, slice or test name that points at an unknown story.
-WARN (exit 0): size guidance and shape hints — an epic with no stories, epic >120 lines, slice >60
+WARN (exit 0): size guidance and shape hints — an epic with no stories, epic >120 lines, slice >80
 lines or >5 stories, a story without exactly one AC and one TS, a TS over 5 lines, a missing source
-header or Branch line.
+header or Branch line, a last-resort try whose file is not in `## Placement`. A `## Placement` row
+without a backticked file is an ERROR.
 Exit 2: an explicit PATH that does not exist. `archive/` folders are skipped. Only `slices/<n>.md`
 are slices; reports beside them (`<n>.security.md`, `<n>.mutation.md`) are not checked.
 """
@@ -48,6 +49,13 @@ def entries(lines, kind):
         elif result and result[-1] and line.strip() and not line.startswith(("-", "#")):
             result[-1][1] += 1
     return [tuple(e) for e in result if e]
+
+
+def table(lines):
+    """Rows of the first markdown table in lines, header and separator dropped, cells stripped."""
+    rows = [[c.replace("\\|", "|").strip() for c in re.split(r"(?<!\\)\|", l.strip().strip("|"))]
+            for l in lines if l.strip().startswith("|")]
+    return [r for r in rows[1:] if not set("".join(r)) <= set("-: ")]
 
 
 def check_epic(folder, root):
@@ -93,8 +101,8 @@ def check_slice(path, known, rel):
     lines = text.splitlines()
     if not lines or not HEADER.match(lines[0]):
         say("WARN", rel(path), "first line is not a source header")
-    if len(lines) > 60:
-        say("WARN", rel(path), f"{len(lines)} lines (guidance ≤60)")
+    if len(lines) > 80:
+        say("WARN", rel(path), f"{len(lines)} lines (guidance ≤80)")
     if not re.search(r"^- Layer: \S", text, re.M):
         say("ERROR", rel(path), "missing `- Layer:` line")
     if not re.search(r"^- Branch: `", text, re.M):
@@ -106,7 +114,17 @@ def check_slice(path, known, rel):
     nums = [int(n) for n in STORY_REF.findall(covered.group(1))]
     if len(nums) > 5:
         say("WARN", rel(path), f"covers {len(nums)} stories (guidance ≤5)")
-    tests = re.findall(r"\btest_S(\d+)_", "\n".join(sections(text).get("Tests", [])))
+    secs = sections(text)
+    placed = set()
+    for row in table(secs.get("Placement", [])):
+        files = re.findall(r"`([^`]+)`", row[1] if len(row) > 1 else "")
+        if not files:
+            say("ERROR", rel(path), f"Placement row {row[0]} names no file")
+        placed.update(files)
+    for row in table(secs.get("Last-resort error handling", [])):
+        if row[0].strip("`") not in placed:
+            say("WARN", rel(path), f"last-resort try in {row[0]} is not in `## Placement`")
+    tests = re.findall(r"\btest_S(\d+)_", "\n".join(secs.get("Tests", [])))
     for n in sorted(set(nums + [int(t) for t in tests]) - known):
         say("ERROR", rel(path), f"names unknown story S{n}")
 

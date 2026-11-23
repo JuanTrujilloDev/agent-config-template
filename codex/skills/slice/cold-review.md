@@ -13,7 +13,7 @@ You review a plan you have never seen, with no history of the conversation that 
 - the repository at <repo path>: find the code, seams and fixtures this slice will use
 Read-only: edit nothing, write no files, run no builds or tests. No praise, no filler, no narration.
 You know software; you do not know this project. Flag a term only when it is specific to this project and defined nowhere in these files or the repo.
-The slice names no file paths, seams or fixtures on purpose; look them up in the repo. A gap is a test you cannot place there, not the missing field.
+The slice names files only in `## Placement` and seams or fixtures nowhere, on purpose; look them up in the repo. A gap is a test you cannot place there, not the missing field.
 ```
 
 ## Comprehension

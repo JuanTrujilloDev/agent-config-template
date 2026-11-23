@@ -31,6 +31,7 @@ Frontend source: `{{frontend_dir}}`
 {{/has_frontend}}
 Tests: `{{tests_glob}}`
 Epics and slices: `docs/epics/<ID>/epic.md`, `docs/epics/<ID>/slices/<n>.md`
+Where each kind of code goes: `.claude/rules/architecture-map.md` (always loaded; yours to edit)
 
 ## Code Style
 
@@ -51,7 +52,7 @@ Style skills (loaded by `implement` and `code-review` per slice layer): `backend
 
 ## Workflow
 
-`/epic` → `/slice` → `tests-first` → `implement` → `code-review` → `/pr`, all in this thread.
+`/epic` → `/slice` → `tests-first` → `implement` → `code-review` → `/pr`, all in this thread. A feature with several layers or a UI starts earlier: scope the flows (`scope-page`), then `architect` designs it on three models and you approve the design.
 
 1. **`/epic <{{#branch_prefix}}{{branch_prefix}}-<#> or {{/branch_prefix}}ask>`** drafts the epic once: capability groups, one-case stories, acceptance criteria, Given/When/Then test scenarios, layered slices. You approve by number.
 2. **`/slice <ID> <n>`** briefs the next slice in `db → be → fe` order: stories, seams, fixtures, expected behaviour. You say yes. Add `cold-review` and two fresh reviewers read the slice before you do.

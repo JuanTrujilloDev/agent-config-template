@@ -1,0 +1,15 @@
+{
+  "slice": "1",
+  "layer": "be",
+  "status": "review",
+  "branch": "feature/EXAMPLE-1-export-be",
+  "mr": "!12",
+  "head": "9f31c0a",
+  "review": [
+    { "file": "app/exports/views/fund_export_views.py", "lines": "1-40", "why": "the endpoint and its permission" },
+    { "file": "app/exports/tasks/fund_export_tasks.py", "why": "the background job" },
+    { "file": "tests/exports/test_fund_export_views.py", "why": "approved tests, locked" }
+  ],
+  "dod": "format, lint, changed lines, slice tests 6 passed, suite green",
+  "updated": "2026-11-20T11:05:00-05:00"
+}

@@ -8,7 +8,8 @@ if [ -z "${ROOT:-}" ]; then
 fi
 
 V5_S="$ROOT/core/.claude/skills"
-check "v0.11 i5 core rules/ holds principles only" "principles.md" "$(cd "$ROOT/core/.claude/rules" && echo *.md)"
+# v0.13 adds the always-loaded architecture map beside the principles.
+check "v0.11 i5 core rules/ holds the map and principles only" "architecture-map.md principles.md" "$(cd "$ROOT/core/.claude/rules" && echo *.md)"
 check "v0.11 i5 core .claude/patterns/ gone" "absent" "$([ -e "$ROOT/core/.claude/patterns" ] && echo present || echo absent)"
 for s in backend-style frontend-style code-query patterns; do
   check "v0.11 i5 core skill $s" "present" "$([ -f "$V5_S/$s/SKILL.md" ] && echo present || echo absent)"
@@ -20,7 +21,8 @@ check "v0.11 i5 patterns has no ledger wording" "0" "$(grep -ciE 'ledger|mini-fe
 n=$(grep -rnE '\.claude/rules/(backend-style|frontend-style|code-query|patterns)|\.claude/patterns/' "$ROOT/core" "$ROOT/hosts" | tee "$WORK/v5-refs.txt" | wc -l | tr -d ' ')
 check "v0.11 i5 no reference to the old rule paths in core/ or hosts/" "0" "$n"
 [ "$n" = 0 ] || sed 's/^/    /' "$WORK/v5-refs.txt"
-line_max "v0.11 i5 principles still ≤80 lines" "$ROOT/core/.claude/rules/principles.md" 80
+# v0.13 raised the cap from 80 to 90 for the Deslop section.
+line_max "v0.11 i5 principles still ≤90 lines" "$ROOT/core/.claude/rules/principles.md" 90
 
 # build.sh: placeholder-free core skills are copied verbatim into plugin/skills; style skills stay hand-authored.
 for s in epic slice tests-first implement code-review council code-query patterns; do
@@ -47,7 +49,7 @@ check "v0.11 i5 cursor render no placeholder" "0" "$(grep -rlE "$PH" "$V5_C" | w
 # Claude render: style skills render, frontend-style only with a frontend.
 V5_D="$WORK/v5-django"
 bash "$ROOT/setup.sh" --target "$V5_D" --answers "$ROOT/examples/python-django/answers.env" >/dev/null 2>&1
-check "v0.11 i5 django rules/" "principles.md" "$(cd "$V5_D/.claude/rules" && echo *.md)"
+check "v0.11 i5 django rules/" "architecture-map.md principles.md" "$(cd "$V5_D/.claude/rules" && echo *.md)"
 grep_case "v0.11 i5 django backend-style skill rendered" "$V5_D/.claude/skills/backend-style/SKILL.md" '^name: backend-style$'
 check "v0.11 i5 django skills placeholder-free" "0" "$(grep -rlE "$PH" "$V5_D/.claude/skills" | wc -l | tr -d ' ')"
 V5_F="$WORK/v5-fastapi"

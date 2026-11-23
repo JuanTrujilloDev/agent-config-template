@@ -47,6 +47,8 @@ It prints one row per slug: `done` specs are archived verbatim to `docs/epics/ar
 One numbered list: config paths to overwrite, obsolete paths to prune, LEGACY paths to decide, specs to migrate, and these manual steps:
 
 - **`UserPromptSubmit` cleanup**: `--prune` drops the settings hook entry of every file it prunes (v0.10's `coding-reminder.sh`). Without `--prune`, or when `coding-reminder.sh` is `CUSTOMIZED-OBSOLETE`, offer to delete that entry from `.claude/settings.json` by hand.
+- **Architecture map (v0.13)**: when `.claude/rules/architecture-map.md` holds only its starter `Test` row, offer `/setup-template` step 9 to draft the rows from the code.
+- **One changed-lines hook (v0.13)**: when the project already runs its own changed-lines verifier as a hook, keep one: point it at `tools/verify_changed.py` or drop the new `Stop` entry from `.claude/settings.json`.
 - **`CUSTOMIZED CLAUDE.md` reconcile**: v0.11 rewrote the Workflow, Agents and Commands sections of `CLAUDE.md`; diff it against a fresh render (`setup.sh --target <tmp> --answers answers.env`) and fold those sections in. It is always loaded, so a stale copy points at dropped agents and commands.
 
 The user answers by number (`approve 1-4, 7`); anything unanswered is skipped. Never overwrite silently. `CUSTOMIZED` and `CUSTOMIZED-*` paths are never offered for overwrite; list them so the user can reconcile by hand.

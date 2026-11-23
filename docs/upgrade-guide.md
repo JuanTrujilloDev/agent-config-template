@@ -2,6 +2,16 @@
 
 How to pull updates from the template into a project that's already configured.
 
+## Upgrading from v0.12.1 to v0.13.0
+
+No breaking change to existing epics or slices; re-run `update-config`, or the one-command install with `--ref v0.13.0`. New and changed files arrive as `STALE-MANAGED` (overwrite) or new; then:
+
+- **Architecture map.** `.claude/rules/architecture-map.md` is new and yours (`CUSTOMIZED` once edited, never overwritten). It ships with one starter row; draft the rest with `/setup-template` step 9 (it measures the code and proposes rows), or by hand.
+- **Changed-lines verifier.** `tools/verify_changed.py` is new and registered as a Claude Code `Stop` hook (merged into `.claude/settings.json`). It checks only added lines; ruff and ESLint add their rules when installed. A project with its own changed-lines hook keeps one of the two: point yours at `tools/verify_changed.py`, or drop the new `Stop` entry.
+- **Principles.** A Deslop section and Definition of Done step 3 (the verifier). `principles.md` grows to ≤90 lines; reconcile a `CUSTOMIZED` copy by hand.
+- **Slices.** New slices carry `## Placement` and `## Last-resort error handling`; old slices without them still validate. `code-review` checks Placement only when the slice has it.
+- **New skills.** `architect`, `scope-page`, `lang-python`, `lang-javascript`, `lang-typescript`, `lang-css`. `scope-page`'s `verify.mjs` needs Playwright where you run it.
+
 ## Upgrading from v0.12.0 to v0.12.1
 
 No breaking change; re-run `update-config`, or the one-command install with `--ref v0.12.1`.
@@ -113,7 +123,7 @@ git add answers.env   # the source of truth — re-renders the same config later
 
 ```bash
 # 1. Pull the latest template (or check out a tag for stability)
-cd ~/code/agent-config-template && git pull origin main   # or: git checkout v0.12.1
+cd ~/code/agent-config-template && git pull origin main   # or: git checkout v0.13.0
 
 # 2. Preview what would change in your project
 cd ~/code/my-project
@@ -123,7 +133,7 @@ cd ~/code/my-project
 ~/code/agent-config-template/setup.sh --target . --answers ./answers.env --merge
 
 # 4. Commit
-git add .claude/ CLAUDE.md docs/ agent-config.lock.json && git commit -m "chore: upgrade agent-config-template to v0.12.1"
+git add .claude/ CLAUDE.md docs/ agent-config.lock.json && git commit -m "chore: upgrade agent-config-template to v0.13.0"
 ```
 
 A template upgrade (`setup.sh --merge`) is its own `chore:` commit — never mixed into a feature PR.

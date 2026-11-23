@@ -101,6 +101,16 @@ The interview is **infer → show → ask once → record → render**. Facts ar
    - `not_now` — mention once (don't push): `/setup-companions` installs the optional companion tools — graphify (knowledge graph behind the `code-query` skill), ponytail (runtime minimal-code enforcement) and, when `has_ui`, ui-ux-pro-max (design-system skill).
    - `never` — say nothing about companions, this run and every future run (the recorded value also skips question 4).
 
+9. **Architecture map.** When `.claude/rules/architecture-map.md` still holds only the starter `Test` row, survey the code and draft the rows; never touch a map that already has more. Per kind of code the project has (models, serializers or schemas, views or handlers, business rules, queries, tasks, clients, constants, templates or partials, components, tests), find where it lives and count what one module holds: top-level classes per file with `python3 -c "import ast,sys; ..."` for Python, exports per file for JS/TS. Show one table, each row with its measurement:
+
+   | Kind | Lives in | Per module | File name | Check | Measured |
+   |---|---|---|---|---|---|
+   | Model | `apps/*/models/*.py` | one model | `<model_name>.py` | max 1 class based on Model | 62 of 64 modules |
+   | Serializer | `apps/*/serializers/*.py` | every serializer of one domain | `<domain>_serializers.py` | — | 36 modules, 2–12 each |
+   | Business rule | `apps/*/methods/*.py` | functions only | `<topic>_methods.py` | no classes | 193 of 228 modules |
+
+   Propose a Check only where at least 90% of modules already follow the row; say which modules break it. The user approves or edits the rows by number; write the file after the yes. The map is user-owned: re-renders and `--merge` keep it.
+
 ## Config scopes
 
 Every config value lives in exactly one of three scopes:
@@ -149,8 +159,10 @@ A calibrated host tree. Cursor adds `AGENTS.md`, `.cursor/`, and the shared
 - **`.claude/HELP.md`** — decision tree + worked examples customized for the stack.
 - **`.claude/settings.json`** — permissions tightened around the project's actual tools.
 - **`.claude/mcp.json.example`** — MCP server template.
-- **`.claude/rules/principles.md`** — the one always-loaded file: operating principles tailored to the stack.
-- **`.claude/skills/`** — `epic`, `slice`, `tests-first`, `implement`, `code-review`, `council` (opt-in), `update-config`, `code-query`, `patterns`, `backend-style` and, with a frontend, `frontend-style`; loaded on demand.
+- **`.claude/rules/principles.md`** — always loaded: operating principles tailored to the stack, with the Deslop rule.
+- **`.claude/rules/architecture-map.md`** — always loaded: where each kind of code goes (step 9 drafts it; yours to edit).
+- **`tools/verify_changed.py`** — checks the lines a change adds (Deslop, last-resort tries, the map); a Stop hook and a Definition of Done step.
+- **`.claude/skills/`** — `scope-page`, `architect`, `lang-python`, `lang-javascript`, `lang-typescript`, `lang-css` (loaded by file path), `epic`, `slice`, `tests-first`, `implement`, `code-review`, `council` (opt-in), `update-config`, `code-query`, `patterns`, `backend-style` and, with a frontend, `frontend-style`; loaded on demand.
 - **`.claude/agents/`** — `security-reviewer`, plus `ui-designer` when there's a UI and `mutation-tester` when enabled. There is no coordinator or dev subagent: the slice loop runs in your thread.
 - **`.claude/commands/`** — `/fix`, `/verify`, `/audit`, `/commit`, `/pr`, `/integrate`, `/design` (with a UI), locally available (non-namespaced).
 - **`.claude/hooks/`** — branch discipline, the approved-tests lock, auto-format — with the project's actual `src_dir` / `default_branch` baked in (no env-var fallback needed).

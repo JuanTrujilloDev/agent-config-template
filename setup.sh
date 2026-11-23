@@ -76,7 +76,7 @@
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-TEMPLATE_VERSION="0.12.1"
+TEMPLATE_VERSION="0.13.0"
 # Canonical source is core/ at the repo root; the bundled plugin copy ships as
 # template/. The same script works in both locations by auto-detecting.
 if [ -d "$SCRIPT_DIR/core" ]; then
@@ -421,7 +421,7 @@ try:
     LOCK_SCHEMA = 1
     DOT_CLAUDE_MD = os.path.join(".claude", "CLAUDE.md")  # never staged: the template's version is the ../CLAUDE.md symlink
     # D13: user-filled files are yours — never labelled stale, never in --overwrite-files.
-    NON_MANAGED = {"CLAUDE.md", os.path.join("docs", "CONTEXT.md")}
+    NON_MANAGED = {"CLAUDE.md", os.path.join("docs", "CONTEXT.md"), os.path.join(".claude", "rules", "architecture-map.md")}
     NON_MANAGED_DIRS = (os.path.join("docs", "design-system") + os.sep,)
     MANAGED_EXACT = {
         "AGENTS.md",

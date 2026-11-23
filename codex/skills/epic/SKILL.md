@@ -25,6 +25,7 @@ Files (grammar in `docs/epics/EXAMPLE/` when this repo ships it, else the templa
 
 - A ticket id (`ABC-12`): read the card through the tracker MCP named in `CLAUDE.md` (MCP Servers): title, body, comments, sub-issues. If no tracker MCP is configured, ask for the card text.
 - Free text: that text is the Request, quoted verbatim.
+- An approved design (`architect`): the Request cites it (`Design: <design folder>/design.md, approved <date>`), the stories follow its flows, and the Technical tasks are its slices, in its order. Do not re-slice an approved design; a slice that no longer fits goes back to the user as a question.
 - Read `docs/CONTEXT.md` when it exists and use its terms.
 
 ## 2. Survey the code
@@ -82,7 +83,7 @@ Read the epic card and its slice sub-issues and overwrite `docs/epics/<ID>/epic.
 <!-- generated from <tracker> <ID> at <ISO time>; source=<tracker>; edit the card, then `/epic render <ID>` -->
 ```
 
-Never hand-edit a rendered file; change the card and render again. Keep each slice's `- Branch:` and `## Approved tests` lines when re-rendering: the test lock keys on them.
+Never hand-edit a rendered file; change the card and render again. Keep each slice's `- Branch:` line and its `## Approved tests`, `## Placement` and `## Last-resort error handling` sections when re-rendering: the test lock and the verifier key on them, and the card never carries file paths.
 
 ## Validate
 
