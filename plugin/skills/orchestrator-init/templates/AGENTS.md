@@ -29,25 +29,34 @@ Workspace: `<tracker workspace>`. {{tracker}} access goes through `<connection o
 ## The cycle
 
 1. **Intake**: {{approver}} selects a card; record it in a new state file.
-2. **Research**: open questions come back in the report; relay them to {{approver}}.
-3. **Plan**: epics, tasks, security invariants, parallelism, review assignments. {{approver}} approves.
-4. **Design**: for UI tasks, before they execute.
-5. **Execute**: one thread per task, in the T3 project of the repo it works on, on a worktree cut from the target branch.
-6. **Review**: one remote code review per delivered task, one fix round.
-7. **Learnings**: lessons go to `learnings/`, flake entries to `flakes/`.
-8. **Close**: when every epic is done, report; {{approver}} tests and closes the card.
+2. **Flows**: the `scope-page` skill, in a design folder outside the repo: the scope markdown and a page that walks each user flow, flows only. {{approver}} approves the flows and picks one `architect` model per provider.
+3. **Design**: `architect <design folder>` writes `design.md` from three providers. {{approver}} approves it.
+4. **Plan**: `plan` is added to the page's `content.mjs` (the design's slices); the page shows the Plan checklist.
+5. **Epic**: `/epic` from the approved design.
+6. **Slices**: one thread per slice, in the T3 project of the repo it works on, on a worktree cut from the target branch.
+7. **Review**: one code review per delivered slice, one fix round.
+8. **Learnings**: lessons go to `learnings/`, flake entries to `flakes/`.
+9. **Close**: when every slice is done, report; {{approver}} tests and closes the card.
+
+A repo without the `architect` skill ("Which flow" below) runs the earlier cycle: Intake, Research (open questions relayed to {{approver}}), Plan (`plans/TEMPLATE.md`, approved by {{approver}}), Design (UI tasks only), Execute, Review, Learnings, Close.
 
 ## Threads
 
 - Every task, review or fix round runs in its own new T3 thread named `<TASK-ID> / <what>`, with the model set explicitly from the routing table. This thread only coordinates: it reads results and writes state, inbox and outbox.
 - A thread that needs a push ends its turn with "commit done, push pending approval"; this thread never approves a push and lists every pending push in its next reply.
-- **Fresh thread per round.** A review, fix or follow-up round never goes as a second turn into a long thread: it gets a new thread whose launch message pastes the previous report (MR/PR, head SHA, findings, decisions). Reason: every extra turn re-reads the whole thread, and cache reads dominate the bill. The one exception is a thread that is mid-task and idle for minutes, not hours.
+- **Fresh thread per round.** A review, fix or follow-up round never goes as a second turn into a long thread: it gets a new thread whose launch message pastes the previous report (MR/PR, head SHA, findings, decisions). Reason: every extra turn re-reads the whole thread, and cache reads dominate the bill. Exceptions: a thread that is mid-task and idle for minutes, not hours, and the epic thread below.
+- **The epic thread (v0.13 repos).** One Claude thread `<TASK-ID> / epic` runs the flows, design and plan rounds and stays the same thread across them, even days apart. It stops three times: flows, design, plan plus `/epic`. At the flows stop it lists the models `orchestrator_capabilities` offers per provider (Claude, Codex, Cursor) with one recommendation each; {{approver}} picks one per provider with the flows approval, and `architect` runs only with those picks. Slice threads stay one per slice. If T3 warns that the epic thread's context is near full, the next round goes to a fresh epic thread with the scope and its Round decisions pasted.
 - **Owner-driven rounds.** When {{approver}} continues a task thread themselves, record each of their rounds as a run (provider, model and times from `t3_thread_read`) and launch no parallel thread for the same work. The progress check reads every task thread past its last recorded run.
 - Every launch message ends with the block in `plans/launch-standing-orders.md`, pasted unchanged. Task threads read the project repo's own rules (`AGENTS.md`, `CLAUDE.md`), not this file.
 
 ## Epic → story → slice
 
-Follows the agent-config-template `epic`, `slice`, `tests-first` and `code-review` skills.
+Follows the agent-config-template `epic`, `slice`, `tests-first` and `code-review` skills, plus `scope-page` and `architect` from v0.13.0.
+
+- **Which flow.** The v0.13 flow (flows, `architect` design, plan, `/epic`, slices with progress files) applies only when the target repo's `agent-config.lock.json` lists `.claude/skills/architect/SKILL.md`. Every other repo keeps the earlier flow. The launch draft says which flow it picked. A rule marked "v0.13 repos" applies only there.
+- **Owner gate (v0.13 repos).** The launch draft states the task's owner: the {{tracker}} card's assignee; an empty or unclear assignee is a question in that draft. When the owner is not {{approver}}, the work is designed at a high level only, for the owner to decide how to build it: the flows page, a visual design for each new or changed screen, and a high-level overview with the use cases (`design.md`: what each use case does, which apps and data it touches without file paths, permissions, risks, open questions). No `architect`, Complexity, Placement, slices or slice threads. On {{approver}}'s yes the page zip goes on the card (numbered draft), the card moves to the ready column, and tracking ends.
+- **Cards (v0.13 repos).** The card stays in the refinement column while the flows are open and moves to the ready column when {{approver}} approves them. For {{approver}}'s own tasks the epic card body is drafted after the plan, its Design paragraph citing `design.md` and the page zip; slice cards come from the plan, each when its brief is approved.
+- **Slice gates (v0.13 repos).** The slice launch fills in the design folder. A slice's `execute` run is `delivered` only when its progress file says `review` and the hand-back quotes a clean `tools/verify_changed.py` and the `code-review` Placement gate; otherwise `changes_requested` with the reason. Slice threads never write `done`: the progress check does, once the MR/PR is merged, and rebuilds the page. The state file records `design_folder` and `stage`.
 
 - **Epic**: stories are one case each, with one acceptance criterion and one test scenario per story. The `epic` skill asks whether to use {{tracker}} cards, and no is the default: then `docs/epics/<ID>/` is the source of truth. With cards, one card labelled `epic` is the source of truth, its stories live in the card body (not as separate cards), and `docs/epics/<ID>/` is generated from it.
 - **Slice**: `docs/epics/<ID>/slices/<n>.md`, and with cards a sub-card of the epic labelled `slice` plus its layer (`db`, `backend`, `frontend`), naming the stories it covers. Slices stack DB → BE → FE per capability group, 200–400 LOC each (12 files / 3,000 LOC hard cap), one MR/PR per slice.
@@ -66,6 +75,13 @@ Before every launch, post a numbered draft: the task, its tier, the field (front
 | Simple: one file or one well-defined change, no design decision | |
 | Medium: several files or one module, needs tests and a review | |
 | Complex: cross-module, architecture, migrations, security-sensitive or unclear scope | |
+
+- **Architect runs (v0.13 repos).** No fixed row for the `architect` trio: {{approver}} picks one model per provider for each epic at the flows stop. The epic launch draft names the epic thread's model and the trio's token estimate (about 0.85–1.6 M per epic). Inside `architect` a provider that fails to start or stalls is retried once; then the design goes ahead with the other two and the hand-back names the missing one. Never substitute another provider or model. Record four `design` runs per architect pass: one per provider with its child task id, and the consolidation run on the epic thread.
+
+## Scope pages (v0.13 repos)
+
+- Every scoping, plan or design task delivers the scope markdown and the page `scope/index.html` in a design folder outside the repo, built with the repo's `.claude/skills/scope-page/build.mjs` and checked with its `verify.mjs` (needs Playwright). Until {{approver}} approves the design the page holds the flows only; slices and the Plan checklist come with the plan.
+- {{approver}}'s answers go in a dated `Round N decisions` block at the top of the markdown, which overrides older text, and the page is rebuilt.
 
 ## Inbox and outbox
 

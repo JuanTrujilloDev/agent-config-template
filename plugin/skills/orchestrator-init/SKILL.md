@@ -10,15 +10,15 @@ Optional. Renders the file skeleton of an orchestrator: a folder that plans work
 
 | Path | What it is |
 | --- | --- |
-| `AGENTS.md` | Orchestration rules skeleton: people, tracker projects, T3 project ids, cycle, threads, an empty model routing table (Trivial, Simple, Medium, Complex), progress check, config review. `<placeholders>` stay for the user to fill. |
+| `AGENTS.md` | Orchestration rules skeleton: people, tracker projects, T3 project ids, the v0.13 cycle (flows, design, plan, epic, slices) with the earlier one for repos without `architect`, threads and the epic thread, the owner gate, an empty model routing table (Trivial, Simple, Medium, Complex) with the per-epic `architect` model pick, scope pages, progress check, config review. `<placeholders>` stay for the user to fill. |
 | `bin/` | `state.py`, `render-progress.py`, `resource-check.py`, `tracker-comment.py`, `archive-evidence.py`, `_common.py`, `README.md`. Python with PEP 723 metadata, run through `uv` (PyYAML). Paths resolve from the scripts' own folder. |
-| `state/SCHEMA.md`, `state/EXAMPLE.yaml` | Format of `state/<TASK-ID>.yaml`, and a fictional example to copy for each new task. |
+| `state/SCHEMA.md`, `state/EXAMPLE.yaml` | Format of `state/<TASK-ID>.yaml` (with the optional v0.13 `design_folder` and `stage`), and a fictional example to copy for each new task. |
 | `plans/TEMPLATE.md` | Plan shape: current block, security invariants, epics and tasks, parallelism, review log. |
-| `plans/launch-standing-orders.md` | The standing orders pasted at the end of every task-thread launch: `/slice` first, tests red then stop, no merge, push pending approval. |
+| `plans/launch-standing-orders.md` | The standing orders pasted at the end of every task-thread launch: `/slice` first, tests red then stop, no merge, push pending approval; for v0.13 repos the slice gates, the Epic orders and the High-level orders. |
 | `inbox/`, `outbox/` | `README.md` with the request format, plus `done/`. |
 | `learnings/`, `flakes/` | Empty, with `.gitkeep`. |
 | `skills/VENDORED.md` | Header of the pinned-skills table. |
-| `schedules/` | The two schedule prompts, kept with the folder so they can be re-created. |
+| `schedules/` | The two schedule prompts, kept with the folder so they can be re-created. The progress check reads each v0.13 epic's Plan checklist and progress files and writes `done` after a merge. |
 
 ## Steps
 

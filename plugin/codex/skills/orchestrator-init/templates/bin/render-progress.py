@@ -74,6 +74,10 @@ def _current_block(d: Dict[str, Any]) -> List[str]:
     summary = (cur.get("summary") or "").strip()
     out.append(summary if summary else "_No summary recorded._")
     out.append("")
+    if d.get("stage") or d.get("design_folder"):
+        stage, folder = d.get("stage") or "unset", d.get("design_folder") or "unset"
+        out.append(f"**Stage:** {stage} · design folder `{folder}`")
+        out.append("")
     out.append(f"**Next step:** {cur.get('next_step') or 'none'}")
     out.append("")
     out.append("**Blockers:**")

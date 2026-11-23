@@ -31,6 +31,7 @@ ENUMS: Dict[str, List[str]] = {
     ],
     "run.state": ["queued", "running", "completed", "failed", "cancelled", "blocked"],
     "run.result": ["clean", "changes_requested", "blocked", "inconclusive", "delivered", "n/a"],
+    "stage": ["flows", "design", "plan", "slices", "done"],
 }
 
 # Filled by orchestrator-init; used in rendered progress and tracker comments.
@@ -161,6 +162,10 @@ def validate_state(data: Dict[str, Any]) -> List[str]:
         if not data.get(key):
             problems.append(f"missing required field {key!r}")
     chk("status", data.get("status"), "status")
+    chk("stage", data.get("stage"), "stage")
+    folder = data.get("design_folder")
+    if folder is not None and not (Path(str(folder)).is_absolute() and Path(str(folder)).is_dir()):
+        problems.append(f"design_folder {folder!r} must be an absolute path to an existing folder")
     chk("tracker.state", (data.get("tracker") or {}).get("state"), "tracker.state")
     if "unchanged_checks" in data and not isinstance(data["unchanged_checks"], int):
         problems.append("unchanged_checks must be an integer")

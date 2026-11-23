@@ -24,11 +24,11 @@ Each model writes the whole design: screens, backend, security, complexity and t
 
 | Model | Lead area | Stressed in the brief |
 | --- | --- | --- |
-| Claude (strongest, high effort) | Frontend and design | templates, partials, components, state, tokens, every screen state |
-| Codex (strongest, high effort) | Backend | the file for each piece from the map, signatures, query plan, migrations, Complexity; two shapes, keep one |
-| Cursor (strongest, high effort) | Security | who reads and writes each endpoint and field, validation, what must not leak; give it the project's security scan output (`ruff --select S`, `npm audit` or the stack's equivalent) |
+| Claude (the user's pick) | Frontend and design | templates, partials, components, state, tokens, every screen state |
+| Codex (the user's pick) | Backend | the file for each piece from the map, signatures, query plan, migrations, Complexity; two shapes, keep one |
+| Cursor (the user's pick) | Security | who reads and writes each endpoint and field, validation, what must not leak; give it the project's security scan output (`ruff --select S`, `npm audit` or the stack's equivalent) |
 
-In T3 Code: call `orchestrator_capabilities` once, then one read-only `delegate_task` per model, in parallel, each writing `<design folder>/designs/<provider>.md`. Elsewhere, use the host's sub-agents for the providers it has. A provider or model that is unavailable is reported in step 4; **never substitute** another one. Cost: about 0.85 to 1.6 M tokens per epic for the three designs, the consolidation and the interrogation (an estimate).
+Ask the user to pick one model per provider before any brief: list the models each provider offers, with their efforts and one recommendation each, and wait for the answer (for example "Claude 1, Codex 2, Cursor 1"). Skip the question only when the user already picked them, for example with the scope approval. In T3 Code: call `orchestrator_capabilities` once (it lists the models for the question), then one read-only `delegate_task` per model, in parallel, each writing `<design folder>/designs/<provider>.md`. Elsewhere, use the host's sub-agents for the providers it has. A provider or model that is unavailable is reported in step 4; **never substitute** another one. Cost: about 0.85 to 1.6 M tokens per epic for the three designs, the consolidation and the interrogation (an estimate).
 
 ## 2. Consolidate: this thread, once
 
