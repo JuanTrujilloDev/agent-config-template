@@ -20,7 +20,7 @@ Use the argument when given. Otherwise: the stacked base from the slice's `- Bra
 ## 2. Sources
 
 - **Spec**: the slice file `docs/epics/<ID>/slices/<n>.md` for the current branch (its `- Branch:` line), plus the slice's stories, AC and TS lines in `docs/epics/<ID>/epic.md`. No slice file (a `/fix`, a refactor): the user's request or the issue they name; if there is none, skip the Spec axis and say "no spec available".
-- **Standards**: `.claude/rules/principles.md`, the layer style skill (`backend-style` for db/be, `frontend-style` for fe, both when the diff spans both), the `patterns` skill, plus `CONTRIBUTING.md` or `CODING_STANDARDS.md` when present, plus the smell baseline below.
+- **Standards**: `.claude/rules/principles.md` (its Deslop section included), `.claude/rules/architecture-map.md`, the layer style skill (`backend-style` for db/be, `frontend-style` for fe, both when the diff spans both), the `patterns` skill, plus `CONTRIBUTING.md` or `CODING_STANDARDS.md` when present, plus the smell baseline below.
 - **Design system** (UI diffs only): `docs/design-system/MASTER.md` (or a `pages/<page>.md` override), `docs/design-system/tokens.json` and `tokens.lock.json`. A hardcoded color, spacing, radius or font value not traceable to the token source is a finding, cited `file:line`. A missing theme target, a stale `source_sha256` / `target_sha256`, a raw brand value or an undocumented page-level token fork is a Blocker.
 
 ### Smell baseline (Fowler, *Refactoring* ch. 3)
@@ -40,20 +40,22 @@ The repo overrides: a documented standard wins where it endorses something flagg
 - **Middle Man**: a class or function that mostly delegates. → call the real target.
 - **Refused Bequest**: an implementer ignoring most of what it inherits. → composition.
 
-## 3. Approved-tests gate (before the sub-agents)
+## 3. Gates (before the sub-agents)
 
 1. **The slice file is append-only.** Run `git diff $(git merge-base <fixed-point> HEAD) -- docs/epics/<ID>/slices/<n>.md` (commits and working tree). A removed or changed line under `## Approved tests`, or on the `- Branch:` line, is a **Spec blocker**: it would lift the lock or redirect this gate. Added lines are fine (a re-approval appends a new `Commit:` line).
 2. **Approved tests are unchanged.** Read `## Approved tests`: the last `Commit: <sha>` line and every listed path. Run `git diff <sha> -- <paths>` (covers commits and the working tree). Non-empty output is a **Spec blocker** that fails the review regardless of everything else: approved tests or fixtures were changed after approval. Quote the diff stat.
+3. **Placement.** List `git diff --name-only <fixed-point>...HEAD`. Every file must appear in the slice's `## Placement`, or be a test, a migration, an `__init__` file or a file under `docs/`. A file outside Placement is a **Spec blocker** (code landed where the design did not put it); a Placement row the diff never touches is a Spec judgement call. No slice file: skip and say so.
+4. **Changed lines.** Run `python3 tools/verify_changed.py --base <fixed-point>` and quote its output. Every line it reports is a **Standards blocker** (Deslop, last-resort tries, the architecture map).
 
 ## 4. Spawn both sub-agents in parallel
 
-**Standards prompt**: the diff command, commit list, the standards files, and the smell baseline pasted in full. Brief: "Report per file/hunk (a) each violation of a documented standard, citing file and rule, and (b) any baseline smell, named, with the hunk quoted. Mark each finding Blocker or Judgement call; baseline smells are always judgement calls. Under 400 words."
+**Standards prompt**: the diff command, commit list, the standards files, and the smell baseline pasted in full. Brief: "Report per file/hunk (a) each violation of a documented standard, citing file and rule, (b) any baseline smell, named, with the hunk quoted, and (c) reader load: a changed function you had to read twice to follow, with the line that made you go back. Mark each finding Blocker or Judgement call; baseline smells are always judgement calls. Under 400 words."
 
 **Spec prompt**: the diff command, commit list, the slice file and its stories/AC/TS pasted. Brief: "Report (a) stories or TS the slice covers that are missing or partial; (b) behaviour in the diff no story asks for (scope creep); (c) behaviour that looks implemented but wrong. Quote the story or TS line for each. Mark each Blocker or Judgement call. Under 400 words."
 
 ## 5. Aggregate
 
-Present `## Standards` and `## Spec` verbatim or lightly cleaned, with the approved-tests gate result first under Spec. Do **not** merge or rerank findings across axes: code can follow every standard and build the wrong thing, or build the right thing against the conventions; separate reports stop one axis masking the other. End with one line: findings per axis and the worst issue within each.
+Present `## Standards` and `## Spec` verbatim or lightly cleaned, with the approved-tests and Placement gate results first under Spec and the changed-lines result first under Standards. Do **not** merge or rerank findings across axes: code can follow every standard and build the wrong thing, or build the right thing against the conventions; separate reports stop one axis masking the other. End with one line: findings per axis and the worst issue within each.
 
 ## 6. One fix round
 

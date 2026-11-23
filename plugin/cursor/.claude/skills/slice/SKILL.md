@@ -44,13 +44,23 @@ What the code does after this slice, in 2–5 sentences, with the literal values
 
 ## Tests
 - `test_S1_<case>` → TS1
+
+## Placement
+| Piece | File | New or edit | Map row |
+| --- | --- | --- | --- |
+| `CompanySsoSettings` | `apps/accounts/models/company_sso_settings.py` | new | Model |
+
+## Last-resort error handling
+None.
 ```
 
 Rules:
 
 - Stack the branch on the previous layer's branch while its PR is open: write `- Branch: `feature/<ID>-<group>-be` (stacked on `feature/<ID>-<group>-db`)`.
-- No file paths, no file lists and no MR links in the card or the slice body; the code-query findings stay in the reply.
-- Ask only about granularity (split or merge?) and story coverage (anything missing?). With `cold-review`, run step 4 first. Stop for the user's yes.
+- **Placement**: one row per class, function, template or component the slice adds or changes, with its file and the `.claude/rules/architecture-map.md` row it follows. Take it from the approved design when the epic has one (`architect`), else from the code-query findings. A piece with no map row adds the row in this slice. Tests, migrations and `__init__` files need no row.
+- **Last-resort error handling**: `None.`, or a table `| File | Function | Why no handler covers it |` for each try the slice needs (principles, Deslop). The user approves it with the slice; `tools/verify_changed.py` fails any try not listed here.
+- File paths go only in those two sections: no file paths, no file lists and no MR links in the card, the Expected behaviour or the Tests; the other code-query findings stay in the reply.
+- Ask only about granularity (split or merge?), story coverage (anything missing?) and any last-resort try. With `cold-review`, run step 4 first. Stop for the user's yes.
 
 ## 4. Cold review (only with `cold-review`)
 

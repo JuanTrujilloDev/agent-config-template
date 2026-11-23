@@ -75,7 +75,7 @@ Read the epic card and its slice sub-issues and overwrite `docs/epics/<ID>/epic.
 <!-- generated from <tracker> <ID> at <ISO time>; source=<tracker>; edit the card, then `/epic render <ID>` -->
 ```
 
-Never hand-edit a rendered file; change the card and render again. Keep each slice's `- Branch:` and `## Approved tests` lines when re-rendering: the test lock keys on them.
+Never hand-edit a rendered file; change the card and render again. Keep each slice's `- Branch:` line and its `## Approved tests`, `## Placement` and `## Last-resort error handling` sections when re-rendering: the test lock and the verifier key on them, and the card never carries file paths.
 
 ## Validate
 
