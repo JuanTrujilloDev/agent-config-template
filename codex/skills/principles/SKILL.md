@@ -40,7 +40,16 @@ Read the target file end to end and check its callers before editing (graph firs
 
 - DRY by the rule of three: extract on the third copy, not the second.
 - Functions well under ~40 lines; split a file past ~400 lines or one that mixes responsibilities.
-- Dependencies point one way (no import cycles, no "misc" modules). Comments explain why; no commented-out code, no banners.
+- Dependencies point one way (no import cycles, no "misc" modules).
+
+## Deslop
+
+Every diff, before review. `tools/verify_changed.py` checks the lines a change adds.
+
+- No comments. Names carry the meaning; keep only tool directives, a license header and a link to an outside spec or bug. No TODO: the ticket is the TODO.
+- No try/except. Errors propagate to the framework's error handlers. A try is a last resort, listed in the slice's `## Last-resort error handling` (file, function, why no handler covers it) and approved with the design. Never catch to re-raise with a new message; never pass.
+- Few ifs: guard clauses and early returns; no nested if or nested ternary; block depth ≤2, complexity ≤8. Do not re-check what the caller or the type already rules out.
+- Plain code a reader follows once: no clever one-liner, no wrapper that only delegates.
 
 ## Commits
 
@@ -56,10 +65,11 @@ Not done until each step passes, in order. Paste the command and its output; a s
 
 1. Format: `your project's format command`
 2. Lint: `your project's lint command`, zero new warnings
-3. Tests: `your project's test command` green, ≥80% coverage
-4. Review: `code-review` (Standards and Spec axes); one fix round for its blockers
-5. Security: `security-reviewer` when the change touches auth, permissions, data exposure or input boundaries
-6. Browser: for changes under `the frontend directory` or over 5 files / 500 lines, walk the success criteria with `mcp__playwright__*`
+3. Changed lines: `python3 tools/verify_changed.py --base <the slice's base branch>` passes (Deslop)
+4. Tests: `your project's test command` green, ≥80% coverage
+5. Review: `code-review` (Standards and Spec axes); one fix round for its blockers
+6. Security: `security-reviewer` when the change touches auth, permissions, data exposure or input boundaries
+7. Browser: for changes under `the frontend directory` or over 5 files / 500 lines, walk the success criteria with `mcp__playwright__*`
 
 ## Conciseness
 

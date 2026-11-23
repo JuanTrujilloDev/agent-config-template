@@ -20,7 +20,8 @@ check "v0.11 i5 patterns has no ledger wording" "0" "$(grep -ciE 'ledger|mini-fe
 n=$(grep -rnE '\.claude/rules/(backend-style|frontend-style|code-query|patterns)|\.claude/patterns/' "$ROOT/core" "$ROOT/hosts" | tee "$WORK/v5-refs.txt" | wc -l | tr -d ' ')
 check "v0.11 i5 no reference to the old rule paths in core/ or hosts/" "0" "$n"
 [ "$n" = 0 ] || sed 's/^/    /' "$WORK/v5-refs.txt"
-line_max "v0.11 i5 principles still ≤80 lines" "$ROOT/core/.claude/rules/principles.md" 80
+# v0.13 raised the cap from 80 to 90 for the Deslop section.
+line_max "v0.11 i5 principles still ≤90 lines" "$ROOT/core/.claude/rules/principles.md" 90
 
 # build.sh: placeholder-free core skills are copied verbatim into plugin/skills; style skills stay hand-authored.
 for s in epic slice tests-first implement code-review council code-query patterns; do

@@ -30,7 +30,8 @@ n=$(grep -nE '(^|[^[:alnum:]:_-])/(spec|feature)([^[:alnum:]_-]|$)|agent-config-
 check "v0.11 i7 no /spec, /feature or docs/specs" "0" "$n"
 [ "$n" = 0 ] || sed 's/^/    /' "$WORK/v7-cmds.txt"
 check "v0.11 i7 plugin files placeholder-free" "0" "$(grep -lE "$PH" $V7_FILES | grep -v 'hosts/' | wc -l | tr -d ' ')"
-line_max "v0.11 i7 plugin principles ≤90 lines" "$V7_P/skills/principles/SKILL.md" 90
+# v0.13 raised the cap from 90 to 100 for the Deslop section.
+line_max "v0.11 i7 plugin principles ≤100 lines" "$V7_P/skills/principles/SKILL.md" 100
 grep_case "v0.11 i7 plugin principles locks approved tests" "$V7_P/skills/principles/SKILL.md" 'Approved tests'
 grep_case "v0.11 i7 setup-template points to update-config" "$V7_P/commands/setup-template.md" 'update-config'
 grep_case "v0.11 i7 README lists the slice loop" "$V7_P/README.md" 'tests-first'

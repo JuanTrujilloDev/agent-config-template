@@ -29,8 +29,9 @@ grep_case "v0.11 c1 settings allows Write(docs/epics/**)" "$DJ/.claude/settings.
 for h in "$ROOT"/core/.claude/hooks/*.sh "$DJ"/.claude/hooks/*.sh; do
   check "v0.11 c1 bash -n ${h#$ROOT/}" "0" "$(bash -n "$h" 2>/dev/null; echo $?)"
 done
-line_max "v0.11 c1 principles ≤80 lines (core)" "$ROOT/core/.claude/rules/principles.md" 80
-line_max "v0.11 c1 principles ≤80 lines (rendered)" "$DJ/.claude/rules/principles.md" 80
+# v0.13 raised the cap from 80 to 90 for the Deslop section.
+line_max "v0.11 c1 principles ≤90 lines (core)" "$ROOT/core/.claude/rules/principles.md" 90
+line_max "v0.11 c1 principles ≤90 lines (rendered)" "$DJ/.claude/rules/principles.md" 90
 line_max "v0.11 c1 CLAUDE.md ≤120 lines (rendered)" "$DJ/CLAUDE.md" 120
 line_max "v0.11 c1 HELP.md ≤80 lines (rendered)" "$DJ/.claude/HELP.md" 80
 for w in '/epic' '/slice' 'tests-first' 'implement' 'code-review'; do

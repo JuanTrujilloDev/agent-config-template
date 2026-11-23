@@ -33,9 +33,9 @@ Template for MCP server config. Copy to `.claude/mcp.json` and fill in real valu
 
 ## `.claude/rules/principles.md`
 
-The only always-loaded rule (≤80 lines): Think Before Coding, Simplicity First
+Always loaded (≤90 lines): Think Before Coding, Simplicity First
 (with the leverage ladder), Surgical Changes, Goal-Driven Execution (approved
-tests locked), Read Before You Write, Code Health, Commits, Micro-PR Discipline,
+tests locked), Read Before You Write, Code Health, Deslop, Commits, Micro-PR Discipline,
 Definition of Done, Conciseness, Autonomy Mode, Branch Discipline. If you change
 one, change every reference to it in `CLAUDE.md`, `HELP.md` and the skills.
 
@@ -132,7 +132,7 @@ Issues a tool can't auto-fix are surfaced to stderr (no longer silently swallowe
 
 | Need | Where |
 |---|---|
-| A rule every coding turn needs | `rules/principles.md` (keep it ≤80 lines) |
+| A rule every coding turn needs | `rules/principles.md` (keep it ≤90 lines) |
 | A procedure or reference loaded when relevant | `skills/<name>/SKILL.md` |
 | A read-only role with its own context window | `agents/` |
 | A user-triggered shortcut | `commands/` |
