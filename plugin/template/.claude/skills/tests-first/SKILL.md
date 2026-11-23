@@ -54,6 +54,6 @@ Commit: `<sha>`
 - `tests/sso/conftest.py`
 ```
 
-Commit that edit. From now on the `agent-enforcement` hook blocks edits to these paths on this branch, and `code-review` fails when `git diff <sha> -- <paths>` is not empty. The section is append-only: never edit or delete its lines or the `- Branch:` line (`code-review` fails on it). If a test turns out wrong later, stop and ask; the user unlocks with `AGENT_CONFIG_UNLOCK_TESTS=1` and approves the changed test again (append a new `Commit:` line).
+Commit that edit. When the epic's Request cites a design, write `<design folder>/_build/progress/<n>.json` with status `tests approved` and rebuild the page (`scope-page` skill). From now on the `agent-enforcement` hook blocks edits to these paths on this branch, and `code-review` fails when `git diff <sha> -- <paths>` is not empty. The section is append-only: never edit or delete its lines or the `- Branch:` line (`code-review` fails on it). If a test turns out wrong later, stop and ask; the user unlocks with `AGENT_CONFIG_UNLOCK_TESTS=1` and approves the changed test again (append a new `Commit:` line).
 
 Next: `implement`.

@@ -162,7 +162,7 @@ A calibrated host tree. Cursor adds `AGENTS.md`, `.cursor/`, and the shared
 - **`.claude/rules/principles.md`** — always loaded: operating principles tailored to the stack, with the Deslop rule.
 - **`.claude/rules/architecture-map.md`** — always loaded: where each kind of code goes (step 9 drafts it; yours to edit).
 - **`tools/verify_changed.py`** — checks the lines a change adds (Deslop, last-resort tries, the map); a Stop hook and a Definition of Done step.
-- **`.claude/skills/`** — `architect`, `epic`, `slice`, `tests-first`, `implement`, `code-review`, `council` (opt-in), `update-config`, `code-query`, `patterns`, `backend-style` and, with a frontend, `frontend-style`; loaded on demand.
+- **`.claude/skills/`** — `scope-page`, `architect`, `epic`, `slice`, `tests-first`, `implement`, `code-review`, `council` (opt-in), `update-config`, `code-query`, `patterns`, `backend-style` and, with a frontend, `frontend-style`; loaded on demand.
 - **`.claude/agents/`** — `security-reviewer`, plus `ui-designer` when there's a UI and `mutation-tester` when enabled. There is no coordinator or dev subagent: the slice loop runs in your thread.
 - **`.claude/commands/`** — `/fix`, `/verify`, `/audit`, `/commit`, `/pr`, `/integrate`, `/design` (with a UI), locally available (non-namespaced).
 - **`.claude/hooks/`** — branch discipline, the approved-tests lock, auto-format — with the project's actual `src_dir` / `default_branch` baked in (no env-var fallback needed).

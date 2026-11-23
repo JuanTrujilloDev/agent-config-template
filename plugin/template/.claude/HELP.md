@@ -15,7 +15,7 @@ Read [the principles](rules/principles.md) first; everything below builds on the
 {{#ticket_tracker_linear}}
 | Linear epic assigned | `/epic <ticket-id>`: reads the ticket, drafts stories and slices |
 {{/ticket_tracker_linear}}
-| Feature with several layers or a UI | Scope the flows (`scope-page`), then `architect <design folder>`: three models design it, you approve, then `/epic` |
+| Feature with several layers or a UI | Scope the flows (`scope-page`), then `architect <design folder>`: three models design it, you approve, the plan and checklist are added, then `/epic` |
 | New feature, no ticket | `/epic <ask>`: asks whether to put the epic on a tracker; if not, `docs/epics/<ID>/` is the source of truth |
 | Epic approved, next piece of work | `/slice <ID> <n>` → `tests-first` → `implement` → `code-review` → `/pr` |
 | Small fix with an obvious cause | `/fix <description>`: no epic, full Definition of Done |

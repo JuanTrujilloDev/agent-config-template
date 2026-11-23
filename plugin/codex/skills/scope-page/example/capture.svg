@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="640" viewBox="0 0 1280 640" font-family="system-ui, sans-serif">
+  <!-- Stand-in for a real capture. Replace with a PNG taken from a local run or staging. -->
+  <rect width="1280" height="640" fill="#F6F8FB"/>
+  <rect width="220" height="640" fill="#101A2C"/>
+  <text x="28" y="48" fill="#FFFFFF" font-size="20" font-weight="700">Example app</text>
+  <text x="28" y="110" fill="#C9D1DE" font-size="14">Portfolios</text>
+  <text x="28" y="146" fill="#C9D1DE" font-size="14">Funds</text>
+  <text x="260" y="70" fill="#101A2C" font-size="28" font-weight="700">Sample Fund</text>
+  <text x="260" y="100" fill="#4D5B70" font-size="14">Example data, not a real client</text>
+  <rect x="260" y="130" width="980" height="440" rx="16" fill="#FFFFFF" stroke="#E1E6EE"/>
+  <text x="290" y="174" fill="#4D5B70" font-size="12" font-weight="700">TICKER</text>
+  <text x="520" y="174" fill="#4D5B70" font-size="12" font-weight="700">SHARES</text>
+  <text x="760" y="174" fill="#4D5B70" font-size="12" font-weight="700">MARKET VALUE</text>
+  <g fill="#101A2C" font-size="14">
+    <text x="290" y="220">AAA</text><text x="520" y="220">120</text><text x="760" y="220">$12,400</text>
+    <text x="290" y="264">BBB</text><text x="520" y="264">80</text><text x="760" y="264">$9,120</text>
+    <text x="290" y="308">CCC</text><text x="520" y="308">45</text><text x="760" y="308">$4,050</text>
+  </g>
+</svg>

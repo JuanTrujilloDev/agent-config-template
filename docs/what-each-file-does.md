@@ -45,6 +45,7 @@ Loaded on demand, never on every turn.
 
 | Skill | Role |
 |---|---|
+| `scope-page` (+ `build.mjs`, `page.js`, `verify.mjs`, `tokens.css`, `example/`) | The scope as an offline story walkthrough; after design approval, slices per flow and a Plan checklist from per-slice progress files |
 | `architect` (+ `design-template.md`) | Once per epic: three providers each write a full design, one consolidation, interrogation by running things, the user approves |
 | `epic` (+ `validate-epics.py`) | `/epic`: draft the epic once; `render <ID>` writes the repo copy from tracker cards; validator for `docs/epics/` |
 | `slice` | `/slice`: brief one layer of one capability group |
