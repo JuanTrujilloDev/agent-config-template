@@ -25,3 +25,4 @@ V13_PLAN=$(bash "$ROOT/setup.sh" --target "$V13_U" --answers "$ROOT/examples/pyt
 check "v0.13 i3 an edited map is CUSTOMIZED, not stale" "1" "$(printf '%s\n' "$V13_PLAN" | grep -cE 'CUSTOMIZED +\.claude/rules/architecture-map\.md')"
 bash "$ROOT/setup.sh" --target "$V13_U" --answers "$ROOT/examples/python-fastapi/answers.env" --merge >/dev/null 2>&1
 grep_case "v0.13 i3 --merge keeps the edited map" "$V13_U/.claude/rules/architecture-map.md" '^\| Model \| `src/models/\*\.py`'
+before "v0.13 i3 step 9 sits in the numbered steps" "$ROOT/plugin/commands/setup-template.md" '^9\. \*\*Architecture map\.\*\*' '^## Config scopes$'

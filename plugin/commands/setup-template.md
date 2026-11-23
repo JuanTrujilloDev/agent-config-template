@@ -101,6 +101,16 @@ The interview is **infer → show → ask once → record → render**. Facts ar
    - `not_now` — mention once (don't push): `/setup-companions` installs the optional companion tools — graphify (knowledge graph behind the `code-query` skill), ponytail (runtime minimal-code enforcement) and, when `has_ui`, ui-ux-pro-max (design-system skill).
    - `never` — say nothing about companions, this run and every future run (the recorded value also skips question 4).
 
+9. **Architecture map.** When `.claude/rules/architecture-map.md` still holds only the starter `Test` row, survey the code and draft the rows; never touch a map that already has more. Per kind of code the project has (models, serializers or schemas, views or handlers, business rules, queries, tasks, clients, constants, templates or partials, components, tests), find where it lives and count what one module holds: top-level classes per file with `python3 -c "import ast,sys; ..."` for Python, exports per file for JS/TS. Show one table, each row with its measurement:
+
+   | Kind | Lives in | Per module | File name | Check | Measured |
+   |---|---|---|---|---|---|
+   | Model | `apps/*/models/*.py` | one model | `<model_name>.py` | max 1 class based on Model | 62 of 64 modules |
+   | Serializer | `apps/*/serializers/*.py` | every serializer of one domain | `<domain>_serializers.py` | — | 36 modules, 2–12 each |
+   | Business rule | `apps/*/methods/*.py` | functions only | `<topic>_methods.py` | no classes | 193 of 228 modules |
+
+   Propose a Check only where at least 90% of modules already follow the row; say which modules break it. The user approves or edits the rows by number; write the file after the yes. The map is user-owned: re-renders and `--merge` keep it.
+
 ## Config scopes
 
 Every config value lives in exactly one of three scopes:
@@ -138,16 +148,6 @@ The general rule: **if a `when:` clause isn't satisfied, the variable doesn't ex
 ## Variant: just-go mode
 
 If the user prefixes the command with explicit phrasing like *"setup, just go"* or passes `--auto` to this command, skip the frontier round: every recommendation is accepted as if the user had replied `all defaults`, UNKNOWN values stay blank with their `# TODO` line (reported after the render), and the render runs immediately. Against an existing config the plan is still printed and applied with `--merge`; `--overwrite` is never automatic. Useful for throwaway projects, dangerous on real ones — the user is taking responsibility for any wrong inferences.
-
-9. **Architecture map.** When `.claude/rules/architecture-map.md` still holds only the starter `Test` row, survey the code and draft the rows; never touch a map that already has more. Per kind of code the project has (models, serializers or schemas, views or handlers, business rules, queries, tasks, clients, constants, templates or partials, components, tests), find where it lives and count what one module holds: top-level classes per file with `python3 -c "import ast,sys; ..."` for Python, exports per file for JS/TS. Show one table, each row with its measurement:
-
-   | Kind | Lives in | Per module | File name | Check | Measured |
-   |---|---|---|---|---|---|
-   | Model | `apps/*/models/*.py` | one model | `<model_name>.py` | max 1 class based on Model | 62 of 64 modules |
-   | Serializer | `apps/*/serializers/*.py` | every serializer of one domain | `<domain>_serializers.py` | — | 36 modules, 2–12 each |
-   | Business rule | `apps/*/methods/*.py` | functions only | `<topic>_methods.py` | no classes | 193 of 228 modules |
-
-   Propose a Check only where at least 90% of modules already follow the row; say which modules break it. The user approves or edits the rows by number; write the file after the yes. The map is user-owned: re-renders and `--merge` keep it.
 
 ## What gets rendered
 

@@ -100,3 +100,28 @@ V13_OUT=$(cd "$V13_R" && python3 "$V13_T" 2>&1); V13_RC=$?
 check "v0.13 i1 verifier passes a clean tree" "0" "$V13_RC"
 V13_RC=$(cd "$V13_R" && python3 "$V13_T" --base HEAD~1 >/dev/null 2>&1; echo $?)
 check "v0.13 i1 --base checks the branch since its merge-base" "1" "$V13_RC"
+
+# Review fixes: renames, colored git output, detached HEAD, else-if, subdirectory paths, outside a repo, cell syntax.
+V13_R2="$WORK/v013-repo2"; mkdir -p "$V13_R2/src"
+(
+  cd "$V13_R2" && git init -q -b feature/DEMO-core-be && git config user.email smoke@example.com && git config user.name smoke
+  printf '# legacy\ndef old(a):\n    try:\n        return a[0]\n    except IndexError:\n        return None\n' > src/legacy.py
+  git add . && git commit -qm base && git mv src/legacy.py src/renamed.py
+)
+check "v0.13 i1 a renamed file keeps its legacy lines legacy" "0" "$(cd "$V13_R2" && python3 "$V13_T" >/dev/null 2>&1; echo $?)"
+(cd "$V13_R2" && git commit -qm rename && git config color.ui always && printf 'def f():\n    # added\n    return 1\n' > src/new.py)
+check "v0.13 i1 colored git output still finds added lines" "1" "$(cd "$V13_R2" && python3 "$V13_T" 2>&1 | grep -c 'src/new.py:2: new comment')"
+printf 'def f(a, b):\n    if a:\n        return 1\n    else:\n        if b:\n            return 2\n    return 3\n' > "$V13_R2/src/new.py"
+check "v0.13 i1 else: if is a nested if" "1" "$(cd "$V13_R2" && python3 "$V13_T" 2>&1 | grep -c 'src/new.py:5: nested if')"
+printf 'def f(a, b):\n    if a:\n        return 1\n    elif b:\n        return 2\n    return 3\n' > "$V13_R2/src/new.py"
+check "v0.13 i1 elif is not a nested if" "0" "$(cd "$V13_R2" && python3 "$V13_T" 2>&1 | grep -c 'nested if')"
+printf 'class C:\n    def m(self):\n        try:\n            return 1\n        except KeyError:\n            return 2\n' > "$V13_R2/src/new.py"
+check "v0.13 i1 a path from a subdirectory is checked" "1" "$(cd "$V13_R2/src" && python3 "$V13_T" new.py 2>&1 | grep -c 'src/new.py:3: new try in m')"
+mkdir -p "$V13_R2/docs/epics/DEMO/slices"
+printf '%s\n' '- Branch: `feature/DEMO-core-be`' '## Last-resort error handling' '| File | Function | Why no handler covers it |' '| --- | --- | --- |' '| `src/new.py` | `C.m()` | a \| b result the user sees |' > "$V13_R2/docs/epics/DEMO/slices/1.md"
+check "v0.13 i1 Last-resort accepts C.m() and an escaped pipe" "0" "$(cd "$V13_R2" && python3 "$V13_T" 2>&1 | grep -c 'new try')"
+(cd "$V13_R2" && git add -A && git commit -qm try && git checkout -q --detach)
+check "v0.13 i1 detached HEAD notes --slice" "1" "$(cd "$V13_R2" && python3 "$V13_T" --base HEAD~1 2>&1 | grep -c 'detached HEAD: pass --slice')"
+check "v0.13 i1 --slice honours its tries on a detached HEAD" "0" "$(cd "$V13_R2" && python3 "$V13_T" --base HEAD~1 --slice docs/epics/DEMO/slices/1.md 2>&1 | grep -c 'new try')"
+V13_NR="$WORK/v013-not-a-repo"; mkdir -p "$V13_NR"
+check "v0.13 i1 hook is quiet outside a git repo" "0" "$(cd "$V13_NR" && printf '{}' | python3 "$V13_T" --hook >/dev/null 2>&1; echo $?)"

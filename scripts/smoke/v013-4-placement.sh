@@ -33,3 +33,8 @@ check "v0.13 i4 validator fails a Placement row with no file" "1" "$V13_RC"
 check "v0.13 i4 validator names the row" "1" "$(printf '%s\n' "$V13_OUT" | grep -cF 'Placement row `run()` names no file')"
 check "v0.13 i4 validator warns on a try outside Placement" "1" "$(printf '%s\n' "$V13_OUT" | grep -c 'WARN .*last-resort try in `src/other.py` is not in `## Placement`')"
 check "v0.13 i4 validator passes the repo's epics" "0" "$(python3 "$V13_S/epic/validate-epics.py" "$ROOT/docs/epics" >/dev/null 2>&1; echo $?)"
+printf '%s\n' '<!-- source=local -->' '# Slice 1 — be: demo' '- Layer: be' '- Stories covered: S1' '- Branch: `feature/DEMO-x-be`' \
+  '## Placement' '| Piece | File | New or edit | Map row |' '| --- | --- | --- | --- |' '| `a \| b` | `src/a.py` | new | Business rule |' > "$V13_E/slices/1.md"
+check "v0.13 i4 validator keeps an escaped pipe inside a cell" "0" "$(python3 "$V13_S/epic/validate-epics.py" "$V13_E" >/dev/null 2>&1; echo $?)"
+grep_case "v0.13 i4 code-review lets a slice add a map row" "$CR" 'or `\.claude/rules/architecture-map\.md` \(a slice adds a row'
+grep_case "v0.13 i4 slice names the Function cell" "$SL" 'Function is the name of the function or method'

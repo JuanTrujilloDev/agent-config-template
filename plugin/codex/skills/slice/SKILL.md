@@ -65,7 +65,7 @@ Rules:
 
 - Stack the branch on the previous layer's branch while its PR is open: write `- Branch: `feature/<ID>-<group>-be` (stacked on `feature/<ID>-<group>-db`)`.
 - **Placement**: one row per class, function, template or component the slice adds or changes, with its file and the `.claude/rules/architecture-map.md` row it follows. Take it from the approved design when the epic has one (`architect`), else from the code-query findings. A piece with no map row adds the row in this slice. Tests, migrations and `__init__` files need no row.
-- **Last-resort error handling**: `None.`, or a table `| File | Function | Why no handler covers it |` for each try the slice needs (principles, Deslop). The user approves it with the slice; `tools/verify_changed.py` fails any try not listed here.
+- **Last-resort error handling**: `None.`, or a table `| File | Function | Why no handler covers it |` for each try the slice needs (principles, Deslop). Function is the name of the function or method that holds the try (`sweep_revoked_sso`, `Exporter.run`). The user approves it with the slice; `tools/verify_changed.py` fails any try not listed here.
 - File paths go only in those two sections: no file paths, no file lists and no MR links in the card, the Expected behaviour or the Tests; the other code-query findings stay in the reply.
 - Ask only about granularity (split or merge?), story coverage (anything missing?) and any last-resort try. With `cold-review`, run step 4 first. Stop for the user's yes.
 

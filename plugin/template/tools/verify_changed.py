@@ -6,6 +6,7 @@ Usage:
   python3 tools/verify_changed.py --base main     # the branch since its merge-base with main
   python3 tools/verify_changed.py --hook          # Claude Code Stop hook (exit 2 asks for a fix)
   python3 tools/verify_changed.py src/a.py        # only these files
+  python3 tools/verify_changed.py --slice docs/epics/X/slices/2.md   # on a detached HEAD (CI)
 
 Python files get an AST pass (nested if, nested ternary, block depth over 2, new try not listed
 under `## Last-resort error handling` in the current slice file, new comments outside the keep
@@ -69,21 +70,30 @@ def base_ref(repo: Path, base: str | None) -> str:
     return "HEAD" if has_head.returncode == 0 else EMPTY_TREE
 
 
+DIFF = ("diff", "--no-color", "--no-ext-diff", "-M")
+
+
 def changed_files(repo: Path, ref: str) -> list[Path]:
     dirs = [d.rstrip("/") for d in SOURCE_DIRS if d]
-    tracked = git(repo, "diff", "--name-only", "--diff-filter=ACMR", "-z", ref, "--", *dirs)
+    tracked = git(repo, *DIFF, "--name-only", "--diff-filter=ACMR", "-z", ref, "--", *dirs)
     untracked = git(repo, "ls-files", "--others", "--exclude-standard", "-z", "--", *dirs)
     names = dict.fromkeys(n for n in (tracked + untracked).split("\0") if n)
     return [repo / n for n in names]
 
 
-def added_lines(repo: Path, path: Path, ref: str) -> set[int]:
+def renames(repo: Path, ref: str) -> dict[str, str]:
+    fields = git(repo, *DIFF, "--name-status", "--diff-filter=R", "-z", ref).split("\0")
+    return {fields[i + 2]: fields[i + 1] for i in range(0, len(fields) - 2, 3) if fields[i].startswith("R")}
+
+
+def added_lines(repo: Path, path: Path, ref: str, moved: dict[str, str]) -> set[int]:
     rel = str(path.relative_to(repo))
-    known = subprocess.run(["git", "cat-file", "-e", f"{ref}:{rel}"], cwd=repo, capture_output=True)
+    old = moved.get(rel, rel)
+    known = subprocess.run(["git", "cat-file", "-e", f"{ref}:{old}"], cwd=repo, capture_output=True)
     if known.returncode:
         return set(range(1, len(path.read_text(encoding="utf-8").splitlines()) + 1))
     lines: set[int] = set()
-    for line in git(repo, "diff", "--unified=0", ref, "--", rel).splitlines():
+    for line in git(repo, *DIFF, "--unified=0", ref, "--", *dict.fromkeys((old, rel))).splitlines():
         match = HUNK.match(line)
         if match:
             start, count = int(match.group(1)), int(match.group(2) or "1")
@@ -91,10 +101,13 @@ def added_lines(repo: Path, path: Path, ref: str) -> set[int]:
     return lines
 
 
-def current_slice(repo: Path) -> str:
+def current_slice(repo: Path, chosen: Path | None, notes: list[str]) -> str:
+    if chosen:
+        return chosen.read_text(encoding="utf-8")
     head = subprocess.run(["git", "symbolic-ref", "--short", "-q", "HEAD"], cwd=repo, text=True, capture_output=True)
     branch = head.stdout.strip()
     if not branch:
+        notes.append("detached HEAD: pass --slice <slice file> so its last-resort tries count")
         return ""
     pattern = re.compile(r"^- Branch: `" + re.escape(branch) + "`", re.M)
     for path in sorted(repo.glob("docs/epics/*/slices/*.md")):
@@ -106,13 +119,15 @@ def current_slice(repo: Path) -> str:
 
 def table_rows(text: str, heading: str) -> list[list[str]]:
     section = re.search(r"^## " + re.escape(heading) + r"\n(.*?)(?=^## |\Z)", text, re.M | re.S)
-    rows = [line.strip().strip("|").split("|") for line in (section.group(1) if section else "").splitlines()]
-    cells = [[c.strip().strip("`") for c in row] for row in rows if len(row) > 1]
+    lines = (section.group(1) if section else "").splitlines()
+    rows = [re.split(r"(?<!\\)\|", line.strip().strip("|")) for line in lines if line.strip().startswith("|")]
+    cells = [[c.replace("\\|", "|").strip().strip("`") for c in row] for row in rows if len(row) > 1]
     return [row for row in cells[1:] if not set(row[0]) <= set("-: ")]
 
 
 def last_resort(slice_text: str) -> set[tuple[str, str]]:
-    return {(row[0], row[1]) for row in table_rows(slice_text, "Last-resort error handling") if len(row) > 1}
+    rows = table_rows(slice_text, "Last-resort error handling")
+    return {(row[0], row[1].removesuffix("()").rsplit(".", 1)[-1]) for row in rows if len(row) > 1}
 
 
 def map_rules(repo: Path) -> list[tuple[str, str, re.Match]]:
@@ -127,8 +142,8 @@ def map_rules(repo: Path) -> list[tuple[str, str, re.Match]]:
 
 
 class Shape(ast.NodeVisitor):
-    def __init__(self, rel: str, added: set[int], allowed: set[tuple[str, str]]) -> None:
-        self.rel, self.added, self.allowed = rel, added, allowed
+    def __init__(self, rel: str, source: str, added: set[int], allowed: set[tuple[str, str]]) -> None:
+        self.rel, self.lines, self.added, self.allowed = rel, source.splitlines(), added, allowed
         self.function, self.stack, self.elifs, self.ternary = "", [], set(), 0
         self.errors: list[str] = []
 
@@ -170,8 +185,9 @@ class Shape(ast.NodeVisitor):
         for child in node.body:
             self.visit(child)
         self.stack.pop()
-        if len(node.orelse) == 1 and isinstance(node.orelse[0], ast.If):
-            self.elifs.add(id(node.orelse[0]))
+        tail = node.orelse[0] if len(node.orelse) == 1 else None
+        if isinstance(tail, ast.If) and self.lines[tail.lineno - 1].lstrip().startswith("elif"):
+            self.elifs.add(id(tail))
             self.visit(node.orelse[0])
             return
         self.stack.append(node)
@@ -222,7 +238,7 @@ def python_errors(repo: Path, path: Path, added: set[int], allowed: set, rules: 
         tree = ast.parse(source, filename=rel)
     except SyntaxError as error:
         return [f"{rel}:{error.lineno}: could not parse: {error.msg}"]
-    shape = Shape(rel, added, allowed)
+    shape = Shape(rel, source, added, allowed)
     shape.visit(tree)
     return shape.errors + comment_errors(rel, source, added) + map_errors(rel, tree, added, rules)
 
@@ -272,16 +288,17 @@ def eslint_errors(repo: Path, files: list[Path], added: dict[Path, set[int]], al
     return errors
 
 
-def verify(repo: Path, paths: list[Path], base: str | None) -> tuple[int, list[str], list[str]]:
+def verify(repo: Path, paths: list[Path], base: str | None, chosen: Path | None) -> tuple[int, list[str], list[str]]:
     ref = base_ref(repo, base)
     files = [p.resolve() for p in (paths or changed_files(repo, ref)) if p.is_file()]
     py = [p for p in files if p.suffix in PY_SUFFIXES]
     js = [p for p in files if p.suffix in JS_SUFFIXES]
-    added = {p: added_lines(repo, p, ref) for p in py + js}
-    allowed = last_resort(current_slice(repo))
+    moved = renames(repo, ref)
+    added = {p: added_lines(repo, p, ref, moved) for p in py + js}
+    notes: list[str] = []
+    allowed = last_resort(current_slice(repo, chosen, notes))
     rules = map_rules(repo)
     errors: list[str] = []
-    notes: list[str] = []
     for path in py:
         errors.extend(python_errors(repo, path, added[path], allowed, rules))
     errors.extend(ruff_errors(repo, py, added, notes))
@@ -293,12 +310,17 @@ def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     parser.add_argument("--hook", action="store_true")
     parser.add_argument("--base")
+    parser.add_argument("--slice", type=Path)
     parser.add_argument("--repo", type=Path, default=Path.cwd())
     parser.add_argument("paths", nargs="*", type=Path)
     args = parser.parse_args()
-    repo = Path(git(args.repo, "rev-parse", "--show-toplevel").strip()).resolve()
+    top = subprocess.run(["git", "rev-parse", "--show-toplevel"], cwd=args.repo, text=True, capture_output=True)
+    if top.returncode:
+        print("{}" if args.hook else "[verify-changed] not a git repository; nothing to check")
+        return 0
+    repo = Path(top.stdout.strip()).resolve()
     payload = json.loads(sys.stdin.read() or "{}") if args.hook else {}
-    count, errors, notes = verify(repo, [repo / p for p in args.paths], args.base)
+    count, errors, notes = verify(repo, [Path.cwd() / p for p in args.paths], args.base, args.slice)
     for note in notes:
         print(f"[verify-changed] note: {note}", file=sys.stderr)
     if not errors:

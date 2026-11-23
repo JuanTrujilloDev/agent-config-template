@@ -59,16 +59,25 @@ const plan = C.plan || null;
 const progress = {};
 const storyById = Object.fromEntries(C.stories.map(s => [s.id, s]));
 for (const sl of plan ? plan.slices : []) {
-  for (const [flow, steps] of Object.entries(sl.flows || {})) {
+  if (!sl.flows || typeof sl.flows !== 'object') throw new Error(`Plan: slice ${sl.id} needs flows: { <story id>: [step numbers] }`);
+  for (const [flow, steps] of Object.entries(sl.flows)) {
     if (!storyById[flow]) throw new Error(`Plan: slice ${sl.id} names missing flow ${flow}`);
     const n = storyById[flow].steps.length;
-    for (const k of steps) if (!(k >= 1 && k <= n)) throw new Error(`Plan: slice ${sl.id} names step ${k} of flow ${flow}, which has ${n}`);
+    for (const k of steps) if (!(Number.isInteger(k) && k >= 1 && k <= n)) throw new Error(`Plan: slice ${sl.id} names step ${JSON.stringify(k)} of flow ${flow}, which has steps 1 to ${n}`);
   }
 }
 const PROGRESS = path.join(CONTENT_DIR, 'progress');
+function parseProgress(f) {
+  const text = fs.readFileSync(path.join(PROGRESS, f), 'utf8');
+  try {
+    return JSON.parse(text);
+  } catch (error) {
+    throw new Error(`Progress ${f}: not valid JSON (${error.message})`);
+  }
+}
 const sliceIds = new Set((plan ? plan.slices : []).map(sl => sl.id));
 for (const f of plan && fs.existsSync(PROGRESS) ? fs.readdirSync(PROGRESS).filter(f => f.endsWith('.json')).sort() : []) {
-  const p = JSON.parse(fs.readFileSync(path.join(PROGRESS, f), 'utf8'));
+  const p = parseProgress(f);
   if (!sliceIds.has(p.slice)) throw new Error(`Progress ${f}: unknown slice ${p.slice}`);
   if (!SLICE_STATUS.includes(p.status)) throw new Error(`Progress ${f}: unknown status ${p.status} (use ${SLICE_STATUS.join(', ')})`);
   progress[p.slice] = p;

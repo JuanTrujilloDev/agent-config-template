@@ -22,7 +22,7 @@ ${mutation}
 export const { meta, images, css, screens, stories, build, plan, decisions, assumptions, questions } = C;`);
   if (progress) {
     fs.mkdirSync(path.join(dir, 'progress'));
-    fs.writeFileSync(path.join(dir, 'progress', 'x.json'), JSON.stringify(progress));
+    fs.writeFileSync(path.join(dir, 'progress', 'x.json'), typeof progress === 'string' ? progress : JSON.stringify(progress));
   }
   return spawnSync(process.execPath, [path.join(HERE, 'build.mjs'), content, path.join(dir, 'scope')], { encoding: 'utf8' });
 }
@@ -42,7 +42,9 @@ describe('build.mjs content validation', () => {
     ['screen crop', "delete C.screens['fund-today'].crop;", 'Screen fund-today: crop must be [x, y, w, h]'],
     ['screen status', "C.screens['fund-today'].status = 'nope';", 'Screen fund-today: unknown status nope'],
     ['plan flow → stories', "C.plan.slices[0].flows = { nope: [1] };", 'Plan: slice 1 names missing flow nope'],
-    ['plan step → story steps', "C.plan.slices[0].flows = { export: [4] };", 'Plan: slice 1 names step 4 of flow export, which has 3'],
+    ['plan step → story steps', "C.plan.slices[0].flows = { export: [4] };", 'Plan: slice 1 names step 4 of flow export, which has steps 1 to 3'],
+    ['plan step as a string', "C.plan.slices[0].flows = { export: ['2'] };", 'Plan: slice 1 names step "2" of flow export'],
+    ['plan slice without flows', "delete C.plan.slices[0].flows;", 'Plan: slice 1 needs flows'],
   ];
   for (const [name, mutation, message] of broken) {
     test(`fails on a broken ${name}`, () => {
@@ -56,6 +58,12 @@ describe('build.mjs content validation', () => {
     const result = build('', { slice: '9', status: 'done' });
     assert.notEqual(result.status, 0);
     assert.match(result.stderr, /Progress x.json: unknown slice 9/);
+  });
+
+  test('names a progress file that is not valid JSON', () => {
+    const result = build('', '{"slice": "1",}');
+    assert.notEqual(result.status, 0);
+    assert.match(result.stderr, /Progress x.json: not valid JSON/);
   });
 
   test('fails on an unknown progress status', () => {

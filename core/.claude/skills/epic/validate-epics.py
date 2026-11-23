@@ -53,7 +53,8 @@ def entries(lines, kind):
 
 def table(lines):
     """Rows of the first markdown table in lines, header and separator dropped, cells stripped."""
-    rows = [[c.strip() for c in l.strip().strip("|").split("|")] for l in lines if l.strip().startswith("|")]
+    rows = [[c.replace("\\|", "|").strip() for c in re.split(r"(?<!\\)\|", l.strip().strip("|"))]
+            for l in lines if l.strip().startswith("|")]
     return [r for r in rows[1:] if not set("".join(r)) <= set("-: ")]
 
 
