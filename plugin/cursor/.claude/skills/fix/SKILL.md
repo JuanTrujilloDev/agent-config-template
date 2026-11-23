@@ -29,7 +29,7 @@ For a tracked fix, reference the ticket: `/fix {{branch_prefix}}-<#>` — e.g. `
 1. **Reproduce red first.** Obtain a red-capable reproduction — a failing test or a command that fails for *this* bug and goes green only when fixed — before naming the cause.
 
    If you cannot get a reproduction in one step, stop and switch to `/epic`. Write 2–4 ranked falsifiable hypotheses only when the reproduction does not single out a cause, and test them one variable at a time.
-2. **State the root cause** in a sentence or two, plus 2–4 verifiable success criteria. No separate brief/plan docs.
+2. **State the root cause** in a sentence or two, plus 2–4 verifiable success criteria. No separate brief/plan docs. A guard that only hides the crash is not a fix: say why the value is wrong where it is made.
 3. **Check out a typed branch** — `fix/{{#branch_prefix}}{{branch_prefix}}-<#>-{{/branch_prefix}}<slug>` (or `hotfix/<slug>` for urgent prod). Never on `{{default_branch}}`.
 4. **Implement** the scoped change. Stay surgical — the diff traces 1:1 to the success criteria.
 5. **Run the full Definition of Done** (no shortcuts here):

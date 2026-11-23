@@ -25,6 +25,8 @@ A **seam** is the public boundary you test at: the interface where you observe b
 
 - **Implementation-coupled**: mocks internal collaborators, tests private methods, or verifies through a side channel (querying the database instead of using the interface). The tell: the test breaks when you refactor but behavior hasn't changed.
 - **Tautological**: the assertion recomputes the expected value the way the code does (`expect(add(a, b)).toBe(a + b)`, a snapshot derived by hand the same way, a constant asserted equal to itself), so it passes by construction and can never disagree with the code. Expected values must come from an independent source of truth: here, the literal values in the TS line.
+- **Empty-return**: the test would still pass if every function under it returned nothing (`None`, `[]`, `{}`, an empty response). Throw it out and assert on a value only the real behaviour produces.
+- **Tests the mock**: the assertion checks what a mock was told to return. Assert on what the code did with it.
 
 ## The slice's tests, then one red run
 
@@ -33,6 +35,7 @@ The stories were already cut to one case each and the seams agreed, so the usual
 1. Check the branch matches the slice's `- Branch:` line; check it out if not.
 2. One test per TS line the slice covers, named `test_S<n>_<case>` exactly as in the slice's `## Tests` list. Given = fixtures, When = one call through the seam, Then = assertions on the TS literals.
 3. Use the project's existing fixtures and factories; add a fixture only when none fits.
+   When the epic's approved design has a `## Complexity` row for a piece this slice builds, its "Checked by" column is a test too: name it `test_S<n>_<case>` for the story the piece serves (`test_S1_totals_query_count_constant`), list it under `## Tests` as `→ Complexity`, and measure at two sizes (query count with the framework's query capture, a streamed response, a time ratio) so the claim stays true after the design.
 4. Run only these test files. Every test must fail for the right reason: the behavior is missing (404, assertion on the expected value, missing symbol), not a typo, an import error in the test itself or a broken fixture. Fix any test that fails for the wrong reason and rerun.
 5. Commit the tests on the slice branch: `test(<scope>): add slice <n> tests for <ID>`.
 
