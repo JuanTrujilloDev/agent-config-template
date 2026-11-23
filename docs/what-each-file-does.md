@@ -16,7 +16,7 @@ Project-level Claude Code settings. Three things:
 - **`permissions.allow`** — tools Claude can use without asking (e.g. `Bash(pytest:*)`).
 - **`permissions.deny`** — tools blocked outright (e.g. `Bash(rm -rf:*)`, `Edit(.env*)`).
 - **`permissions.ask`** — tools that prompt for confirmation each call (e.g. `Bash(git commit:*)`).
-- **`hooks`** — registers the two shell hooks for `PreToolUse` and `PostToolUse`.
+- **`hooks`** — registers the two shell hooks for `PreToolUse` and `PostToolUse`, and `tools/verify_changed.py --hook` on `Stop`.
 - Allows `Read(docs/epics/**)` and `Write(docs/epics/**)` for epic and slice files.
 
 `.claude/settings.local.json` is per-user / per-machine overrides. **Gitignore it.**
@@ -38,6 +38,14 @@ Always loaded (≤90 lines): Think Before Coding, Simplicity First
 tests locked), Read Before You Write, Code Health, Deslop, Commits, Micro-PR Discipline,
 Definition of Done, Conciseness, Autonomy Mode, Branch Discipline. If you change
 one, change every reference to it in `CLAUDE.md`, `HELP.md` and the skills.
+
+## `.claude/rules/architecture-map.md`
+
+Always loaded, and yours: where each kind of code goes (kind, glob, what one module holds, file name, an optional Check). `/setup-template` step 9 drafts it from the code; re-renders never overwrite it. `tools/verify_changed.py` enforces the Check column on added lines.
+
+## `tools/verify_changed.py`
+
+Checks only the lines a change adds: the Deslop rule (comments, nested ifs, depth, a try not listed as a last resort in the slice), the architecture map, plus ruff's and ESLint's deslop rules when they are installed. Runs as Definition of Done step 3, as a `Stop` hook (`--hook`; never loops) and in `code-review` (`--base <fixed point>`).
 
 ## `.claude/skills/<name>/SKILL.md`
 
@@ -61,7 +69,7 @@ Loaded on demand, never on every turn.
 
 ## `docs/epics/<ID>/`
 
-`epic.md` (≤120 lines) and `slices/<n>.md` (≤60 lines). The first line says
+`epic.md` (≤120 lines) and `slices/<n>.md` (≤80 lines, with `## Placement` and `## Last-resort error handling` since v0.13). The first line says
 where the truth lives: `source=<tracker>` (rendered from cards), `source=local`
 or `source=migrated`. `archive/<slug>/` holds pre-v0.11 `docs/specs/` folders.
 See `docs/epic-story-slice.md`.
@@ -136,6 +144,7 @@ Issues a tool can't auto-fix are surfaced to stderr (no longer silently swallowe
 | Need | Where |
 |---|---|
 | A rule every coding turn needs | `rules/principles.md` (keep it ≤90 lines) |
+| Where a kind of code lives | `rules/architecture-map.md` (a row, with a Check when the code already follows it) |
 | A procedure or reference loaded when relevant | `skills/<name>/SKILL.md` |
 | A read-only role with its own context window | `agents/` |
 | A user-triggered shortcut | `commands/` |

@@ -13,6 +13,14 @@
 
 It turns a ticket or an ask into one approved epic of one-case stories, then ships it one layered slice at a time: tests first and locked, code to green, two-axis review, one small PR. Epics and slices live on disk (or on your tracker), so the workflow survives restarts across web, backend, mobile, Unity, desktop, CLI, and data projects.
 
+## v0.13.0 — plan, design, deslop
+
+- **Flows, then design, then plan.** `scope-page` (moved into the template) walks the user flows first. After you approve them, `architect` has Claude, Codex and Cursor each write a full design, consolidates them once, interrogates every claim by running something, and hands you one design with a Complexity section (what n is, time, queries, memory). After you approve it, the page shows the slices per flow and a Plan checklist the slice threads tick through their own progress files.
+- **Deslop.** A new principles section: no comments outside a short keep list, no try/except unless the slice lists it as an approved last resort, guard clauses, depth ≤2. `tools/verify_changed.py` checks only the lines a change adds, as a Definition of Done step, a Stop hook and a `code-review` gate; `implement` gains a deslop pass.
+- **Where code goes.** An always-loaded `.claude/rules/architecture-map.md` (yours; `/setup-template` drafts it from measured code) and a `## Placement` table in every slice file; `code-review` fails a changed file outside Placement.
+- **Per-language skills.** `lang-python`, `lang-javascript`, `lang-typescript`, `lang-css`, loaded by file path.
+- Worked example: [docs/guides/plan-design-build.md](docs/guides/plan-design-build.md) and `docs/epics/EXAMPLE/design/`.
+
 ## v0.12.1 — bootstrap follow-ups
 
 - `bootstrap.sh --orchestrator <dir> --tracker <name> --approver <name>` (opt-in) also scaffolds an `orchestrator-init` folder after the apply; it needs `uv`, checked before the clone only when the option is given.
@@ -36,18 +44,18 @@ Patch release from the v0.11.0 review: slice reports no longer fail `validate-ep
 - The always-loaded text drops from about 9.5k to about 3k tokens: one ≤80-line principles file, everything else is a skill loaded on demand.
 - `update-config` upgrades a rendered project and migrates old `docs/specs/` folders to `docs/epics/`.
 
-Upgrade path: `0.10.0 → 0.12.1` via `update-config`; see the [upgrade guide](docs/upgrade-guide.md).
+Upgrade path: `0.10.0 → 0.13.0` via `update-config`; see the [upgrade guide](docs/upgrade-guide.md).
 
 ## Install
 
 At the root of any git repository:
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/JuanTrujilloDev/agent-config-template/v0.12.1/bootstrap.sh | sh -s -- --host claude
+curl -fsSL https://raw.githubusercontent.com/JuanTrujilloDev/agent-config-template/v0.13.0/bootstrap.sh | sh -s -- --host claude
 ```
 
 <!-- RELEASE STEP (every release, before tagging): set the tag in the command and the line below, set DEFAULT_REF in bootstrap.sh to the same tag, then set the sha256 to `shasum -a 256 bootstrap.sh`. -->
-`bootstrap.sh` at `v0.12.1`: sha256 `323aff335bbe16f980b551541d98e42ac93c291e674ae7fbd1f9e1e115d0d675`. It clones the
+`bootstrap.sh` at `v0.13.0`: sha256 `a17b010aa5881580d4671af263d9cdbb35fef744697a9a853cfca01584fe5634`. It clones the
 template at that tag, prints the plan, and writes only after you answer `y`.
 `--host cursor` or `--host codex` for the other hosts.
 
