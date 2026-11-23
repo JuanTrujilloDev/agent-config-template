@@ -1,0 +1,15 @@
+{
+  "slice": "1",
+  "layer": "db",
+  "status": "done",
+  "branch": "feature/EXAMPLE-login-db",
+  "mr": "#41",
+  "head": "4f2c9e1",
+  "review": [
+    { "file": "apps/accounts/models/sso_identity.py", "why": "the new model" },
+    { "file": "apps/accounts/methods/sso_methods.py", "why": "company_for_email" },
+    { "file": "tests/sso/test_models.py", "why": "approved tests, locked" }
+  ],
+  "dod": "format, lint, changed lines, slice tests 3 passed, suite green",
+  "updated": "2026-11-02T10:12:00-05:00"
+}

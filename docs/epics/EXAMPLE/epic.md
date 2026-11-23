@@ -4,6 +4,8 @@
 ## Request
 "Let issuer admins log in with their company Google Workspace instead of a password." (ask, 2026-10-28)
 
+Design: `docs/epics/EXAMPLE/design/design.md`, approved 2026-10-30 (in a real project the design folder lives outside the repo).
+
 ## Description
 Issuer admins of a company with a verified domain authenticate through OIDC; passwords stay for everyone else. Revocation at the IdP logs the user out within one sweep.
 

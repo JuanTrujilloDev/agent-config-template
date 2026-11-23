@@ -1,0 +1,16 @@
+{
+  "slice": "2",
+  "layer": "be",
+  "status": "review",
+  "branch": "feature/EXAMPLE-login-be",
+  "mr": "#43",
+  "head": "b81d07a",
+  "review": [
+    { "file": "apps/accounts/views/sso_callback_views.py", "lines": "1-48", "why": "the callback, the refusal and the session" },
+    { "file": "apps/accounts/tasks/sso_tasks.py", "why": "the sweep and its one approved last-resort try" },
+    { "file": "apps/accounts/clients/oidc_client.py", "why": "the token exchange" },
+    { "file": "tests/sso/test_callback.py", "why": "approved tests, locked; includes the two Complexity tests" }
+  ],
+  "dod": "format, lint, changed lines, slice tests 5 passed, suite green",
+  "updated": "2026-11-04T16:40:00-05:00"
+}

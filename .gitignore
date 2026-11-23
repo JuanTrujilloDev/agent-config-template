@@ -14,3 +14,6 @@ Thumbs.db
 # Per-user setup answers (when developing the template itself)
 /answers.env
 /eval-results/
+
+# Built scope pages of the worked example (node core/.claude/skills/scope-page/build.mjs ...)
+/docs/epics/*/design/scope/
