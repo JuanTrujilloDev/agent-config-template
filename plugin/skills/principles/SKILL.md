@@ -48,7 +48,7 @@ Every diff, before review. `tools/verify_changed.py` checks the lines a change a
 - No comments. Names carry the meaning; keep only tool directives, a license header and a link to an outside spec or bug. No TODO: the ticket is the TODO.
 - No try/except. Errors propagate to the framework's error handlers. A try is a last resort, listed in the slice's `## Last-resort error handling` (file, function, why no handler covers it) and approved with the design. Never catch to re-raise with a new message; never pass.
 - Few ifs: guard clauses and early returns; no nested if or nested ternary; block depth ≤2, complexity ≤8. Do not re-check what the caller or the type already rules out.
-- Plain code a reader follows once: no clever one-liner, no wrapper that only delegates.
+- Plain code a reader follows once: no clever one-liner, no wrapper that only delegates. New code goes where `.claude/rules/architecture-map.md` says.
 
 ## Commits
 

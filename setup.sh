@@ -421,7 +421,7 @@ try:
     LOCK_SCHEMA = 1
     DOT_CLAUDE_MD = os.path.join(".claude", "CLAUDE.md")  # never staged: the template's version is the ../CLAUDE.md symlink
     # D13: user-filled files are yours — never labelled stale, never in --overwrite-files.
-    NON_MANAGED = {"CLAUDE.md", os.path.join("docs", "CONTEXT.md")}
+    NON_MANAGED = {"CLAUDE.md", os.path.join("docs", "CONTEXT.md"), os.path.join(".claude", "rules", "architecture-map.md")}
     NON_MANAGED_DIRS = (os.path.join("docs", "design-system") + os.sep,)
     MANAGED_EXACT = {
         "AGENTS.md",

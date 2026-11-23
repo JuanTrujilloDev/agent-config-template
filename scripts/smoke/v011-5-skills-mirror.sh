@@ -8,7 +8,8 @@ if [ -z "${ROOT:-}" ]; then
 fi
 
 V5_S="$ROOT/core/.claude/skills"
-check "v0.11 i5 core rules/ holds principles only" "principles.md" "$(cd "$ROOT/core/.claude/rules" && echo *.md)"
+# v0.13 adds the always-loaded architecture map beside the principles.
+check "v0.11 i5 core rules/ holds the map and principles only" "architecture-map.md principles.md" "$(cd "$ROOT/core/.claude/rules" && echo *.md)"
 check "v0.11 i5 core .claude/patterns/ gone" "absent" "$([ -e "$ROOT/core/.claude/patterns" ] && echo present || echo absent)"
 for s in backend-style frontend-style code-query patterns; do
   check "v0.11 i5 core skill $s" "present" "$([ -f "$V5_S/$s/SKILL.md" ] && echo present || echo absent)"
@@ -48,7 +49,7 @@ check "v0.11 i5 cursor render no placeholder" "0" "$(grep -rlE "$PH" "$V5_C" | w
 # Claude render: style skills render, frontend-style only with a frontend.
 V5_D="$WORK/v5-django"
 bash "$ROOT/setup.sh" --target "$V5_D" --answers "$ROOT/examples/python-django/answers.env" >/dev/null 2>&1
-check "v0.11 i5 django rules/" "principles.md" "$(cd "$V5_D/.claude/rules" && echo *.md)"
+check "v0.11 i5 django rules/" "architecture-map.md principles.md" "$(cd "$V5_D/.claude/rules" && echo *.md)"
 grep_case "v0.11 i5 django backend-style skill rendered" "$V5_D/.claude/skills/backend-style/SKILL.md" '^name: backend-style$'
 check "v0.11 i5 django skills placeholder-free" "0" "$(grep -rlE "$PH" "$V5_D/.claude/skills" | wc -l | tr -d ' ')"
 V5_F="$WORK/v5-fastapi"

@@ -12,7 +12,9 @@ Full text: `.claude/rules/principles.md` (always loaded via `.cursor/rules/princ
 4. **Goal-Driven Execution** — write 2–4 verifiable success criteria first; loop until they pass. Approved tests are locked: never edit one to go green; stop and ask.
 - **Micro-PR Discipline** — one slice per PR, one layer per slice (db → be → fe); aim for 200–400 non-test lines; cap ≤{{max_files_per_pr}} files, <{{max_loc_per_pr}} lines.
 - **Definition of Done** — Format → Lint → Tests → `code-review` before declaring done.
+- **Deslop** — no comments (keep tool directives, license, outside links); no try/except unless the slice lists it as a last resort; guard clauses, no nested if, depth ≤2. `python3 tools/verify_changed.py` checks the added lines.
 - **Branch Discipline** — never code on `{{default_branch}}`; check out a typed branch first.
+- **Architecture map** — read `.claude/rules/architecture-map.md` before adding a file: it says where each kind of code goes.
 
 Before any coding task: restate the goal in one sentence + list 2–4 verifiable success criteria.
 

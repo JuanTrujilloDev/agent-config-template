@@ -31,6 +31,7 @@ Frontend source: `{{frontend_dir}}`
 {{/has_frontend}}
 Tests: `{{tests_glob}}`
 Epics and slices: `docs/epics/<ID>/epic.md`, `docs/epics/<ID>/slices/<n>.md`
+Where each kind of code goes: `.claude/rules/architecture-map.md` (always loaded; yours to edit)
 
 ## Code Style
 
