@@ -13,6 +13,11 @@
 
 It turns a ticket or an ask into one approved epic of one-case stories, then ships it one layered slice at a time: tests first and locked, code to green, two-axis review, one small PR. Epics and slices live on disk (or on your tracker), so the workflow survives restarts across web, backend, mobile, Unity, desktop, CLI, and data projects.
 
+## v0.13.1 — orchestrator-init and architect model pick
+
+- **`orchestrator-init` follows the v0.13 flow.** The skeleton's `AGENTS.md` runs flows, design, plan, `/epic` and slices for repos whose lock lists `architect` (the earlier cycle stays for the others), with one epic thread across the three rounds, an owner gate, and scope pages. `launch-standing-orders.md` gains the Slice gates, Epic orders and High-level orders blocks; state files take an optional `design_folder` and `stage`; the progress check reads each epic's Plan checklist and progress files.
+- **`architect` asks for the models.** Before any brief it lists the models each provider offers and waits for you to pick one per provider, unless you already picked them with the scope approval.
+
 ## v0.13.0 — plan, design, deslop
 
 - **Flows, then design, then plan.** `scope-page` (moved into the template) walks the user flows first. After you approve them, `architect` has Claude, Codex and Cursor each write a full design, consolidates them once, interrogates every claim by running something, and hands you one design with a Complexity section (what n is, time, queries, memory). After you approve it, the page shows the slices per flow and a Plan checklist the slice threads tick through their own progress files.
@@ -32,10 +37,6 @@ It turns a ticket or an ask into one approved epic of one-case stories, then shi
 - `orchestrator-init`: `bin/state.py` accepts the `tests` run kind, validates `tracker.state` and reads `plane.<x>` as `tracker.<x>`; `validate-packaging.py` fails if those drift. The skeleton gains `plans/launch-standing-orders.md` and the fresh-thread, owner-round and epic → story → slice rules.
 - `slice` gains an opt-in cold review (`/slice <ID> <n> cold-review`): two fresh reviewers, Comprehension and Readiness, read the epic, the slice draft and the repo with no thread context, one round, before you approve the slice. Prompts adapted from google/elephant-goldfish-model (Apache-2.0).
 
-## v0.11.1 — fixes
-
-Patch release from the v0.11.0 review: slice reports no longer fail `validate-epics.py`, `--merge --prune` drops the stale v0.10 prompt hook from `settings.json`, `code-review` treats the slice's `## Approved tests` as append-only, `migrate.py` reads the older `@sN` grammar, and the test lock resolves symlinks and case. See the [upgrade guide](docs/upgrade-guide.md).
-
 ## v0.11.0 — breaking
 
 - `/spec` and `/feature` are gone: `/epic` → `/slice` → `tests-first` → `implement` → `code-review` → `/pr`, all in your thread.
@@ -44,18 +45,18 @@ Patch release from the v0.11.0 review: slice reports no longer fail `validate-ep
 - The always-loaded text drops from about 9.5k to about 3k tokens: one ≤80-line principles file, everything else is a skill loaded on demand.
 - `update-config` upgrades a rendered project and migrates old `docs/specs/` folders to `docs/epics/`.
 
-Upgrade path: `0.10.0 → 0.13.0` via `update-config`; see the [upgrade guide](docs/upgrade-guide.md).
+Upgrade path: `0.10.0 → 0.13.1` via `update-config`; see the [upgrade guide](docs/upgrade-guide.md).
 
 ## Install
 
 At the root of any git repository:
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/JuanTrujilloDev/agent-config-template/v0.13.0/bootstrap.sh | sh -s -- --host claude
+curl -fsSL https://raw.githubusercontent.com/JuanTrujilloDev/agent-config-template/v0.13.1/bootstrap.sh | sh -s -- --host claude
 ```
 
 <!-- RELEASE STEP (every release, before tagging): set the tag in the command and the line below, set DEFAULT_REF in bootstrap.sh to the same tag, then set the sha256 to `shasum -a 256 bootstrap.sh`. -->
-`bootstrap.sh` at `v0.13.0`: sha256 `a17b010aa5881580d4671af263d9cdbb35fef744697a9a853cfca01584fe5634`. It clones the
+`bootstrap.sh` at `v0.13.1`: sha256 `e738cc2d97e464b53fd3906f3233857a9cbb1c315f0806a5bb7bfe36ba0274c2`. It clones the
 template at that tag, prints the plan, and writes only after you answer `y`.
 `--host cursor` or `--host codex` for the other hosts.
 
